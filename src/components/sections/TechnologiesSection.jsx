@@ -94,7 +94,7 @@ const TechnologiesSection = () => {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-r from-${stack.color}-500 to-${stack.color}-600 flex items-center justify-center text-white text-xl sm:text-2xl flex-shrink-0`}>
+                      className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl bg-linear-to-r from-${stack.color}-500 to-${stack.color}-600 flex items-center justify-center text-white text-xl sm:text-2xl shrink-0`}>
                       {stack.icon}
                     </div>
                     <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
