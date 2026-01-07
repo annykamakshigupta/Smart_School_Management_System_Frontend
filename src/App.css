@@ -1,11 +1,4 @@
-/* ==========================================================================
-   App Component Styles - Minimal styles, most handled by Tailwind in components
-   ========================================================================== */
 
-/* Main content offset for fixed header */
-main {
-  min-height: calc(100vh - 200px);
-}
 
 /* Smooth scroll behavior */
 html {

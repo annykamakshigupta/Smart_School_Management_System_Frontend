@@ -8,7 +8,7 @@ const HeroSection = () => {
       id="home"
       className="relative w-full min-h-screen flex items-center bg-gray-50 py-20"
     >
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 items-center gap-12 lg:gap-16">
           {/* Left Content */}
           <div className="space-y-6">
@@ -43,10 +43,6 @@ const HeroSection = () => {
 
             {/* Key Highlights */}
             <div className="grid grid-cols-3 gap-4 pt-6">
-              <div className="glass-card text-center p-4">
-                <FaBrain className="text-3xl text-indigo-600 mx-auto mb-2" />
-                <div className="text-sm font-semibold text-gray-700">AI-Powered</div>
-              </div>
               <div className="glass-card text-center p-4">
                 <FaShieldAlt className="text-3xl text-indigo-600 mx-auto mb-2" />
                 <div className="text-sm font-semibold text-gray-700">Secure</div>
