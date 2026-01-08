@@ -6,8 +6,6 @@ export { default as Footer } from "./layout/Footer";
 export { default as HeroSection } from "./sections/HeroSection";
 export { default as FeaturesSection } from "./sections/FeaturesSection";
 export { default as AboutSection } from "./sections/AboutSection";
-export { default as ServicesSection } from "./sections/ServicesSection";
-export { default as StatsSection } from "./sections/StatsSection";
-export { default as TestimonialsSection } from "./sections/TestimonialsSection";
+// Removed exports for missing section files (ServicesSection, StatsSection, TestimonialsSection)
 export { default as ContactSection } from "./sections/ContactSection";
 export { default as CTASection } from "./sections/CTASection";

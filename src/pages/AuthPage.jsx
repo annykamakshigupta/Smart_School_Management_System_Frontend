@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Button, Input, Form, Checkbox } from "antd";
+import { Link, useLocation } from "react-router-dom";
+import { Button, Input, Form, Checkbox, message, Alert } from "antd";
 import {
   UserOutlined,
   LockOutlined,
@@ -8,12 +8,25 @@ import {
   PhoneOutlined,
 } from "@ant-design/icons";
 import { FaGoogle, FaFacebook, FaGraduationCap } from "react-icons/fa";
+import { useAuth } from "../hooks/useAuth";
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [isAnimating, setIsAnimating] = useState(false);
   const [loginForm] = Form.useForm();
   const [signupForm] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+
+  const { login, signup, error, clearError } = useAuth();
+  const location = useLocation();
+
+  // Show redirect message if any
+  const redirectMessage = location.state?.message;
+
+  // Clear error when switching forms
+  useEffect(() => {
+    clearError();
+  }, [isLogin, clearError]);
 
   const handleToggle = (newState) => {
     if (isAnimating || isLogin === newState) return;
@@ -22,12 +35,40 @@ const AuthPage = () => {
     setTimeout(() => setIsAnimating(false), 600);
   };
 
-  const handleLoginSubmit = (values) => {
-    console.log("Login:", values);
+  const handleLoginSubmit = async (values) => {
+    setLoading(true);
+    try {
+      const result = await login(values);
+      if (result.success) {
+        message.success("Login successful! Redirecting...");
+        // Redirect is handled by AuthProvider
+      } else {
+        message.error(result.error || "Login failed");
+      }
+    } catch (err) {
+      message.error("Login error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSignupSubmit = (values) => {
-    console.log("Signup:", values);
+  const handleSignupSubmit = async (values) => {
+    setLoading(true);
+    try {
+      const { confirmPassword, ...signupData } = values;
+      const result = await signup(signupData);
+      if (result.success) {
+        message.success(result.message || "Signup successful! Please login.");
+        setIsLogin(true);
+        signupForm.resetFields();
+      } else {
+        message.error(result.error || "Signup failed");
+      }
+    } catch (err) {
+      message.error("Signup error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Staggered animation for form fields
@@ -102,7 +143,6 @@ const AuthPage = () => {
 
                 {/* Signup Panel Content */}
                 <div
-
                   style={{
                     opacity: !isLogin ? 1 : 0,
                     transform: !isLogin ? "translateY(0)" : "translateY(-20px)",
@@ -122,7 +162,6 @@ const AuthPage = () => {
                   </button>
                 </div>
               </div>
-
             </div>
 
             {/* Right Panel - Login Form */}
@@ -237,11 +276,6 @@ const AuthPage = () => {
                   <div
                     className="flex items-center justify-between mb-6 mt-4"
                     style={getFieldDelay(4)}>
-                    <Form.Item name="remember" valuePropName="checked" noStyle>
-                      <Checkbox className="transform transition-all duration-200 hover:scale-105">
-                        Remember me
-                      </Checkbox>
-                    </Form.Item>
                     <Link
                       to="/forgot-password"
                       className="text-indigo-600 hover:text-indigo-700 font-medium transform transition-all duration-200 hover:scale-105">
@@ -290,7 +324,8 @@ const AuthPage = () => {
                   Create Account
                 </h2>
                 <p className="text-gray-600 mb-8">
-                  Create your SSMS account to manage student, parent and teacher access.
+                  Create your SSMS account to manage student, parent and teacher
+                  access.
                 </p>
 
                 <Form
@@ -301,7 +336,12 @@ const AuthPage = () => {
                   <div className="space-y-4">
                     <Form.Item
                       name="name"
-                      rules={[{ required: true, message: "Please enter your full name" }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter your full name",
+                        },
+                      ]}
                       style={getFieldDelay(2)}>
                       <Input
                         prefix={<UserOutlined className="text-gray-400" />}
@@ -314,17 +354,23 @@ const AuthPage = () => {
                     <Form.Item
                       name="role"
                       label="Account Type"
-                      rules={[{ required: true, message: "Please select your account type" }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please select your account type",
+                        },
+                      ]}
                       style={getFieldDelay(3)}>
                       <select
                         className="w-full rounded-xl border border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 py-3 px-4 text-base text-gray-700 bg-white shadow-sm transition-all duration-300"
                         defaultValue="">
-                        <option value="" disabled>
-                          Continue as Student, Parent or Teacher
+                       <option value="" disabled>
+                          Continue as Student/Parent/Teacher/admin
                         </option>
                         <option value="student">Student</option>
                         <option value="parent">Parent</option>
                         <option value="teacher">Teacher</option>
+                        <option value="admin">Admin</option>
                       </select>
                     </Form.Item>
 
@@ -338,7 +384,10 @@ const AuthPage = () => {
                       name="email"
                       rules={[
                         { required: true, message: "Please enter your email" },
-                        { type: "email", message: "Please enter a valid email" },
+                        {
+                          type: "email",
+                          message: "Please enter a valid email",
+                        },
                       ]}
                       style={getFieldDelay(4)}>
                       <Input
@@ -351,7 +400,12 @@ const AuthPage = () => {
 
                     <Form.Item
                       name="phone"
-                      rules={[{ required: true, message: "Please enter your mobile number" }]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter your mobile number",
+                        },
+                      ]}
                       style={getFieldDelay(5)}>
                       <Input
                         prefix={<PhoneOutlined className="text-gray-400" />}
@@ -364,8 +418,14 @@ const AuthPage = () => {
                     <Form.Item
                       name="password"
                       rules={[
-                        { required: true, message: "Please enter your password" },
-                        { min: 8, message: "Password must be at least 8 characters" },
+                        {
+                          required: true,
+                          message: "Please enter your password",
+                        },
+                        {
+                          min: 8,
+                          message: "Password must be at least 8 characters",
+                        },
                       ]}
                       style={getFieldDelay(6)}>
                       <Input.Password
@@ -380,13 +440,18 @@ const AuthPage = () => {
                       name="confirmPassword"
                       dependencies={["password"]}
                       rules={[
-                        { required: true, message: "Please confirm your password" },
+                        {
+                          required: true,
+                          message: "Please confirm your password",
+                        },
                         ({ getFieldValue }) => ({
                           validator(_, value) {
                             if (!value || getFieldValue("password") === value) {
                               return Promise.resolve();
                             }
-                            return Promise.reject(new Error("Passwords do not match"));
+                            return Promise.reject(
+                              new Error("Passwords do not match")
+                            );
                           },
                         }),
                       ]}
@@ -545,9 +610,6 @@ const AuthPage = () => {
                   </div>
 
                   <div className="flex items-center justify-between mb-6 mt-4">
-                    <Form.Item name="remember" valuePropName="checked" noStyle>
-                      <Checkbox>Remember me</Checkbox>
-                    </Form.Item>
                     <Link
                       to="/forgot-password"
                       className="text-indigo-600 hover:text-indigo-700 text-sm font-medium">
@@ -643,11 +705,12 @@ const AuthPage = () => {
                         className="w-full rounded-xl border border-gray-300 focus:border-indigo-600 focus:ring-indigo-600 py-3 px-4 text-base text-gray-700 bg-white shadow-sm transition-all duration-300"
                         defaultValue="">
                         <option value="" disabled>
-                          Continue as Student, Parent or Teacher
+                          Continue as Student/Parent/Teacher/admin
                         </option>
                         <option value="student">Student</option>
                         <option value="parent">Parent</option>
                         <option value="teacher">Teacher</option>
+                        <option value="admin">admin</option>
                       </select>
                     </Form.Item>
 
@@ -712,13 +775,18 @@ const AuthPage = () => {
                       name="confirmPassword"
                       dependencies={["password"]}
                       rules={[
-                        { required: true, message: "Please confirm your password" },
+                        {
+                          required: true,
+                          message: "Please confirm your password",
+                        },
                         ({ getFieldValue }) => ({
                           validator(_, value) {
                             if (!value || getFieldValue("password") === value) {
                               return Promise.resolve();
                             }
-                            return Promise.reject(new Error("Passwords do not match"));
+                            return Promise.reject(
+                              new Error("Passwords do not match")
+                            );
                           },
                         }),
                       ]}>
@@ -730,27 +798,6 @@ const AuthPage = () => {
                       />
                     </Form.Item>
                   </div>
-
-                  <Form.Item
-                    name="terms"
-                    valuePropName="checked"
-                    rules={[
-                      {
-                        validator: (_, value) =>
-                          value
-                            ? Promise.resolve()
-                            : Promise.reject(new Error("Please accept terms")),
-                      },
-                    ]}>
-                    <Checkbox className="text-sm">
-                      I agree to the{" "}
-                      <Link
-                        to="/terms"
-                        className="text-indigo-600 hover:text-indigo-700">
-                        Terms
-                      </Link>
-                    </Checkbox>
-                  </Form.Item>
 
                   <Form.Item>
                     <Button
