@@ -3,6 +3,7 @@ import { PageHeader } from "../../../components/UI";
 import * as classService from "../../../services/class.service";
 import * as userService from "../../../services/user.service";
 import { Plus, Edit, Trash2, X } from "lucide-react";
+import { message } from "antd";
 
 const ClassesPage = () => {
   const [classes, setClasses] = useState([]);
@@ -30,7 +31,7 @@ const ClassesPage = () => {
       setClasses(response.data || []);
     } catch (error) {
       console.error("Error fetching classes:", error);
-      alert(error.message);
+      message.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -104,16 +105,16 @@ const ClassesPage = () => {
     try {
       if (editingClass) {
         await classService.updateClass(editingClass._id, formData);
-        alert("Class updated successfully!");
+        message.success("Class updated successfully!");
       } else {
         await classService.createClass(formData);
-        alert("Class created successfully!");
+        message.success("Class created successfully!");
       }
       handleCloseModal();
       fetchClasses();
     } catch (error) {
       console.error("Error saving class:", error);
-      alert(error.message);
+      message.error(error.message);
     }
   };
 
@@ -122,11 +123,11 @@ const ClassesPage = () => {
 
     try {
       await classService.deleteClass(classId);
-      alert("Class deleted successfully!");
+      message.success("Class deleted successfully!");
       fetchClasses();
     } catch (error) {
       console.error("Error deleting class:", error);
-      alert(error.message);
+      message.error(error.message);
     }
   };
 

@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Menu,
   X,
+  Book,
 } from "lucide-react";
 
 /**
@@ -41,7 +42,8 @@ const NAVIGATION_CONFIG = {
     {
       section: "Academics",
       items: [
-        { key: "classes", label: "Classes & Subjects", path: "/admin/classes", icon: BookOpen },
+        { key: "classes", label: "Classes", path: "/admin/academics/classes", icon: BookOpen },
+        { key: "subjects", label: "Subjects", path: "/admin/academics/subjects", icon: Book },
         { key: "fees", label: "Fees & Finance", path: "/admin/fees", icon: DollarSign },
       ],
     },
