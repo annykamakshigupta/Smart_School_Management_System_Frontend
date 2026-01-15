@@ -86,7 +86,7 @@ const NAVIGATION_CONFIG = {
     {
       section: "Main",
       items: [
-        { key: "dashboard", label: "Dashboard", path: "/student", icon: LayoutDashboard },
+        { key: "dashboard", label: "Dashboard", path: "/student/dashboard", icon: LayoutDashboard },
         { key: "classes", label: "My Classes", path: "/student/classes", icon: BookOpen },
       ],
     },

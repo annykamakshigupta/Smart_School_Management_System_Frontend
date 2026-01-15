@@ -4,9 +4,8 @@
  */
 
 import axios from "axios";
-const API_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://smart-school-backend-4ce1.onrender.com/api/auth";
+import BASE_URL from "../config/baseUrl";
+const API_URL = `${BASE_URL}/auth`;
 
 // Token storage keys
 const TOKEN_KEY = "ssms_token";

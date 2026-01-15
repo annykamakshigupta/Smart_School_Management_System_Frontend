@@ -224,14 +224,7 @@ export const parentNavigation = [
     path: "/parent/children",
   },
   {
-    key: "performance",
-    label: "Academic Performance",
-    icon: TrophyOutlined,
-    children: [
-      { key: "grades", label: "Grades", path: "/parent/performance/grades" },
-      {
-        key: "attendance",
-        laattendance",
+    key: "attendance",
     label: "Child's Attendance",
     icon: CheckCircleOutlined,
     path: "/parent/attendance",
@@ -241,7 +234,13 @@ export const parentNavigation = [
     label: "Academic Performance",
     icon: TrophyOutlined,
     children: [
-      { key: "grades", label: "Grades", path: "/parent/performance/grades"con: DollarOutlined,
+      { key: "grades", label: "Grades", path: "/parent/performance/grades" },
+    ],
+  },
+  {
+    key: "fees",
+    label: "Fee Status",
+    icon: DollarOutlined,
     children: [
       { key: "status", label: "Payment Status", path: "/parent/fees/status" },
       {

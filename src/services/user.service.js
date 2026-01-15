@@ -1,6 +1,7 @@
 import axios from "axios";
+import BASE_URL from "../config/baseUrl";
 
-const API_URL = "https://smart-school-backend-4ce1.onrender.com/api/users";
+const API_URL = `${BASE_URL}/users`;
 
 // Helper to get auth headers
 const getAuthHeaders = () => {

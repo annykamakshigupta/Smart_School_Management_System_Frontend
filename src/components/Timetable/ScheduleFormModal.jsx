@@ -1,4 +1,5 @@
 import React from "react";
+import BASE_URL from "../../config/baseUrl";
 
 const ScheduleFormModal = ({
   isOpen,
@@ -52,27 +53,24 @@ const ScheduleFormModal = ({
     try {
       // Fetch all data in parallel
       const [classesRes, subjectsRes, teachersRes] = await Promise.all([
-        fetch("https://smart-school-backend-4ce1.onrender.com/api/classes", {
+        fetch(`${BASE_URL}/classes`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }),
-        fetch("https://smart-school-backend-4ce1.onrender.com/api/subjects", {
+        fetch(`${BASE_URL}/subjects`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }),
-        fetch(
-          "https://smart-school-backend-4ce1.onrender.com/api/users?role=teacher",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        ),
+        fetch(`${BASE_URL}/users?role=teacher`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }),
       ]);
 
       if (classesRes.ok) {
