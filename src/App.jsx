@@ -30,6 +30,7 @@ import {
   SchedulesPage,
   ClassesPage,
   SubjectsPage,
+  AdminAttendancePage,
 } from "./features/admin";
 
 // Feature Pages - Teacher
@@ -52,6 +53,7 @@ import {
   ParentDashboard,
   MyChildrenPage,
   FeePaymentPage,
+  ParentChildAttendancePage,
 } from "./features/parent";
 
 // Styles
@@ -140,6 +142,12 @@ function App() {
                     element={<SchedulesPage />}
                   />
 
+                  {/* Attendance */}
+                  <Route
+                    path="/admin/attendance"
+                    element={<AdminAttendancePage />}
+                  />
+
                   {/* Fee Management */}
                   <Route
                     path="/admin/fees/structure"
@@ -180,12 +188,8 @@ function App() {
 
                   {/* Attendance */}
                   <Route
-                    path="/teacher/attendance/mark"
+                    path="/teacher/attendance"
                     element={<TeacherAttendancePage />}
-                  />
-                  <Route
-                    path="/teacher/attendance/history"
-                    element={<PlaceholderPage title="Attendance History" />}
                   />
 
                   {/* Grades */}
@@ -291,23 +295,25 @@ function App() {
                     path="/parent/dashboard"
                     element={<ParentDashboard />}
                   />
-
                   {/* Children */}
                   <Route path="/parent/children" element={<MyChildrenPage />} />
                   <Route
                     path="/parent/children/:id"
                     element={<PlaceholderPage title="Child Details" />}
                   />
-
+                  {/* Performance */}
                   {/* Performance */}
                   <Route
                     path="/parent/performance/grades"
                     element={<PlaceholderPage title="Child Grades" />}
                   />
+
+                  {/* Attendance */}
                   <Route
-                    path="/parent/performance/attendance"
-                    element={<PlaceholderPage title="Child Attendance" />}
+                    path="/parent/attendance"
+                    element={<ParentChildAttendancePage />}
                   />
+
                   <Route
                     path="/parent/performance/reports"
                     element={<PlaceholderPage title="Performance Reports" />}
@@ -322,7 +328,6 @@ function App() {
                     path="/parent/fees/history"
                     element={<PlaceholderPage title="Payment History" />}
                   />
-
                   {/* Other */}
                   <Route
                     path="/parent/communication"

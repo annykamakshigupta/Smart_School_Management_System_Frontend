@@ -58,6 +58,12 @@ export const adminNavigation = [
     ],
   },
   {
+    key: "attendance",
+    label: "Attendance",
+    icon: CheckCircleOutlined,
+    path: "/admin/attendance",
+  },
+  {
     key: "fees",
     label: "Fee Management",
     icon: DollarOutlined,
@@ -103,14 +109,7 @@ export const teacherNavigation = [
     key: "attendance",
     label: "Attendance",
     icon: CheckCircleOutlined,
-    children: [
-      {
-        key: "mark",
-        label: "Mark Attendance",
-        path: "/teacher/attendance/mark",
-      },
-      { key: "history", label: "History", path: "/teacher/attendance/history" },
-    ],
+    path: "/teacher/attendance",
   },
   {
     key: "grades",
@@ -232,16 +231,17 @@ export const parentNavigation = [
       { key: "grades", label: "Grades", path: "/parent/performance/grades" },
       {
         key: "attendance",
-        label: "Attendance",
-        path: "/parent/performance/attendance",
-      },
-      { key: "reports", label: "Reports", path: "/parent/performance/reports" },
-    ],
+        laattendance",
+    label: "Child's Attendance",
+    icon: CheckCircleOutlined,
+    path: "/parent/attendance",
   },
   {
-    key: "fees",
-    label: "Fee Payment",
-    icon: DollarOutlined,
+    key: "performance",
+    label: "Academic Performance",
+    icon: TrophyOutlined,
+    children: [
+      { key: "grades", label: "Grades", path: "/parent/performance/grades"con: DollarOutlined,
     children: [
       { key: "status", label: "Payment Status", path: "/parent/fees/status" },
       {
