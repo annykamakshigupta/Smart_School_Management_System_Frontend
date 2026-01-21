@@ -45,7 +45,7 @@ const ScheduleFormModal = ({
     const token = localStorage.getItem("ssms_token");
 
     if (!token) {
-      console.error("No authentication token found");
+
       setLoading(false);
       return;
     }
@@ -106,6 +106,19 @@ const ScheduleFormModal = ({
       }
     }
 
+    // Auto-populate teacherId when subject is selected
+    if (name === "subjectId") {
+      const selectedSubject = subjects.find((s) => s._id === value);
+      if (selectedSubject && selectedSubject.assignedTeacher) {
+        setFormData((prev) => ({
+          ...prev,
+          teacherId:
+            selectedSubject.assignedTeacher._id ||
+            selectedSubject.assignedTeacher,
+        }));
+      }
+    }
+
     // Clear error for this field
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -118,7 +131,7 @@ const ScheduleFormModal = ({
     if (!formData.classId) newErrors.classId = "Class is required";
     if (!formData.section) newErrors.section = "Section is required";
     if (!formData.subjectId) newErrors.subjectId = "Subject is required";
-    if (!formData.teacherId) newErrors.teacherId = "Teacher is required";
+    // teacherId validation removed - it's auto-assigned from subject
     if (!formData.room) newErrors.room = "Room is required";
     if (!formData.dayOfWeek) newErrors.dayOfWeek = "Day is required";
     if (!formData.startTime) newErrors.startTime = "Start time is required";
@@ -251,18 +264,22 @@ const ScheduleFormModal = ({
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Teacher <span className="text-red-500">*</span>
+                  <span className="text-xs text-gray-500 ml-2">
+                    (Auto-assigned from subject)
+                  </span>
                 </label>
                 <select
                   name="teacherId"
                   value={formData.teacherId}
                   onChange={handleChange}
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
+                  disabled={true}
+                  className={`w-full px-3 py-2 border rounded-lg bg-gray-100 cursor-not-allowed ${
                     errors.teacherId ? "border-red-500" : "border-gray-300"
                   }`}>
-                  <option value="">Select a teacher</option>
+                  <option value="">Select a subject first</option>
                   {teachers.map((teacher) => (
                     <option key={teacher._id} value={teacher._id}>
-                      {teacher.name} ({teacher.email})
+                      {teacher.firstName} {teacher.lastName} ({teacher.email})
                     </option>
                   ))}
                 </select>

@@ -32,17 +32,17 @@ const TimetableGrid = ({
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto overflow-visible">
       <div className="min-w-225">
         {/* Header */}
         <div className="grid grid-cols-6 gap-2 mb-2">
-          <div className="text-center font-semibold text-gray-700 p-3">
+          <div className="text-center font-semibold text-gray-700 p-3 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border border-gray-200">
             Time
           </div>
           {DAYS.map((day) => (
             <div
               key={day}
-              className="text-center font-semibold text-gray-700 p-3 bg-white rounded-lg border border-gray-200">
+              className="text-center font-semibold text-gray-700 p-3 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
               {day}
             </div>
           ))}
@@ -63,13 +63,13 @@ const TimetableGrid = ({
             {DAYS.map((day) => {
               const daySchedules = weeklySchedule[day] || [];
               const scheduleInSlot = daySchedules.find((schedule) =>
-                isInTimeSlot(schedule, timeSlot)
+                isInTimeSlot(schedule, timeSlot),
               );
 
               return (
                 <div
                   key={`${day}-${timeSlot}`}
-                  className="min-h-20 p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors relative">
+                  className="min-h-20 p-2 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors relative overflow-visible">
                   {scheduleInSlot ? (
                     <TimetableCard
                       schedule={scheduleInSlot}

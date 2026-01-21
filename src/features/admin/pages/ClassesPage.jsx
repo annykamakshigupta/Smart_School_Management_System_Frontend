@@ -28,6 +28,8 @@ const ClassesPage = () => {
     setLoading(true);
     try {
       const response = await classService.getAllClasses();
+      console.log("Fetched classes:", response.data);
+      console.log("First class teacher:", response.data?.[0]?.classTeacher);
       setClasses(response.data || []);
     } catch (error) {
       console.error("Error fetching classes:", error);
@@ -40,6 +42,7 @@ const ClassesPage = () => {
   const fetchTeachers = async () => {
     try {
       const response = await userService.getAllTeachers();
+      console.log("Fetched teachers:", response.data);
       setTeachers(response.data || []);
     } catch (error) {
       console.error("Error fetching teachers:", error);
@@ -195,7 +198,12 @@ const ClassesPage = () => {
                       {classItem.academicYear}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {classItem.classTeacher?.name || "Not Assigned"}
+                      {classItem.classTeacher
+                        ? classItem.classTeacher.firstName &&
+                          classItem.classTeacher.lastName
+                          ? `${classItem.classTeacher.firstName} ${classItem.classTeacher.lastName}`
+                          : classItem.classTeacher.email || "Not Assigned"
+                        : "Not Assigned"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {classItem.subjects?.length || 0} subjects
@@ -307,7 +315,7 @@ const ClassesPage = () => {
                   <option value="">Select a teacher</option>
                   {teachers.map((teacher) => (
                     <option key={teacher._id} value={teacher._id}>
-                      {teacher.name} ({teacher.email})
+                      {teacher.firstName} {teacher.lastName} ({teacher.email})
                     </option>
                   ))}
                 </select>

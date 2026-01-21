@@ -37,14 +37,8 @@ const MySchedulePage = () => {
       setLoading(true);
       setError(null);
 
-      if (!user?._id) {
-        setError("User information not available");
-        return;
-      }
-
-      const response = await scheduleService.getWeeklyScheduleForTeacher(
-        user._id
-      );
+      // Use new API endpoint that doesn't require teacherId (uses JWT)
+      const response = await scheduleService.getMySchedule();
       setWeeklySchedule(response.data);
     } catch (err) {
       setError(err.message || "Failed to fetch schedule");
@@ -54,10 +48,8 @@ const MySchedulePage = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchSchedule();
-    }
-  }, [user]);
+    fetchSchedule();
+  }, []);
 
   // Handle schedule card click to show details
   const handleScheduleClick = (schedule) => {
@@ -192,7 +184,29 @@ const MySchedulePage = () => {
 
       {/* Timetable */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        {isMobile ? (
+        {Object.values(weeklySchedule).flat().length === 0 ? (
+          <div className="text-center py-12">
+            <svg
+              className="w-24 h-24 mx-auto text-gray-300 mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No Classes Assigned Yet
+            </h3>
+            <p className="text-gray-500">
+              You don't have any scheduled classes at the moment. Please contact
+              your administrator if you believe this is an error.
+            </p>
+          </div>
+        ) : isMobile ? (
           <TimetableMobileView
             weeklySchedule={weeklySchedule}
             onScheduleClick={handleScheduleClick}

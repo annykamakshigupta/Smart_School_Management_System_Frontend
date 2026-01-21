@@ -4,6 +4,7 @@ import * as subjectService from "../../../services/subject.service";
 import * as classService from "../../../services/class.service";
 import * as userService from "../../../services/user.service";
 import { Plus, Edit, Trash2, X } from "lucide-react";
+import { message } from "antd";
 
 const SubjectsPage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -32,13 +33,9 @@ const SubjectsPage = () => {
     setLoading(true);
     try {
       const response = await subjectService.getAllSubjects();
-      console.log("📦 API Response:", response);
-      console.log("📊 Subjects count:", response.count);
-      console.log("📋 Subjects data:", response.data);
       setSubjects(response.data || []);
     } catch (error) {
-      console.error("Error fetching subjects:", error);
-      alert(error.message);
+      message.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -49,7 +46,7 @@ const SubjectsPage = () => {
       const response = await classService.getAllClasses();
       setClasses(response.data || []);
     } catch (error) {
-      console.error("Error fetching classes:", error);
+      message.error(error.message);
     }
   };
 
@@ -127,16 +124,15 @@ const SubjectsPage = () => {
     try {
       if (editingSubject) {
         await subjectService.updateSubject(editingSubject._id, formData);
-        alert("Subject updated successfully!");
+        message.success("Subject updated successfully!");
       } else {
         await subjectService.createSubject(formData);
-        alert("Subject created successfully!");
+        message.success("Subject created successfully!");
       }
       handleCloseModal();
       fetchSubjects();
     } catch (error) {
-      console.error("Error saving subject:", error);
-      alert(error.message);
+      message.error(error.message);
     }
   };
 
@@ -146,11 +142,10 @@ const SubjectsPage = () => {
 
     try {
       await subjectService.deleteSubject(subjectId);
-      alert("Subject deleted successfully!");
+      message.success("Subject deleted successfully!");
       fetchSubjects();
     } catch (error) {
-      console.error("Error deleting subject:", error);
-      alert(error.message);
+      message.error(error.message);
     }
   };
 
@@ -222,7 +217,9 @@ const SubjectsPage = () => {
                         : "Not Assigned"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {subject.assignedTeacher?.name || "Not Assigned"}
+                      {subject.assignedTeacher
+                        ? `${subject.assignedTeacher.firstName || ""} ${subject.assignedTeacher.lastName || ""}`.trim()
+                        : "Not Assigned"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {subject.academicYear}
@@ -352,7 +349,7 @@ const SubjectsPage = () => {
                   <option value="">Select a teacher</option>
                   {teachers.map((teacher) => (
                     <option key={teacher._id} value={teacher._id}>
-                      {teacher.name} ({teacher.email})
+                      {teacher.firstName} {teacher.lastName} ({teacher.email})
                     </option>
                   ))}
                 </select>

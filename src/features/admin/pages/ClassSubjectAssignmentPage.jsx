@@ -111,7 +111,9 @@ const ClassSubjectAssignmentPage = () => {
               icon={<UserOutlined />}
               className="bg-blue-100"
             />
-            <span>{teacher.name}</span>
+            <span>
+              {teacher.firstName} {teacher.lastName}
+            </span>
           </div>
         ) : (
           <Tag color="default">Not Assigned</Tag>
@@ -197,7 +199,9 @@ const ClassSubjectAssignmentPage = () => {
               icon={<UserOutlined />}
               className="bg-blue-100"
             />
-            <span>{teacher.name}</span>
+            <span>
+              {teacher.firstName} {teacher.lastName}
+            </span>
           </div>
         ) : (
           <Tag color="default">Not Assigned</Tag>
@@ -359,7 +363,9 @@ const ClassSubjectAssignmentPage = () => {
                     className="bg-blue-100 text-blue-600"
                   />
                   <div className="flex-1">
-                    <div className="font-medium">{teacher.name}</div>
+                    <div className="font-medium">
+                      {teacher.firstName} {teacher.lastName}
+                    </div>
                     <div className="text-xs text-gray-500">{teacher.email}</div>
                   </div>
                   <Button size="small">View</Button>
@@ -491,7 +497,7 @@ const ClassSubjectAssignmentPage = () => {
               optionFilterProp="children">
               {teachers.map((teacher) => (
                 <Select.Option key={teacher._id} value={teacher._id}>
-                  {teacher.name} ({teacher.email})
+                  {teacher.firstName} {teacher.lastName} ({teacher.email})
                 </Select.Option>
               ))}
             </Select>
@@ -556,7 +562,7 @@ const ClassSubjectAssignmentPage = () => {
               optionFilterProp="children">
               {teachers.map((teacher) => (
                 <Select.Option key={teacher._id} value={teacher._id}>
-                  {teacher.name} ({teacher.email})
+                  {teacher.firstName} {teacher.lastName} ({teacher.email})
                 </Select.Option>
               ))}
             </Select>

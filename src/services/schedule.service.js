@@ -11,7 +11,6 @@ const getAuthToken = () => {
     console.warn("No authentication token found in localStorage");
     console.log("Available localStorage keys:", Object.keys(localStorage));
   } else {
-    console.log("Token found in localStorage");
   }
   return token;
 };
@@ -38,7 +37,7 @@ const scheduleService = {
 
       console.log(
         "Creating schedule with token:",
-        token ? "Token exists" : "No token"
+        token ? "Token exists" : "No token",
       );
 
       const response = await fetch(`${API_URL}/schedules`, {
@@ -52,7 +51,7 @@ const scheduleService = {
       if (!response.ok) {
         if (response.status === 401) {
           console.error(
-            "Authentication failed. Token may be invalid or expired."
+            "Authentication failed. Token may be invalid or expired.",
           );
           throw new Error("Authentication failed. Please login again.");
         }
@@ -175,7 +174,7 @@ const scheduleService = {
         {
           method: "GET",
           headers: getHeaders(),
-        }
+        },
       );
 
       const data = await response.json();
@@ -205,7 +204,37 @@ const scheduleService = {
         {
           method: "GET",
           headers: getHeaders(),
+        },
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error("Authentication failed. Please login again.");
         }
+        throw new Error(data.message || "Failed to fetch weekly schedule");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error fetching teacher schedule:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get authenticated teacher's own schedule (uses JWT, no teacherId needed)
+   */
+  async getMySchedule(academicYear) {
+    try {
+      const queryParams = academicYear ? `?academicYear=${academicYear}` : "";
+      const response = await fetch(
+        `${API_URL}/schedules/my-schedule${queryParams}`,
+        {
+          method: "GET",
+          headers: getHeaders(),
+        },
       );
 
       const data = await response.json();
