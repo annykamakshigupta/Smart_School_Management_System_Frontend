@@ -278,19 +278,7 @@ export const changeStudentClass = async (
   }
 };
 
-// ============ PARENT MANAGEMENT ============
 
-/**
- * Get all parents
- */
-export const getAllParents = async () => {
-  try {
-    const response = await axios.get(`${API_URL}/parents`, getAuthHeaders());
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error fetching parents");
-  }
-};
 
 /**
  * Get children by parent ID
@@ -484,7 +472,6 @@ export default {
   assignParentToStudent,
   changeStudentClass,
   // Parent management
-  getAllParents,
   getChildrenByParentId,
   linkChildToParent,
   unlinkChildFromParent,
