@@ -46,7 +46,7 @@ export const createUser = async (userData) => {
     const response = await axios.post(
       `${API_URL}/users`,
       userData,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -61,12 +61,12 @@ export const getUsersByRole = async (role) => {
   try {
     const response = await axios.get(
       `${API_URL}/users/role/${role}`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error fetching users by role"
+      error.response?.data?.message || "Error fetching users by role",
     );
   }
 };
@@ -78,7 +78,7 @@ export const getUserById = async (userId) => {
   try {
     const response = await axios.get(
       `${API_URL}/users/${userId}`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -94,7 +94,7 @@ export const updateUser = async (userId, userData) => {
     const response = await axios.put(
       `${API_URL}/users/${userId}`,
       userData,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -110,7 +110,7 @@ export const deactivateUser = async (userId, status = "suspended") => {
     const response = await axios.patch(
       `${API_URL}/users/${userId}/status`,
       { status },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -126,12 +126,12 @@ export const resetUserPassword = async (userId, newPassword) => {
     const response = await axios.post(
       `${API_URL}/users/${userId}/reset-password`,
       { newPassword },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error resetting password"
+      error.response?.data?.message || "Error resetting password",
     );
   }
 };
@@ -143,7 +143,7 @@ export const deleteUser = async (userId) => {
   try {
     const response = await axios.delete(
       `${API_URL}/users/${userId}`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -183,7 +183,7 @@ export const createStudent = async (studentData) => {
     const response = await axios.post(
       `${API_URL}/students`,
       studentData,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -198,7 +198,7 @@ export const getStudentsByClass = async (classId) => {
   try {
     const response = await axios.get(
       `${API_URL}/students/class/${classId}`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -213,12 +213,12 @@ export const getStudentProfileByUserId = async (userId) => {
   try {
     const response = await axios.get(
       `${API_URL}/students/user/${userId}`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error fetching student profile"
+      error.response?.data?.message || "Error fetching student profile",
     );
   }
 };
@@ -231,7 +231,7 @@ export const updateStudent = async (studentId, studentData) => {
     const response = await axios.put(
       `${API_URL}/students/${studentId}`,
       studentData,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -247,7 +247,7 @@ export const assignParentToStudent = async (studentId, parentId) => {
     const response = await axios.post(
       `${API_URL}/students/assign-parent`,
       { studentId, parentId },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -262,18 +262,18 @@ export const changeStudentClass = async (
   studentId,
   newClassId,
   newSection,
-  newRollNumber
+  newRollNumber,
 ) => {
   try {
     const response = await axios.post(
       `${API_URL}/students/change-class`,
       { studentId, newClassId, newSection, newRollNumber },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error changing student class"
+      error.response?.data?.message || "Error changing student class",
     );
   }
 };
@@ -299,7 +299,7 @@ export const getChildrenByParentId = async (parentId) => {
   try {
     const response = await axios.get(
       `${API_URL}/parents/${parentId}/children`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -315,12 +315,12 @@ export const linkChildToParent = async (parentId, studentId) => {
     const response = await axios.post(
       `${API_URL}/parents/link-child`,
       { parentId, studentId },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error linking child to parent"
+      error.response?.data?.message || "Error linking child to parent",
     );
   }
 };
@@ -333,12 +333,12 @@ export const unlinkChildFromParent = async (parentId, studentId) => {
     const response = await axios.post(
       `${API_URL}/parents/unlink-child`,
       { parentId, studentId },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error unlinking child from parent"
+      error.response?.data?.message || "Error unlinking child from parent",
     );
   }
 };
@@ -353,13 +353,46 @@ export const assignClassTeacher = async (classId, teacherId) => {
     const response = await axios.post(
       `${API_URL}/classes/assign-teacher`,
       { classId, teacherId },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error assigning class teacher"
+      error.response?.data?.message || "Error assigning class teacher",
     );
+  }
+};
+
+/**
+ * Remove class teacher
+ */
+export const removeClassTeacher = async (classId) => {
+  try {
+    const response = await axios.post(
+      `${API_URL}/classes/remove-teacher`,
+      { classId },
+      getAuthHeaders(),
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error removing class teacher",
+    );
+  }
+};
+
+/**
+ * Get all classes with teacher info
+ */
+export const getAllClassesWithTeachers = async () => {
+  try {
+    const response = await axios.get(
+      `${API_URL}/classes/with-teachers`,
+      getAuthHeaders(),
+    );
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching classes");
   }
 };
 
@@ -371,12 +404,12 @@ export const assignTeacherToSubject = async (subjectId, teacherId) => {
     const response = await axios.post(
       `${API_URL}/subjects/assign-teacher`,
       { subjectId, teacherId },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error assigning teacher to subject"
+      error.response?.data?.message || "Error assigning teacher to subject",
     );
   }
 };
@@ -388,12 +421,12 @@ export const getTeacherAssignments = async (teacherId) => {
   try {
     const response = await axios.get(
       `${API_URL}/teachers/${teacherId}/assignments`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error fetching teacher assignments"
+      error.response?.data?.message || "Error fetching teacher assignments",
     );
   }
 };
@@ -407,12 +440,12 @@ export const getDashboardStats = async () => {
   try {
     const response = await axios.get(
       `${API_URL}/dashboard/stats`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
     throw new Error(
-      error.response?.data?.message || "Error fetching dashboard stats"
+      error.response?.data?.message || "Error fetching dashboard stats",
     );
   }
 };
@@ -457,6 +490,8 @@ export default {
   unlinkChildFromParent,
   // Class & Subject assignments
   assignClassTeacher,
+  removeClassTeacher,
+  getAllClassesWithTeachers,
   assignTeacherToSubject,
   getTeacherAssignments,
   // Dashboard

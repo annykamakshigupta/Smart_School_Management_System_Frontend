@@ -111,9 +111,7 @@ const ClassSubjectAssignmentPage = () => {
               icon={<UserOutlined />}
               className="bg-blue-100"
             />
-            <span>
-              {teacher.firstName} {teacher.lastName}
-            </span>
+            <span>{teacher.name}</span>
           </div>
         ) : (
           <Tag color="default">Not Assigned</Tag>
@@ -199,9 +197,7 @@ const ClassSubjectAssignmentPage = () => {
               icon={<UserOutlined />}
               className="bg-blue-100"
             />
-            <span>
-              {teacher.firstName} {teacher.lastName}
-            </span>
+            <span>{teacher.name}</span>
           </div>
         ) : (
           <Tag color="default">Not Assigned</Tag>
@@ -363,9 +359,7 @@ const ClassSubjectAssignmentPage = () => {
                     className="bg-blue-100 text-blue-600"
                   />
                   <div className="flex-1">
-                    <div className="font-medium">
-                      {teacher.firstName} {teacher.lastName}
-                    </div>
+                    <div className="font-medium">{teacher.name}</div>
                     <div className="text-xs text-gray-500">{teacher.email}</div>
                   </div>
                   <Button size="small">View</Button>
@@ -497,7 +491,7 @@ const ClassSubjectAssignmentPage = () => {
               optionFilterProp="children">
               {teachers.map((teacher) => (
                 <Select.Option key={teacher._id} value={teacher._id}>
-                  {teacher.firstName} {teacher.lastName} ({teacher.email})
+                  {teacher.name} ({teacher.email})
                 </Select.Option>
               ))}
             </Select>
@@ -521,7 +515,7 @@ const ClassSubjectAssignmentPage = () => {
         </Form>
       </Modal>
 
-      {/* Assign Subject Teacher Modal */}
+      {/* Assign Subject Teacher Modal */
       <Modal
         title={`Assign Teacher - ${selectedSubject?.name}`}
         open={isAssignSubjectTeacherModalOpen}
@@ -562,7 +556,7 @@ const ClassSubjectAssignmentPage = () => {
               optionFilterProp="children">
               {teachers.map((teacher) => (
                 <Select.Option key={teacher._id} value={teacher._id}>
-                  {teacher.firstName} {teacher.lastName} ({teacher.email})
+                  {teacher.name} ({teacher.email})
                 </Select.Option>
               ))}
             </Select>
@@ -585,7 +579,7 @@ const ClassSubjectAssignmentPage = () => {
           </Form.Item>
         </Form>
       </Modal>
-
+}
       {/* Teacher Assignments Modal */}
       <Modal
         title={`Assignments - ${selectedTeacher?.name}`}
@@ -645,6 +639,6 @@ const ClassSubjectAssignmentPage = () => {
       </Modal>
     </div>
   );
-};
+}
 
-export default ClassSubjectAssignmentPage;
+export default ClassSubjectAssignmentPage

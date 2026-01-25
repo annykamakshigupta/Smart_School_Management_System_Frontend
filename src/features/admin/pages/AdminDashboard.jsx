@@ -1,9 +1,22 @@
 /**
  * Admin Dashboard
- * Main dashboard view for administrators
+ * Main dashboard view for administrators - Shows real data from API
  */
 
-import { Row, Col, Card, Progress, List, Avatar, Tag, Button } from "antd";
+import { useState, useEffect } from "react";
+import {
+  Row,
+  Col,
+  Card,
+  Progress,
+  List,
+  Avatar,
+  Tag,
+  Button,
+  Spin,
+  Empty,
+  message,
+} from "antd";
 import {
   TeamOutlined,
   UserOutlined,
@@ -13,86 +26,88 @@ import {
   CalendarOutlined,
   BellOutlined,
   ArrowRightOutlined,
+  UsergroupAddOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { StatCard, PageHeader } from "../../../components/UI";
+import {
+  getAllUsers,
+  getAllClassesWithTeachers,
+} from "../../../services/admin.service";
+import { getAllClasses } from "../../../services/class.service";
 
 /**
  * AdminDashboard Component
  */
 const AdminDashboard = () => {
-  // Mock data - replace with actual API calls
-  const stats = {
-    totalStudents: 1245,
-    totalTeachers: 86,
-    totalClasses: 42,
-    feeCollection: 125000,
-    studentChange: 12.5,
-    teacherChange: 3.2,
-    classChange: 0,
-    feeChange: 8.7,
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalStudents: 0,
+    totalTeachers: 0,
+    totalClasses: 0,
+    totalParents: 0,
+  });
+  const [recentStudents, setRecentStudents] = useState([]);
+  const [classesWithTeachers, setClassesWithTeachers] = useState([]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+
+      // Fetch all counts in parallel
+      const [studentsRes, teachersRes, parentsRes, classesRes] =
+        await Promise.all([
+          getAllUsers({ role: "student" }).catch(() => ({ data: [] })),
+          getAllUsers({ role: "teacher" }).catch(() => ({ data: [] })),
+          getAllUsers({ role: "parent" }).catch(() => ({ data: [] })),
+          getAllClassesWithTeachers().catch(() =>
+            getAllClasses().catch(() => ({ data: [] })),
+          ),
+        ]);
+
+      const students = (studentsRes.data || []).map((user) => ({
+        _id: user._id,
+        userId: user,
+        classId: null,
+        section: null,
+        rollNumber: null,
+      }));
+      const teachers = teachersRes.data || [];
+      const parents = parentsRes.data || [];
+      const classes = classesRes.data || [];
+
+      setStats({
+        totalStudents: students.length,
+        totalTeachers: teachers.length,
+        totalClasses: classes.length,
+        totalParents: parents.length,
+      });
+
+      // Get 5 most recent students
+      setRecentStudents(students.slice(0, 5));
+
+      // Get classes with teacher info
+      setClassesWithTeachers(classes.slice(0, 5));
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+      message.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const recentActivities = [
-    {
-      id: 1,
-      action: "New student enrolled",
-      user: "John Doe",
-      time: "5 min ago",
-      type: "student",
-    },
-    {
-      id: 2,
-      action: "Fee payment received",
-      user: "Jane Smith",
-      time: "15 min ago",
-      type: "fee",
-    },
-    {
-      id: 3,
-      action: "Teacher added",
-      user: "Mike Johnson",
-      time: "1 hour ago",
-      type: "teacher",
-    },
-    {
-      id: 4,
-      action: "Class schedule updated",
-      user: "Admin",
-      time: "2 hours ago",
-      type: "class",
-    },
-    {
-      id: 5,
-      action: "New parent registered",
-      user: "Sarah Wilson",
-      time: "3 hours ago",
-      type: "parent",
-    },
-  ];
-
-  const upcomingEvents = [
-    { id: 1, title: "Staff Meeting", date: "Jan 10, 2026", time: "10:00 AM" },
-    {
-      id: 2,
-      title: "Parent-Teacher Conference",
-      date: "Jan 15, 2026",
-      time: "2:00 PM",
-    },
-    {
-      id: 3,
-      title: "Mid-term Exams Begin",
-      date: "Jan 20, 2026",
-      time: "9:00 AM",
-    },
-    { id: 4, title: "Sports Day", date: "Jan 25, 2026", time: "8:00 AM" },
-  ];
-
-  const attendanceData = {
-    present: 85,
-    absent: 10,
-    late: 5,
-  };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-100">
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -109,7 +124,6 @@ const AdminDashboard = () => {
             value={stats.totalStudents.toLocaleString()}
             icon={TeamOutlined}
             iconColor="bg-blue-100 text-blue-600"
-            change={stats.studentChange}
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
@@ -118,7 +132,6 @@ const AdminDashboard = () => {
             value={stats.totalTeachers}
             icon={UserOutlined}
             iconColor="bg-green-100 text-green-600"
-            change={stats.teacherChange}
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
@@ -127,142 +140,126 @@ const AdminDashboard = () => {
             value={stats.totalClasses}
             icon={BookOutlined}
             iconColor="bg-purple-100 text-purple-600"
-            change={stats.classChange}
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <StatCard
-            title="Fee Collection"
-            value={`$${stats.feeCollection.toLocaleString()}`}
-            icon={DollarOutlined}
+            title="Total Parents"
+            value={stats.totalParents}
+            icon={UsergroupAddOutlined}
             iconColor="bg-yellow-100 text-yellow-600"
-            change={stats.feeChange}
           />
         </Col>
       </Row>
 
       <Row gutter={[16, 16]}>
-        {/* Attendance Overview */}
-        <Col xs={24} lg={8}>
-          <Card title="Today's Attendance" className="h-full">
-            <div className="flex justify-center mb-6">
-              <Progress
-                type="circle"
-                percent={attendanceData.present}
-                strokeColor="#22c55e"
-                format={(percent) => (
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{percent}%</div>
-                    <div className="text-xs text-gray-500">Present</div>
-                  </div>
+        {/* Classes with Teachers */}
+        <Col xs={24} lg={12}>
+          <Card
+            title={
+              <span className="flex items-center gap-2">
+                <HomeOutlined className="text-purple-600" />
+                Class Teacher Assignments
+              </span>
+            }
+            extra={
+              <Link to="/admin/assignments" className="text-indigo-600">
+                Manage
+              </Link>
+            }>
+            {classesWithTeachers.length > 0 ? (
+              <List
+                dataSource={classesWithTeachers}
+                renderItem={(cls) => (
+                  <List.Item>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-3">
+                        <Avatar
+                          icon={<BookOutlined />}
+                          className="bg-purple-100 text-purple-600"
+                        />
+                        <div>
+                          <div className="font-medium">{cls.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {cls.students?.length || 0} students
+                          </div>
+                        </div>
+                      </div>
+                      <div>
+                        {cls.classTeacher ? (
+                          <Tag
+                            color="success"
+                            className="flex items-center gap-1">
+                            <UserOutlined />
+                            {cls.classTeacher.name}
+                          </Tag>
+                        ) : (
+                          <Tag color="warning">No Teacher</Tag>
+                        )}
+                      </div>
+                    </div>
+                  </List.Item>
                 )}
               />
-            </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Present</span>
-                <Tag color="success">{attendanceData.present}%</Tag>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Absent</span>
-                <Tag color="error">{attendanceData.absent}%</Tag>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Late</span>
-                <Tag color="warning">{attendanceData.late}%</Tag>
-              </div>
-            </div>
+            ) : (
+              <Empty
+                description="No classes created yet"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
           </Card>
         </Col>
 
-        {/* Recent Activity */}
-        <Col xs={24} lg={8}>
+        {/* Recent Students */}
+        <Col xs={24} lg={12}>
           <Card
-            title="Recent Activity"
+            title={
+              <span className="flex items-center gap-2">
+                <TeamOutlined className="text-blue-600" />
+                Recent Students
+              </span>
+            }
             extra={
-              <Link to="/admin/activity" className="text-indigo-600">
+              <Link to="/admin/users/students" className="text-indigo-600">
                 View All
               </Link>
-            }
-            className="h-full">
-            <List
-              itemLayout="horizontal"
-              dataSource={recentActivities}
-              renderItem={(item) => (
-                <List.Item className="px-0!">
-                  <List.Item.Meta
-                    avatar={
+            }>
+            {recentStudents.length > 0 ? (
+              <List
+                dataSource={recentStudents}
+                renderItem={(student) => (
+                  <List.Item>
+                    <div className="flex items-center gap-3 w-full">
                       <Avatar
-                        icon={
-                          item.type === "student" ? (
-                            <TeamOutlined />
-                          ) : item.type === "teacher" ? (
-                            <UserOutlined />
-                          ) : item.type === "fee" ? (
-                            <DollarOutlined />
-                          ) : (
-                            <BookOutlined />
-                          )
-                        }
-                        className={
-                          item.type === "student"
-                            ? "bg-blue-100 text-blue-600"
-                            : item.type === "teacher"
-                            ? "bg-green-100 text-green-600"
-                            : item.type === "fee"
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "bg-purple-100 text-purple-600"
-                        }
+                        icon={<UserOutlined />}
+                        className="bg-blue-100 text-blue-600"
                       />
-                    }
-                    title={
-                      <span className="text-sm font-medium">{item.action}</span>
-                    }
-                    description={
-                      <span className="text-xs text-gray-500">
-                        {item.user} • {item.time}
-                      </span>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-
-        {/* Upcoming Events */}
-        <Col xs={24} lg={8}>
-          <Card
-            title="Upcoming Events"
-            extra={
-              <Link to="/admin/events" className="text-indigo-600">
-                View All
-              </Link>
-            }
-            className="h-full">
-            <List
-              itemLayout="horizontal"
-              dataSource={upcomingEvents}
-              renderItem={(item) => (
-                <List.Item className="px-0!">
-                  <List.Item.Meta
-                    avatar={
-                      <div className="w-12 h-12 bg-indigo-100 rounded-lg flex flex-col items-center justify-center">
-                        <CalendarOutlined className="text-indigo-600 text-lg" />
+                      <div className="flex-1">
+                        <div className="font-medium">
+                          {student.userId?.name || "N/A"}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {student.classId?.name || "No class"} • Roll:{" "}
+                          {student.rollNumber || "N/A"}
+                        </div>
                       </div>
-                    }
-                    title={
-                      <span className="text-sm font-medium">{item.title}</span>
-                    }
-                    description={
-                      <span className="text-xs text-gray-500">
-                        {item.date} at {item.time}
-                      </span>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
+                      <div>
+                        {student.parentId ? (
+                          <Tag color="success">Parent Linked</Tag>
+                        ) : (
+                          <Tag color="warning">No Parent</Tag>
+                        )}
+                      </div>
+                    </div>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Empty
+                description="No students enrolled yet"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
           </Card>
         </Col>
       </Row>
@@ -273,35 +270,85 @@ const AdminDashboard = () => {
           <Card title="Quick Actions">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Link to="/admin/users/students">
-                <div className="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-colors cursor-pointer">
-                  <TeamOutlined className="text-2xl text-blue-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Add Student
+                <div className="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-all hover:shadow-md cursor-pointer">
+                  <TeamOutlined className="text-3xl text-blue-600 mb-2" />
+                  <div className="font-medium text-gray-900">
+                    Manage Students
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Add / Edit students
                   </div>
                 </div>
               </Link>
               <Link to="/admin/users/teachers">
-                <div className="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-colors cursor-pointer">
-                  <UserOutlined className="text-2xl text-green-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Add Teacher
+                <div className="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-all hover:shadow-md cursor-pointer">
+                  <UserOutlined className="text-3xl text-green-600 mb-2" />
+                  <div className="font-medium text-gray-900">
+                    Manage Teachers
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Add / Edit teachers
                   </div>
                 </div>
               </Link>
+              <Link to="/admin/users/parents">
+                <div className="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-all hover:shadow-md cursor-pointer">
+                  <UsergroupAddOutlined className="text-3xl text-yellow-600 mb-2" />
+                  <div className="font-medium text-gray-900">
+                    Manage Parents
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Link parents to children
+                  </div>
+                </div>
+              </Link>
+              <Link to="/admin/assignments">
+                <div className="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-all hover:shadow-md cursor-pointer">
+                  <BookOutlined className="text-3xl text-purple-600 mb-2" />
+                  <div className="font-medium text-gray-900">
+                    Class Assignments
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Assign teachers to classes
+                  </div>
+                </div>
+              </Link>
+            </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Secondary Quick Actions */}
+      <Row gutter={[16, 16]} className="mt-4">
+        <Col xs={24}>
+          <Card>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Link to="/admin/academics/classes">
-                <div className="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-colors cursor-pointer">
-                  <BookOutlined className="text-2xl text-purple-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Create Class
-                  </div>
+                <div className="p-4 bg-indigo-50 rounded-xl text-center hover:bg-indigo-100 transition-all hover:shadow-md cursor-pointer">
+                  <HomeOutlined className="text-3xl text-indigo-600 mb-2" />
+                  <div className="font-medium text-gray-900">Classes</div>
+                  <div className="text-xs text-gray-500">Manage classes</div>
                 </div>
               </Link>
-              <Link to="/admin/fees/structure">
-                <div className="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-colors cursor-pointer">
-                  <DollarOutlined className="text-2xl text-yellow-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Fee Setup
-                  </div>
+              <Link to="/admin/academics/subjects">
+                <div className="p-4 bg-pink-50 rounded-xl text-center hover:bg-pink-100 transition-all hover:shadow-md cursor-pointer">
+                  <BookOutlined className="text-3xl text-pink-600 mb-2" />
+                  <div className="font-medium text-gray-900">Subjects</div>
+                  <div className="text-xs text-gray-500">Manage subjects</div>
+                </div>
+              </Link>
+              <Link to="/admin/academics/schedule">
+                <div className="p-4 bg-cyan-50 rounded-xl text-center hover:bg-cyan-100 transition-all hover:shadow-md cursor-pointer">
+                  <CalendarOutlined className="text-3xl text-cyan-600 mb-2" />
+                  <div className="font-medium text-gray-900">Schedule</div>
+                  <div className="text-xs text-gray-500">Manage timetables</div>
+                </div>
+              </Link>
+              <Link to="/admin/attendance">
+                <div className="p-4 bg-orange-50 rounded-xl text-center hover:bg-orange-100 transition-all hover:shadow-md cursor-pointer">
+                  <RiseOutlined className="text-3xl text-orange-600 mb-2" />
+                  <div className="font-medium text-gray-900">Attendance</div>
+                  <div className="text-xs text-gray-500">View reports</div>
                 </div>
               </Link>
             </div>

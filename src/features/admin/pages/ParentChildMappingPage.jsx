@@ -34,8 +34,7 @@ import {
 } from "@ant-design/icons";
 import { PageHeader, DataTable } from "../../../components/UI";
 import {
-  getAllParents,
-  getAllStudents,
+  getAllUsers,
   linkChildToParent,
   unlinkChildFromParent,
 } from "../../../services/admin.service";
@@ -45,8 +44,12 @@ const ParentChildMappingPage = () => {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
+  const [isQuickAssignModalOpen, setIsQuickAssignModalOpen] = useState(false);
   const [selectedParent, setSelectedParent] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [assignLoading, setAssignLoading] = useState(false);
   const [form] = Form.useForm();
+  const [quickAssignForm] = Form.useForm();
 
   useEffect(() => {
     fetchData();
@@ -56,21 +59,33 @@ const ParentChildMappingPage = () => {
     setLoading(true);
     try {
       const [parentsRes, studentsRes] = await Promise.all([
-        getAllParents(),
-        getAllStudents(),
+        getAllUsers({ role: "parent" }),
+        getAllUsers({ role: "student" }),
       ]);
-      setParents(parentsRes.data || []);
-      setStudents(studentsRes.data || []);
+
+      // Transform plain User objects to match expected structure
+      const parentUsers = (parentsRes.data || []).map((user) => ({
+        _id: user._id,
+        userId: user, // Wrap user in userId for compatibility
+        children: [], // Will be populated from student relationships
+      }));
+
+      const studentUsers = (studentsRes.data || []).map((user) => ({
+        _id: user._id,
+        userId: user, // Wrap user in userId for compatibility
+        classId: null,
+        section: null,
+        rollNumber: null,
+        parentId: null,
+      }));
+
+      setParents(parentUsers);
+      setStudents(studentUsers);
     } catch (error) {
       message.error(error.message || "Error fetching data");
     } finally {
       setLoading(false);
     }
-  };
-
-  // Get unassigned students (without parent or can be assigned to multiple parents)
-  const getAvailableStudents = () => {
-    return students.filter((s) => !s.parentId || selectedParent);
   };
 
   const columns = [
@@ -119,20 +134,23 @@ const ParentChildMappingPage = () => {
     {
       title: "Actions",
       key: "actions",
-      width: 150,
+      width: 200,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Link Child">
+          <Tooltip title="Assign Children">
             <Button
               type="primary"
               size="small"
-              icon={<LinkOutlined />}
+              icon={<PlusOutlined />}
               onClick={() => handleOpenLinkModal(record)}>
-              Link
+              Assign Child
             </Button>
           </Tooltip>
-          <Tooltip title="View Details">
-            <Button size="small" onClick={() => handleViewDetails(record)}>
+          <Tooltip title="View Children">
+            <Button
+              size="small"
+              icon={<TeamOutlined />}
+              onClick={() => handleViewDetails(record)}>
               View
             </Button>
           </Tooltip>
@@ -163,7 +181,7 @@ const ParentChildMappingPage = () => {
                       key="unlink"
                       title="Unlink this child?"
                       onConfirm={() =>
-                        handleUnlinkChild(parent.userId._id, child._id)
+                        handleUnlinkChild(parent._id, child._id)
                       }>
                       <Button size="small" danger icon={<DisconnectOutlined />}>
                         Unlink
@@ -201,14 +219,49 @@ const ParentChildMappingPage = () => {
 
   const handleLinkChild = async (values) => {
     try {
-      await linkChildToParent(selectedParent.userId._id, values.studentId);
-      message.success("Child linked to parent successfully");
+      setAssignLoading(true);
+      const studentIds = Array.isArray(values.studentIds)
+        ? values.studentIds
+        : [values.studentIds];
+
+      // Link multiple students to parent
+      for (const studentId of studentIds) {
+        await linkChildToParent(selectedParent._id, studentId);
+      }
+
+      message.success(
+        `${studentIds.length} student(s) linked to parent successfully`,
+      );
       setIsLinkModalOpen(false);
       setSelectedParent(null);
       form.resetFields();
       fetchData();
     } catch (error) {
       message.error(error.message || "Error linking child");
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const handleQuickAssign = (student) => {
+    setSelectedStudent(student);
+    quickAssignForm.resetFields();
+    setIsQuickAssignModalOpen(true);
+  };
+
+  const handleQuickAssignSubmit = async (values) => {
+    try {
+      setAssignLoading(true);
+      await linkChildToParent(values.parentId, selectedStudent._id);
+      message.success("Student assigned to parent successfully");
+      setIsQuickAssignModalOpen(false);
+      setSelectedStudent(null);
+      quickAssignForm.resetFields();
+      fetchData();
+    } catch (error) {
+      message.error(error.message || "Error assigning student");
+    } finally {
+      setAssignLoading(false);
     }
   };
 
@@ -224,7 +277,7 @@ const ParentChildMappingPage = () => {
 
   // Stats
   const parentsWithChildren = parents.filter(
-    (p) => p.children && p.children.length > 0
+    (p) => p.children && p.children.length > 0,
   ).length;
   const parentsWithoutChildren = parents.length - parentsWithChildren;
   const studentsWithParent = students.filter((s) => s.parentId).length;
@@ -307,78 +360,91 @@ const ParentChildMappingPage = () => {
         </Col>
       </Row>
 
-      <Row gutter={[16, 16]}>
-        {/* Parents Table */}
-        <Col xs={24} lg={16}>
-          <Card title="Parents List">
-            <DataTable
-              columns={columns}
-              data={parents}
-              loading={loading}
-              showSearch
-              searchPlaceholder="Search parents..."
-              rowKey={(record) => record.userId?._id || record._id}
-            />
-          </Card>
-        </Col>
+      {/* Parent-Child Mapping Table */}
+      <Card>
+        <DataTable
+          columns={columns}
+          data={parents}
+          loading={loading}
+          rowKey="_id"
+        />
+      </Card>
 
-        {/* Students without Parent */}
-        <Col xs={24} lg={8}>
-          <Card
-            title={
-              <span>
-                <UserOutlined className="mr-2" />
-                Students Without Parent
-              </span>
-            }
-            extra={<Tag color="red">{studentsWithoutParent}</Tag>}>
-            {students.filter((s) => !s.parentId).length > 0 ? (
-              <List
-                size="small"
-                dataSource={students.filter((s) => !s.parentId).slice(0, 10)}
-                renderItem={(student) => (
-                  <List.Item>
-                    <List.Item.Meta
-                      avatar={
-                        <Avatar
-                          size="small"
-                          icon={<UserOutlined />}
-                          className="bg-green-100"
-                        />
-                      }
-                      title={
-                        <span className="text-sm">
-                          {student.userId?.name || "Unknown"}
-                        </span>
-                      }
-                      description={
-                        <span className="text-xs text-gray-500">
-                          {student.classId?.name} - {student.section} | Roll:{" "}
-                          {student.rollNumber}
-                        </span>
-                      }
-                    />
-                  </List.Item>
-                )}
-              />
-            ) : (
-              <Empty
-                description="All students have parents assigned"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
+      {/* Students Without Parent Section */}
+      {studentsWithoutParent > 0 && (
+        <Card
+          className="mt-6"
+          title={
+            <div className="flex items-center gap-2">
+              <UserOutlined className="text-orange-600" />
+              <span>Students Without Parent ({studentsWithoutParent})</span>
+            </div>
+          }>
+          <List
+            grid={{
+              gutter: 16,
+              xs: 1,
+              sm: 2,
+              md: 3,
+              lg: 4,
+              xl: 4,
+              xxl: 6,
+            }}
+            dataSource={students.filter((s) => !s.parentId)}
+            renderItem={(student) => (
+              <List.Item>
+                <Card
+                  size="small"
+                  hoverable
+                  className="border border-orange-200"
+                  actions={[
+                    <Button
+                      key="assign"
+                      type="link"
+                      icon={<LinkOutlined />}
+                      onClick={() => handleQuickAssign(student)}>
+                      Assign Parent
+                    </Button>,
+                  ]}>
+                  <Card.Meta
+                    avatar={
+                      <Avatar
+                        icon={<UserOutlined />}
+                        style={{ backgroundColor: "#f97316" }}
+                      />
+                    }
+                    title={student.userId?.name || "Unknown"}
+                    description={
+                      <div className="text-xs">
+                        <div>{student.userId?.email || "N/A"}</div>
+                        <div className="mt-1">
+                          <Tag color="blue" className="text-xs">
+                            {student.classId?.name || "No Class"}
+                          </Tag>
+                          {student.section && (
+                            <Tag color="green" className="text-xs">
+                              {student.section}
+                            </Tag>
+                          )}
+                        </div>
+                      </div>
+                    }
+                  />
+                </Card>
+              </List.Item>
             )}
-            {studentsWithoutParent > 10 && (
-              <div className="text-center mt-2 text-gray-500 text-sm">
-                And {studentsWithoutParent - 10} more...
-              </div>
-            )}
-          </Card>
-        </Col>
-      </Row>
+          />
+        </Card>
+      )}
 
-      {/* Link Child Modal */}
+      {/* Assign Children Modal */}
       <Modal
-        title={`Link Child to ${selectedParent?.userId?.name}`}
+        title={
+          <div className="flex items-center gap-2">
+            <TeamOutlined className="text-purple-600" />
+            Assign Students to Parent
+          </div>
+        }
         open={isLinkModalOpen}
         onCancel={() => {
           setIsLinkModalOpen(false);
@@ -386,54 +452,90 @@ const ParentChildMappingPage = () => {
           form.resetFields();
         }}
         footer={null}
-        width={500}>
-        <div className="mb-4 p-3 bg-purple-50 rounded-lg">
+        width={600}
+        className="rounded-lg">
+        <div className="mb-4 p-4 bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
           <div className="flex items-center gap-3">
-            <Avatar icon={<TeamOutlined />} className="bg-purple-100" />
+            <Avatar
+              size={48}
+              icon={<TeamOutlined />}
+              className="bg-purple-500"
+            />
             <div>
-              <div className="font-medium">{selectedParent?.userId?.name}</div>
-              <div className="text-xs text-gray-500">
-                <MailOutlined className="mr-1" />
+              <div className="font-semibold text-lg">
+                {selectedParent?.userId?.name}
+              </div>
+              <div className="text-xs text-gray-600 flex items-center gap-1">
+                <MailOutlined />
                 {selectedParent?.userId?.email}
               </div>
-              <div className="text-xs text-gray-500">
-                <PhoneOutlined className="mr-1" />
-                {selectedParent?.userId?.phone}
+              <div className="text-xs text-gray-600 flex items-center gap-1">
+                <PhoneOutlined />
+                {selectedParent?.userId?.phone || "N/A"}
               </div>
             </div>
           </div>
+          {selectedParent?.children?.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-purple-200">
+              <div className="text-xs text-gray-600 mb-1">
+                Current Children:
+              </div>
+              <div className="flex flex-wrap gap-1">
+                {selectedParent.children.map((child, idx) => (
+                  <Tag key={idx} color="purple" className="text-xs">
+                    {child?.userId?.name}
+                  </Tag>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        <Divider>Select Student to Link</Divider>
+        <Divider className="my-4">Select Students to Assign</Divider>
 
         <Form form={form} layout="vertical" onFinish={handleLinkChild}>
           <Form.Item
-            name="studentId"
-            label="Select Student"
-            rules={[{ required: true, message: "Please select a student" }]}>
+            name="studentIds"
+            label="Students (Multi-select)"
+            rules={[
+              { required: true, message: "Please select at least one student" },
+            ]}
+            extra="You can select multiple students to assign at once">
             <Select
-              placeholder="Search and select student"
+              mode="multiple"
+              placeholder="Search and select students..."
               showSearch
               optionFilterProp="children"
               filterOption={(input, option) =>
-                option.children.toLowerCase().includes(input.toLowerCase())
-              }>
-              {students
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              maxTagCount="responsive"
+              options={students
                 .filter(
-                  (s) => !selectedParent?.children?.find((c) => c._id === s._id)
+                  (s) =>
+                    !selectedParent?.children?.find((c) => c._id === s._id),
                 )
-                .map((student) => (
-                  <Select.Option key={student._id} value={student._id}>
-                    {student.userId?.name} ({student.classId?.name} -{" "}
-                    {student.section}, Roll: {student.rollNumber})
-                    {student.parentId && " [Has Parent]"}
-                  </Select.Option>
-                ))}
-            </Select>
+                .map((student) => {
+                  const name = student.userId?.name || "Unknown Student";
+                  const className = student.classId?.name || "No Class";
+                  const section = student.section || "N/A";
+                  const rollNumber = student.rollNumber || "N/A";
+                  const hasParent = student.parentId ? " [Has Parent]" : "";
+
+                  return {
+                    label: `${name} (${className} - ${section}, Roll: ${rollNumber})${hasParent}`,
+                    value: student._id,
+                    disabled: false,
+                  };
+                })}
+              className="w-full"
+            />
           </Form.Item>
 
-          <Form.Item className="mb-0 text-right">
-            <Space>
+          <Form.Item className="mb-0">
+            <div className="flex justify-end gap-2">
               <Button
                 onClick={() => {
                   setIsLinkModalOpen(false);
@@ -442,12 +544,110 @@ const ParentChildMappingPage = () => {
                 }}>
                 Cancel
               </Button>
-              <Button type="primary" htmlType="submit" icon={<LinkOutlined />}>
-                Link Child
+              <Button
+                type="primary"
+                htmlType="submit"
+                icon={<LinkOutlined />}
+                loading={assignLoading}>
+                Assign Children
               </Button>
-            </Space>
+            </div>
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Quick Assign Modal (from student to parent) */}
+      <Modal
+        title={
+          <div className="flex items-center gap-2">
+            <UserOutlined className="text-green-600" />
+            Assign Student to Parent
+          </div>
+        }
+        open={isQuickAssignModalOpen}
+        onCancel={() => {
+          setIsQuickAssignModalOpen(false);
+          setSelectedStudent(null);
+          quickAssignForm.resetFields();
+        }}
+        footer={null}
+        width={500}
+        className="rounded-lg">
+        {selectedStudent && (
+          <>
+            <div className="mb-4 p-4 bg-linear-to-r from-green-50 to-blue-50 rounded-xl border border-green-100">
+              <div className="flex items-center gap-3">
+                <Avatar
+                  size={48}
+                  icon={<UserOutlined />}
+                  className="bg-green-500"
+                />
+                <div>
+                  <div className="font-semibold text-lg">
+                    {selectedStudent.userId?.name || "Unknown Student"}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    {selectedStudent.classId?.name || "No Class"} -{" "}
+                    {selectedStudent.section || "N/A"} | Roll:{" "}
+                    {selectedStudent.rollNumber || "N/A"}
+                  </div>
+                  <div className="text-xs text-gray-600">
+                    <MailOutlined className="mr-1" />
+                    {selectedStudent.userId?.email || "N/A"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Divider className="my-4">Select Parent</Divider>
+
+            <Form
+              form={quickAssignForm}
+              layout="vertical"
+              onFinish={handleQuickAssignSubmit}>
+              <Form.Item
+                name="parentId"
+                label="Parent"
+                rules={[{ required: true, message: "Please select a parent" }]}>
+                <Select
+                  placeholder="Search and select parent..."
+                  showSearch
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={parents.map((parent) => ({
+                    label: `${parent.userId?.name} (${parent.userId?.email}) - ${parent.children?.length || 0} children`,
+                    value: parent._id,
+                  }))}
+                  className="w-full"
+                />
+              </Form.Item>
+
+              <Form.Item className="mb-0">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    onClick={() => {
+                      setIsQuickAssignModalOpen(false);
+                      setSelectedStudent(null);
+                      quickAssignForm.resetFields();
+                    }}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    icon={<LinkOutlined />}
+                    loading={assignLoading}>
+                    Assign to Parent
+                  </Button>
+                </div>
+              </Form.Item>
+            </Form>
+          </>
+        )}
       </Modal>
     </div>
   );

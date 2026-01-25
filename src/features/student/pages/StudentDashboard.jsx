@@ -1,349 +1,420 @@
 /**
  * Student Dashboard
- * Main dashboard view for students
+ * Main dashboard view for students - Shows real data from API
  */
 
-import { Row, Col, Card, Progress, List, Tag, Calendar, Timeline } from "antd";
+import { useState, useEffect } from "react";
+import {
+  Row,
+  Col,
+  Card,
+  List,
+  Tag,
+  Spin,
+  Empty,
+  Badge,
+  Avatar,
+  message,
+} from "antd";
 import {
   CheckCircleOutlined,
   BookOutlined,
   CalendarOutlined,
   TrophyOutlined,
-  BellOutlined,
-  ClockCircleOutlined,
   FileTextOutlined,
+  UserOutlined,
+  TeamOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  IdcardOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { StatCard, PageHeader } from "../../../components/UI";
+import {
+  getMyStudentProfile,
+  getMyAttendance,
+  getMyTimetable,
+} from "../../../services/student.service";
 
 const StudentDashboard = () => {
-  // Mock data
-  const stats = {
-    attendanceRate: 92,
-    currentGPA: 3.6,
-    pendingAssignments: 4,
-    upcomingExams: 2,
+  const [loading, setLoading] = useState(true);
+  const [studentProfile, setStudentProfile] = useState(null);
+  const [attendance, setAttendance] = useState([]);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+
+  useEffect(() => {
+    fetchStudentData();
+  }, []);
+
+  const fetchStudentData = async () => {
+    try {
+      setLoading(true);
+      const profileRes = await getMyStudentProfile();
+      setStudentProfile(profileRes.data);
+
+      if (profileRes.data?.classId?._id) {
+        fetchAdditionalData(profileRes.data.classId._id);
+      }
+    } catch (error) {
+      console.error("Error fetching student data:", error);
+      message.error("Failed to load student profile");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const todayClasses = [
-    {
-      id: 1,
-      subject: "Mathematics",
-      time: "8:00 AM",
-      teacher: "Mr. Smith",
-      room: "101",
-    },
-    {
-      id: 2,
-      subject: "Science",
-      time: "9:00 AM",
-      teacher: "Ms. Johnson",
-      room: "203",
-    },
-    {
-      id: 3,
-      subject: "English",
-      time: "10:00 AM",
-      teacher: "Mrs. Brown",
-      room: "105",
-    },
-    {
-      id: 4,
-      subject: "History",
-      time: "11:00 AM",
-      teacher: "Mr. Wilson",
-      room: "302",
-    },
-    {
-      id: 5,
-      subject: "Physics",
-      time: "1:00 PM",
-      teacher: "Dr. Lee",
-      room: "Lab 1",
-    },
-  ];
+  const fetchAdditionalData = async (classId) => {
+    setAttendanceLoading(true);
+    try {
+      const startDate = new Date();
+      startDate.setDate(1);
+      const endDate = new Date();
 
-  const pendingAssignments = [
-    {
-      id: 1,
-      subject: "Mathematics",
-      title: "Chapter 5 Problems",
-      due: "Tomorrow",
-      status: "pending",
-    },
-    {
-      id: 2,
-      subject: "Science",
-      title: "Lab Report",
-      due: "Jan 10",
-      status: "pending",
-    },
-    {
-      id: 3,
-      subject: "English",
-      title: "Essay Draft",
-      due: "Jan 12",
-      status: "in-progress",
-    },
-    {
-      id: 4,
-      subject: "History",
-      title: "Research Paper",
-      due: "Jan 15",
-      status: "pending",
-    },
-  ];
+      const attendanceRes = await getMyAttendance({
+        classId,
+        startDate: startDate.toISOString().split("T")[0],
+        endDate: endDate.toISOString().split("T")[0],
+      }).catch(() => ({ data: [] }));
 
-  const notifications = [
-    {
-      id: 1,
-      message: "Math test scheduled for Jan 15",
-      time: "2 hours ago",
-      type: "exam",
-    },
-    {
-      id: 2,
-      message: "New assignment posted in Science",
-      time: "5 hours ago",
-      type: "assignment",
-    },
-    { id: 3, message: "Fee payment reminder", time: "Yesterday", type: "fee" },
-    {
-      id: 4,
-      message: "Parent-teacher meeting on Jan 20",
-      time: "2 days ago",
-      type: "event",
-    },
-  ];
-
-  const grades = [
-    { subject: "Mathematics", grade: "A", score: 92 },
-    { subject: "Science", grade: "A-", score: 88 },
-    { subject: "English", grade: "B+", score: 85 },
-    { subject: "History", grade: "A", score: 90 },
-    { subject: "Physics", grade: "B+", score: 84 },
-  ];
-
-  const getGradeColor = (grade) => {
-    if (grade.startsWith("A")) return "success";
-    if (grade.startsWith("B")) return "processing";
-    if (grade.startsWith("C")) return "warning";
-    return "error";
+      setAttendance(attendanceRes.data || []);
+    } catch (error) {
+      console.error("Error fetching additional data:", error);
+    } finally {
+      setAttendanceLoading(false);
+    }
   };
+
+  const calculateAttendanceRate = () => {
+    if (!attendance || attendance.length === 0) return 0;
+    const presentDays = attendance.filter((a) => a.status === "present").length;
+    return Math.round((presentDays / attendance.length) * 100);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-100">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  if (!studentProfile) {
+    return (
+      <div>
+        <PageHeader
+          title="Student Dashboard"
+          subtitle="Welcome to your academic portal"
+        />
+        <Card>
+          <Empty
+            description="Student profile not found. Please contact the administrator."
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+          />
+        </Card>
+      </div>
+    );
+  }
+
+  const classInfo = studentProfile.classId;
+  const classTeacher = classInfo?.classTeacher;
+  const parentInfo = studentProfile.parentId;
 
   return (
     <div>
       <PageHeader
-        title="Dashboard"
-        subtitle="Welcome back! Here's your academic overview."
+        title="Student Dashboard"
+        subtitle={`Welcome back, ${studentProfile.userId?.name}!`}
       />
 
-      {/* Stats */}
+      {/* Profile Header Card */}
+      <Card className="mb-6">
+        <div className="bg-linear-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+          <div className="flex flex-col md:flex-row items-start gap-6">
+            <Avatar
+              size={80}
+              icon={<UserOutlined />}
+              className="bg-white/20 border-2 border-white/30"
+            />
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold mb-1">
+                {studentProfile.userId?.name}
+              </h2>
+              <div className="text-white/70 mb-4">
+                {studentProfile.userId?.email}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <div className="text-white/70 text-xs">Class</div>
+                  <div className="font-semibold">
+                    {classInfo?.name} - {studentProfile.section}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-white/70 text-xs">Roll Number</div>
+                  <div className="font-semibold">
+                    {studentProfile.rollNumber}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-white/70 text-xs">Academic Year</div>
+                  <div className="font-semibold">
+                    {studentProfile.academicYear}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-white/70 text-xs">Status</div>
+                  <Badge
+                    status={
+                      studentProfile.userId?.status === "active"
+                        ? "success"
+                        : "warning"
+                    }
+                    text={
+                      <span className="text-white capitalize">
+                        {studentProfile.userId?.status || "Active"}
+                      </span>
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      {/* Stats Row */}
       <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={12} sm={6}>
           <StatCard
             title="Attendance Rate"
-            value={`${stats.attendanceRate}%`}
+            value={`${calculateAttendanceRate()}%`}
             icon={CheckCircleOutlined}
             iconColor="bg-green-100 text-green-600"
           />
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={12} sm={6}>
           <StatCard
-            title="Current GPA"
-            value={stats.currentGPA}
-            icon={TrophyOutlined}
-            iconColor="bg-yellow-100 text-yellow-600"
-          />
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <StatCard
-            title="Pending Assignments"
-            value={stats.pendingAssignments}
-            icon={FileTextOutlined}
+            title="Subjects"
+            value={classInfo?.subjects?.length || 0}
+            icon={BookOutlined}
             iconColor="bg-blue-100 text-blue-600"
           />
         </Col>
-        <Col xs={24} sm={12} lg={6}>
+        <Col xs={12} sm={6}>
           <StatCard
-            title="Upcoming Exams"
-            value={stats.upcomingExams}
-            icon={CalendarOutlined}
-            iconColor="bg-red-100 text-red-600"
+            title="Class"
+            value={`${classInfo?.name || "N/A"}`}
+            icon={TeamOutlined}
+            iconColor="bg-purple-100 text-purple-600"
+          />
+        </Col>
+        <Col xs={12} sm={6}>
+          <StatCard
+            title="Section"
+            value={studentProfile.section || "N/A"}
+            icon={IdcardOutlined}
+            iconColor="bg-yellow-100 text-yellow-600"
           />
         </Col>
       </Row>
 
       <Row gutter={[16, 16]}>
-        {/* Today's Schedule */}
-        <Col xs={24} lg={8}>
+        {/* Class Teacher Info */}
+        <Col xs={24} md={12} lg={8}>
           <Card
-            title="Today's Classes"
-            extra={
-              <Link to="/student/timetable" className="text-indigo-600">
-                Full Schedule
-              </Link>
+            title={
+              <span className="flex items-center gap-2">
+                <TeamOutlined className="text-indigo-600" />
+                Class Teacher
+              </span>
             }
             className="h-full">
-            <Timeline
-              items={todayClasses.map((item, index) => ({
-                color: index === 0 ? "green" : "blue",
-                children: (
-                  <div className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{item.subject}</span>
-                      <Tag color="blue">{item.room}</Tag>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      <ClockCircleOutlined className="mr-1" />
-                      {item.time} • {item.teacher}
-                    </div>
+            {classTeacher ? (
+              <div className="flex items-center gap-4">
+                <Avatar
+                  size={64}
+                  icon={<UserOutlined />}
+                  className="bg-indigo-100 text-indigo-600"
+                />
+                <div>
+                  <h4 className="font-semibold text-lg">{classTeacher.name}</h4>
+                  <div className="text-gray-500 text-sm flex items-center gap-1">
+                    <MailOutlined />
+                    {classTeacher.email}
                   </div>
-                ),
-              }))}
-            />
-          </Card>
-        </Col>
-
-        {/* Assignments */}
-        <Col xs={24} lg={8}>
-          <Card
-            title="Pending Assignments"
-            extra={
-              <Link
-                to="/student/academics/assignments"
-                className="text-indigo-600">
-                View All
-              </Link>
-            }
-            className="h-full">
-            <List
-              itemLayout="horizontal"
-              dataSource={pendingAssignments}
-              renderItem={(item) => (
-                <List.Item className="px-0!">
-                  <List.Item.Meta
-                    avatar={
-                      <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <BookOutlined className="text-blue-600" />
-                      </div>
-                    }
-                    title={
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">
-                          {item.title}
-                        </span>
-                        <Tag
-                          color={
-                            item.status === "in-progress"
-                              ? "processing"
-                              : "warning"
-                          }>
-                          {item.status}
-                        </Tag>
-                      </div>
-                    }
-                    description={
-                      <div className="text-xs text-gray-500">
-                        {item.subject} • Due: {item.due}
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-
-        {/* Notifications */}
-        <Col xs={24} lg={8}>
-          <Card
-            title="Notifications"
-            extra={
-              <Link to="/student/notifications" className="text-indigo-600">
-                View All
-              </Link>
-            }
-            className="h-full">
-            <List
-              itemLayout="horizontal"
-              dataSource={notifications}
-              renderItem={(item) => (
-                <List.Item className="px-0!">
-                  <List.Item.Meta
-                    avatar={
-                      <div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          item.type === "exam"
-                            ? "bg-red-100"
-                            : item.type === "assignment"
-                            ? "bg-blue-100"
-                            : item.type === "fee"
-                            ? "bg-yellow-100"
-                            : "bg-green-100"
-                        }`}>
-                        <BellOutlined
-                          className={
-                            item.type === "exam"
-                              ? "text-red-600"
-                              : item.type === "assignment"
-                              ? "text-blue-600"
-                              : item.type === "fee"
-                              ? "text-yellow-600"
-                              : "text-green-600"
-                          }
-                        />
-                      </div>
-                    }
-                    title={<span className="text-sm">{item.message}</span>}
-                    description={
-                      <span className="text-xs text-gray-500">{item.time}</span>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Grades Overview */}
-      <Row gutter={[16, 16]} className="mt-6">
-        <Col xs={24}>
-          <Card
-            title="Current Grades"
-            extra={
-              <Link to="/student/academics/grades" className="text-indigo-600">
-                View Details
-              </Link>
-            }>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {grades.map((item) => (
-                <div
-                  key={item.subject}
-                  className="text-center p-4 bg-gray-50 rounded-xl">
-                  <div className="text-sm text-gray-500 mb-2">
-                    {item.subject}
-                  </div>
-                  <Tag
-                    color={getGradeColor(item.grade)}
-                    className="text-lg font-bold px-4 py-1">
-                    {item.grade}
-                  </Tag>
-                  <div className="mt-2">
-                    <Progress
-                      percent={item.score}
-                      showInfo={false}
-                      size="small"
-                      strokeColor="#6366f1"
-                    />
-                    <div className="text-xs text-gray-500 mt-1">
-                      {item.score}%
+                  {classTeacher.phone && (
+                    <div className="text-gray-500 text-sm flex items-center gap-1">
+                      <PhoneOutlined />
+                      {classTeacher.phone}
                     </div>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
+              </div>
+            ) : (
+              <Empty
+                description="No class teacher assigned yet"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
+          </Card>
+        </Col>
+
+        {/* Parent Info */}
+        <Col xs={24} md={12} lg={8}>
+          <Card
+            title={
+              <span className="flex items-center gap-2">
+                <UserOutlined className="text-purple-600" />
+                Parent / Guardian
+              </span>
+            }
+            className="h-full">
+            {parentInfo ? (
+              <div className="flex items-center gap-4">
+                <Avatar
+                  size={64}
+                  icon={<UserOutlined />}
+                  className="bg-purple-100 text-purple-600"
+                />
+                <div>
+                  <h4 className="font-semibold text-lg">{parentInfo.name}</h4>
+                  <div className="text-gray-500 text-sm flex items-center gap-1">
+                    <MailOutlined />
+                    {parentInfo.email}
+                  </div>
+                  {parentInfo.phone && (
+                    <div className="text-gray-500 text-sm flex items-center gap-1">
+                      <PhoneOutlined />
+                      {parentInfo.phone}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <Empty
+                description="No parent assigned yet"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
+          </Card>
+        </Col>
+
+        {/* Recent Attendance */}
+        <Col xs={24} lg={8}>
+          <Card
+            title={
+              <span className="flex items-center gap-2">
+                <CheckCircleOutlined className="text-green-600" />
+                Recent Attendance
+              </span>
+            }
+            extra={
+              <Link to="/student/attendance" className="text-indigo-600">
+                View All
+              </Link>
+            }
+            loading={attendanceLoading}
+            className="h-full">
+            {attendance.length > 0 ? (
+              <List
+                size="small"
+                dataSource={attendance.slice(0, 5)}
+                renderItem={(record) => (
+                  <List.Item>
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-gray-600">
+                        {new Date(record.date).toLocaleDateString()}
+                      </span>
+                      <Tag
+                        color={
+                          record.status === "present"
+                            ? "success"
+                            : record.status === "absent"
+                              ? "error"
+                              : "warning"
+                        }>
+                        {record.status?.charAt(0).toUpperCase() +
+                          record.status?.slice(1)}
+                      </Tag>
+                    </div>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Empty
+                description="No attendance records found"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
+          </Card>
+        </Col>
+
+        {/* Class Subjects */}
+        <Col xs={24} md={12}>
+          <Card
+            title={
+              <span className="flex items-center gap-2">
+                <BookOutlined className="text-blue-600" />
+                My Subjects
+              </span>
+            }>
+            {classInfo?.subjects?.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {classInfo.subjects.map((subject, index) => (
+                  <Tag key={index} color="blue" className="py-2 px-4 text-sm">
+                    <BookOutlined className="mr-1" />
+                    {subject.name || subject}
+                  </Tag>
+                ))}
+              </div>
+            ) : (
+              <Empty
+                description="No subjects assigned to your class yet"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
+          </Card>
+        </Col>
+
+        {/* Student Info */}
+        <Col xs={24} md={12}>
+          <Card
+            title={
+              <span className="flex items-center gap-2">
+                <IdcardOutlined className="text-indigo-600" />
+                My Information
+              </span>
+            }>
+            <List size="small">
+              <List.Item>
+                <span className="text-gray-500">Email:</span>
+                <span className="font-medium">
+                  {studentProfile.userId?.email || "N/A"}
+                </span>
+              </List.Item>
+              <List.Item>
+                <span className="text-gray-500">Phone:</span>
+                <span className="font-medium">
+                  {studentProfile.userId?.phone || "N/A"}
+                </span>
+              </List.Item>
+              <List.Item>
+                <span className="text-gray-500">Admission Date:</span>
+                <span className="font-medium">
+                  {studentProfile.admissionDate
+                    ? new Date(
+                        studentProfile.admissionDate,
+                      ).toLocaleDateString()
+                    : "N/A"}
+                </span>
+              </List.Item>
+              <List.Item>
+                <span className="text-gray-500">Academic Year:</span>
+                <span className="font-medium">
+                  {studentProfile.academicYear}
+                </span>
+              </List.Item>
+            </List>
           </Card>
         </Col>
       </Row>
@@ -354,34 +425,40 @@ const StudentDashboard = () => {
           <Card title="Quick Actions">
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <Link to="/student/attendance">
-                <div className="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-colors cursor-pointer">
-                  <CheckCircleOutlined className="text-2xl text-green-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
+                <div className="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-all hover:shadow-md cursor-pointer">
+                  <CheckCircleOutlined className="text-3xl text-green-600 mb-2" />
+                  <div className="font-medium text-gray-900">
                     View Attendance
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Check your attendance
                   </div>
                 </div>
               </Link>
-              <Link to="/student/academics/assignments">
-                <div className="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-colors cursor-pointer">
-                  <FileTextOutlined className="text-2xl text-blue-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Assignments
+              <Link to="/student/assignments">
+                <div className="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-all hover:shadow-md cursor-pointer">
+                  <FileTextOutlined className="text-3xl text-blue-600 mb-2" />
+                  <div className="font-medium text-gray-900">Assignments</div>
+                  <div className="text-xs text-gray-500">
+                    View pending tasks
                   </div>
                 </div>
               </Link>
               <Link to="/student/timetable">
-                <div className="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-colors cursor-pointer">
-                  <CalendarOutlined className="text-2xl text-purple-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Timetable
+                <div className="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-all hover:shadow-md cursor-pointer">
+                  <CalendarOutlined className="text-3xl text-purple-600 mb-2" />
+                  <div className="font-medium text-gray-900">Timetable</div>
+                  <div className="text-xs text-gray-500">
+                    View class schedule
                   </div>
                 </div>
               </Link>
               <Link to="/student/fees">
-                <div className="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-colors cursor-pointer">
-                  <TrophyOutlined className="text-2xl text-yellow-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Fee Status
+                <div className="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-all hover:shadow-md cursor-pointer">
+                  <TrophyOutlined className="text-3xl text-yellow-600 mb-2" />
+                  <div className="font-medium text-gray-900">Fee Status</div>
+                  <div className="text-xs text-gray-500">
+                    Check payment status
                   </div>
                 </div>
               </Link>

@@ -1,19 +1,21 @@
 /**
  * Teacher Dashboard
- * Main dashboard view for teachers
+ * Main dashboard view for teachers - Shows real data from API
  */
 
+import { useState, useEffect } from "react";
 import {
   Row,
   Col,
   Card,
   Button,
-  Progress,
   List,
   Avatar,
   Tag,
-  Calendar,
   Badge,
+  Spin,
+  Empty,
+  message,
 } from "antd";
 import {
   TeamOutlined,
@@ -22,131 +24,115 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   BookOutlined,
+  UserOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  IdcardOutlined,
+  HomeOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { StatCard, PageHeader } from "../../../components/UI";
+import {
+  getMyAssignments,
+  getMySchedule,
+  getMyClasses,
+  getStudentsByClass,
+} from "../../../services/teacher.service";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [teacherData, setTeacherData] = useState({
+    assignedClasses: [],
+    assignedSubjects: [],
+    classTeacherOf: [],
+    schedule: [],
+    totalStudents: 0,
+  });
+  const [scheduleLoading, setScheduleLoading] = useState(false);
 
-  // Mock data
-  const stats = {
-    totalStudents: 156,
-    classesToday: 5,
-    pendingAssignments: 12,
-    attendanceRate: 94,
-  };
+  useEffect(() => {
+    fetchTeacherData();
+  }, []);
 
-  const todaySchedule = [
-    {
-      id: 1,
-      class: "10A",
-      subject: "Mathematics",
-      time: "8:00 AM - 8:45 AM",
-      room: "Room 101",
-    },
-    {
-      id: 2,
-      class: "10B",
-      subject: "Mathematics",
-      time: "9:00 AM - 9:45 AM",
-      room: "Room 102",
-    },
-    {
-      id: 3,
-      class: "9A",
-      subject: "Mathematics",
-      time: "10:00 AM - 10:45 AM",
-      room: "Room 103",
-    },
-    {
-      id: 4,
-      class: "9B",
-      subject: "Mathematics",
-      time: "11:00 AM - 11:45 AM",
-      room: "Room 101",
-    },
-    {
-      id: 5,
-      class: "11A",
-      subject: "Mathematics",
-      time: "1:00 PM - 1:45 PM",
-      room: "Room 201",
-    },
-  ];
+  const fetchTeacherData = async () => {
+    try {
+      setLoading(true);
 
-  const pendingTasks = [
-    { id: 1, task: "Grade 10A Math Test", due: "Today", priority: "high" },
-    { id: 2, task: "Submit attendance report", due: "Today", priority: "high" },
-    {
-      id: 3,
-      task: "Prepare lesson plan for Ch. 5",
-      due: "Tomorrow",
-      priority: "medium",
-    },
-    {
-      id: 4,
-      task: "Parent meeting with John's parents",
-      due: "Jan 10",
-      priority: "medium",
-    },
-    {
-      id: 5,
-      task: "Review assignment submissions",
-      due: "Jan 12",
-      priority: "low",
-    },
-  ];
+      // Fetch assignments (classes and subjects assigned)
+      const assignmentsRes = await getMyAssignments().catch(() => ({
+        data: { assignedClasses: [], assignedSubjects: [] },
+      }));
 
-  const recentSubmissions = [
-    {
-      id: 1,
-      student: "Alice Johnson",
-      assignment: "Math Quiz 3",
-      submitted: "2 hours ago",
-      status: "pending",
-    },
-    {
-      id: 2,
-      student: "Bob Williams",
-      assignment: "Math Quiz 3",
-      submitted: "3 hours ago",
-      status: "graded",
-    },
-    {
-      id: 3,
-      student: "Carol Davis",
-      assignment: "Homework Ch.4",
-      submitted: "5 hours ago",
-      status: "pending",
-    },
-    {
-      id: 4,
-      student: "David Brown",
-      assignment: "Math Quiz 3",
-      submitted: "Yesterday",
-      status: "pending",
-    },
-  ];
+      // Fetch classes where user is class teacher
+      const classTeacherRes = await getMyClasses().catch(() => ({ data: [] }));
 
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "high":
-        return "red";
-      case "medium":
-        return "orange";
-      case "low":
-        return "green";
-      default:
-        return "default";
+      // Fetch schedule
+      setScheduleLoading(true);
+      const scheduleRes = await getMySchedule().catch(() => ({ data: [] }));
+      setScheduleLoading(false);
+
+      // Calculate total students from assigned classes
+      let totalStudents = 0;
+      const assignedClasses = assignmentsRes.data?.assignedClasses || [];
+
+      for (const cls of assignedClasses) {
+        try {
+          const studentsRes = await getStudentsByClass(cls._id || cls);
+          totalStudents += studentsRes.data?.length || 0;
+        } catch {
+          // Ignore errors for individual class student counts
+        }
+      }
+
+      setTeacherData({
+        assignedClasses: assignedClasses,
+        assignedSubjects: assignmentsRes.data?.assignedSubjects || [],
+        classTeacherOf: classTeacherRes.data || [],
+        schedule: scheduleRes.data || [],
+        totalStudents,
+      });
+    } catch (error) {
+      console.error("Error fetching teacher data:", error);
+      message.error("Failed to load dashboard data");
+    } finally {
+      setLoading(false);
     }
   };
+
+  const getTodaySchedule = () => {
+    const today = new Date()
+      .toLocaleDateString("en-US", { weekday: "long" })
+      .toLowerCase();
+    return teacherData.schedule.filter(
+      (s) => s.dayOfWeek?.toLowerCase() === today,
+    );
+  };
+
+  const formatTime = (time) => {
+    if (!time) return "";
+    const [hours, minutes] = time.split(":");
+    const hour = parseInt(hours);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12;
+    return `${formattedHour}:${minutes} ${ampm}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-100">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
+  const todaySchedule = getTodaySchedule();
 
   return (
     <div>
       <PageHeader
         title="Dashboard"
-        subtitle="Welcome back! Here's your schedule and tasks for today."
+        subtitle="Welcome back! Here's your overview for today."
         action={
           <Button
             type="primary"
@@ -163,7 +149,7 @@ const TeacherDashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <StatCard
             title="My Students"
-            value={stats.totalStudents}
+            value={teacherData.totalStudents}
             icon={TeamOutlined}
             iconColor="bg-blue-100 text-blue-600"
           />
@@ -171,197 +157,209 @@ const TeacherDashboard = () => {
         <Col xs={24} sm={12} lg={6}>
           <StatCard
             title="Classes Today"
-            value={stats.classesToday}
+            value={todaySchedule.length}
             icon={CalendarOutlined}
             iconColor="bg-green-100 text-green-600"
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <StatCard
-            title="Pending Reviews"
-            value={stats.pendingAssignments}
-            icon={FileTextOutlined}
+            title="Assigned Classes"
+            value={teacherData.assignedClasses.length}
+            icon={HomeOutlined}
             iconColor="bg-yellow-100 text-yellow-600"
           />
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <StatCard
-            title="Attendance Rate"
-            value={`${stats.attendanceRate}%`}
-            icon={CheckCircleOutlined}
+            title="Subjects"
+            value={teacherData.assignedSubjects.length}
+            icon={BookOutlined}
             iconColor="bg-purple-100 text-purple-600"
           />
         </Col>
       </Row>
 
       <Row gutter={[16, 16]}>
-        {/* Today's Schedule */}
-        <Col xs={24} lg={8}>
-          <Card
-            title="Today's Schedule"
-            extra={
-              <Link to="/teacher/schedule" className="text-indigo-600">
-                View All
-              </Link>
-            }
-            className="h-full">
-            <List
-              itemLayout="horizontal"
-              dataSource={todaySchedule}
-              renderItem={(item, index) => (
-                <List.Item
-                  className={`px-0! ${
-                    index === 0 ? "bg-indigo-50 -mx-4 px-4 rounded-lg" : ""
-                  }`}>
-                  <List.Item.Meta
-                    avatar={
-                      <div className="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                        <BookOutlined className="text-indigo-600" />
+        {/* Class Teacher Status */}
+        {teacherData.classTeacherOf.length > 0 && (
+          <Col xs={24}>
+            <Card className="mb-4">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+                <div className="flex items-center gap-3 mb-4">
+                  <IdcardOutlined className="text-2xl" />
+                  <h3 className="text-xl font-semibold m-0">Class Teacher</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {teacherData.classTeacherOf.map((cls) => (
+                    <div key={cls._id} className="bg-white/10 rounded-lg p-4">
+                      <div className="font-semibold text-lg">{cls.name}</div>
+                      <div className="text-white/70 text-sm">
+                        Section: {cls.section || "A"}
                       </div>
-                    }
-                    title={
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{item.class}</span>
-                        <Tag color="blue" className="m-0!">
-                          {item.subject}
-                        </Tag>
+                      <div className="text-white/70 text-sm">
+                        Students: {cls.students?.length || 0}
                       </div>
-                    }
-                    description={
-                      <div className="text-xs text-gray-500">
-                        <ClockCircleOutlined className="mr-1" />
-                        {item.time} • {item.room}
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </Col>
+        )}
 
-        {/* Pending Tasks */}
-        <Col xs={24} lg={8}>
+        {/* Today's Schedule */}
+        <Col xs={24} lg={12}>
           <Card
-            title="Pending Tasks"
-            extra={
-              <span className="text-sm text-gray-500">
-                {pendingTasks.length} tasks
+            title={
+              <span className="flex items-center gap-2">
+                <CalendarOutlined className="text-green-600" />
+                Today's Schedule
               </span>
             }
-            className="h-full">
-            <List
-              itemLayout="horizontal"
-              dataSource={pendingTasks}
-              renderItem={(item) => (
-                <List.Item className="px-0!">
-                  <List.Item.Meta
-                    title={
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{item.task}</span>
-                        <Tag
-                          color={getPriorityColor(item.priority)}
-                          className="m-0!">
-                          {item.priority}
-                        </Tag>
-                      </div>
-                    }
-                    description={
-                      <span className="text-xs text-gray-500">
-                        Due: {item.due}
-                      </span>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
-          </Card>
-        </Col>
-
-        {/* Recent Submissions */}
-        <Col xs={24} lg={8}>
-          <Card
-            title="Recent Submissions"
             extra={
-              <Link
-                to="/teacher/grades/assignments"
-                className="text-indigo-600">
-                View All
+              <Link to="/teacher/schedule" className="text-indigo-600">
+                View Full
               </Link>
             }
-            className="h-full">
-            <List
-              itemLayout="horizontal"
-              dataSource={recentSubmissions}
-              renderItem={(item) => (
-                <List.Item className="px-0!">
-                  <List.Item.Meta
-                    avatar={
-                      <Avatar className="bg-green-100 text-green-600">
-                        {item.student.charAt(0)}
-                      </Avatar>
-                    }
-                    title={
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">
-                          {item.student}
-                        </span>
-                        <Tag
-                          color={
-                            item.status === "graded" ? "success" : "warning"
-                          }>
-                          {item.status}
-                        </Tag>
+            loading={scheduleLoading}>
+            {todaySchedule.length > 0 ? (
+              <List
+                dataSource={todaySchedule}
+                renderItem={(item) => (
+                  <List.Item>
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div>
+                          <div className="font-medium">
+                            {item.classId?.name || "Class"} -{" "}
+                            {item.subjectId?.name || "Subject"}
+                          </div>
+                          <div className="text-gray-500 text-sm">
+                            {formatTime(item.startTime)} -{" "}
+                            {formatTime(item.endTime)}
+                          </div>
+                        </div>
                       </div>
-                    }
-                    description={
-                      <div className="text-xs text-gray-500">
-                        {item.assignment} • {item.submitted}
-                      </div>
-                    }
-                  />
-                </List.Item>
-              )}
-            />
+                      <Tag color="blue">{item.room || "TBA"}</Tag>
+                    </div>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Empty
+                description="No classes scheduled for today"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
           </Card>
         </Col>
-      </Row>
 
-      {/* Quick Actions */}
-      <Row gutter={[16, 16]} className="mt-6">
-        <Col xs={24}>
+        {/* Assigned Classes */}
+        <Col xs={24} lg={12}>
+          <Card
+            title={
+              <span className="flex items-center gap-2">
+                <HomeOutlined className="text-blue-600" />
+                My Classes
+              </span>
+            }
+            extra={
+              <Link to="/teacher/classes" className="text-indigo-600">
+                View All
+              </Link>
+            }>
+            {teacherData.assignedClasses.length > 0 ? (
+              <List
+                dataSource={teacherData.assignedClasses}
+                renderItem={(cls) => (
+                  <List.Item>
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        icon={<TeamOutlined />}
+                        className="bg-blue-100 text-blue-600"
+                      />
+                      <div>
+                        <div className="font-medium">{cls.name || cls}</div>
+                        <div className="text-gray-500 text-sm">
+                          {cls.students?.length || 0} students
+                        </div>
+                      </div>
+                    </div>
+                  </List.Item>
+                )}
+              />
+            ) : (
+              <Empty
+                description="No classes assigned yet"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
+          </Card>
+        </Col>
+
+        {/* Assigned Subjects */}
+        <Col xs={24} md={12}>
+          <Card
+            title={
+              <span className="flex items-center gap-2">
+                <BookOutlined className="text-purple-600" />
+                My Subjects
+              </span>
+            }>
+            {teacherData.assignedSubjects.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {teacherData.assignedSubjects.map((subject, index) => (
+                  <Tag key={index} color="purple" className="py-2 px-4 text-sm">
+                    <BookOutlined className="mr-1" />
+                    {subject.name || subject}
+                  </Tag>
+                ))}
+              </div>
+            ) : (
+              <Empty
+                description="No subjects assigned yet"
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+              />
+            )}
+          </Card>
+        </Col>
+
+        {/* Quick Actions */}
+        <Col xs={24} md={12}>
           <Card title="Quick Actions">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Link to="/teacher/attendance?mark=1">
-                <div className="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-colors cursor-pointer">
-                  <CheckCircleOutlined className="text-2xl text-blue-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
+            <div className="grid grid-cols-2 gap-4">
+              <Link to="/teacher/attendance">
+                <div className="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-all hover:shadow-md cursor-pointer">
+                  <CheckCircleOutlined className="text-3xl text-green-600 mb-2" />
+                  <div className="font-medium text-gray-900">
                     Mark Attendance
                   </div>
-                </div>
-              </Link>
-              <Link to="/teacher/grades/enter">
-                <div className="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-colors cursor-pointer">
-                  <FileTextOutlined className="text-2xl text-green-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Enter Grades
+                  <div className="text-xs text-gray-500">
+                    Take class attendance
                   </div>
                 </div>
               </Link>
-              <Link to="/teacher/grades/assignments">
-                <div className="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-colors cursor-pointer">
-                  <BookOutlined className="text-2xl text-purple-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Create Assignment
-                  </div>
+              <Link to="/teacher/assignments">
+                <div className="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-all hover:shadow-md cursor-pointer">
+                  <FileTextOutlined className="text-3xl text-blue-600 mb-2" />
+                  <div className="font-medium text-gray-900">Assignments</div>
+                  <div className="text-xs text-gray-500">Create & manage</div>
                 </div>
               </Link>
-              <Link to="/teacher/communication">
-                <div className="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-colors cursor-pointer">
-                  <TeamOutlined className="text-2xl text-yellow-600 mb-2" />
-                  <div className="text-sm font-medium text-gray-900">
-                    Message Parents
-                  </div>
+              <Link to="/teacher/schedule">
+                <div className="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-all hover:shadow-md cursor-pointer">
+                  <CalendarOutlined className="text-3xl text-purple-600 mb-2" />
+                  <div className="font-medium text-gray-900">Schedule</div>
+                  <div className="text-xs text-gray-500">View timetable</div>
+                </div>
+              </Link>
+              <Link to="/teacher/students">
+                <div className="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-all hover:shadow-md cursor-pointer">
+                  <TeamOutlined className="text-3xl text-yellow-600 mb-2" />
+                  <div className="font-medium text-gray-900">Students</div>
+                  <div className="text-xs text-gray-500">View all students</div>
                 </div>
               </Link>
             </div>

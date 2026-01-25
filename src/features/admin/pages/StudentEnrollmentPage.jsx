@@ -38,10 +38,9 @@ import {
 } from "@ant-design/icons";
 import { PageHeader, DataTable } from "../../../components/UI";
 import {
-  getAllStudents,
+  getAllUsers,
   createStudent,
   updateStudent,
-  getUsersByRole,
   generatePassword,
   changeStudentClass,
 } from "../../../services/admin.service";
@@ -68,13 +67,28 @@ const StudentEnrollmentPage = () => {
     setLoading(true);
     try {
       const [studentsRes, classesRes, parentsRes] = await Promise.all([
-        getAllStudents(),
+        getAllUsers({ role: "student" }),
         getAllClasses(),
-        getUsersByRole("parent"),
+        getAllUsers({ role: "parent" }),
       ]);
-      setStudents(studentsRes.data || []);
+
+      const studentUsers = (studentsRes.data || []).map((user) => ({
+        _id: user._id,
+        userId: user,
+        classId: null,
+        section: null,
+        rollNumber: null,
+        parentId: null,
+      }));
+
+      const parentUsers = (parentsRes.data || []).map((user) => ({
+        _id: user._id,
+        userId: user,
+      }));
+
+      setStudents(studentUsers);
       setClasses(classesRes.data || []);
-      setParents(parentsRes.data || []);
+      setParents(parentUsers);
     } catch (error) {
       message.error(error.message || "Error fetching data");
     } finally {
@@ -261,7 +275,7 @@ const StudentEnrollmentPage = () => {
         selectedStudent._id,
         values.newClassId,
         values.newSection,
-        values.newRollNumber
+        values.newRollNumber,
       );
       message.success("Student class changed successfully");
       setIsChangeClassModalOpen(false);
