@@ -38,19 +38,19 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-indigo-50 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-slate-50 via-white to-indigo-50 py-12 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background Decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-y-1/2 translate-x-1/4"></div>
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-y-1/2 -translate-x-1/4"></div>
-        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute top-0 right-0 w-150 h-150 bg-indigo-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 -translate-y-1/2 translate-x-1/4"></div>
+        <div className="absolute bottom-0 left-0 w-125 h-125 bg-blue-100 rounded-full mix-blend-multiply filter blur-3xl opacity-30 translate-y-1/2 -translate-x-1/4"></div>
+        <div className="absolute top-1/2 left-1/2 w-100 h-100 bg-purple-100 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
       </div>
 
       {/* Main Container */}
       <div className="relative w-full max-w-5xl">
         <div className="flex flex-col lg:flex-row bg-white rounded-3xl shadow-2xl shadow-gray-200/60 overflow-hidden">
           {/* Left Panel - Branding */}
-          <div className="lg:w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 text-white p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden">
+          <div className="lg:w-1/2 bg-linear-to-br from-indigo-600 via-indigo-700 to-purple-700 text-white p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden">
             {/* Decorative Elements */}
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
             <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>

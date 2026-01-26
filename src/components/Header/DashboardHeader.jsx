@@ -149,7 +149,7 @@ const DashboardHeader = ({
               className="hidden md:flex items-center gap-2.5 group">
               <div
                 className="
-                  w-9 h-9 bg-gradient-to-br from-indigo-600 to-indigo-700
+                  w-9 h-9 bg-linear-to-br from-indigo-600 to-indigo-700
                   rounded-xl flex items-center justify-center
                   shadow-md shadow-indigo-600/25
                   group-hover:shadow-lg group-hover:scale-105
@@ -248,7 +248,7 @@ const DashboardHeader = ({
                   <div
                     className={`
                       w-9 h-9 rounded-xl
-                      bg-gradient-to-br ${roleConfig.avatar}
+                      bg-linear-to-br ${roleConfig.avatar}
                       flex items-center justify-center
                       text-white font-bold text-sm
                       shadow-md

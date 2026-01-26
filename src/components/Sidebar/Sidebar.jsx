@@ -371,7 +371,7 @@ const NavItem = ({ item, collapsed, theme, onNavigate }) => {
         {/* Active Indicator */}
         {isActive && (
           <div
-            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b ${theme.gradient}`}
+            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-linear-to-b ${theme.gradient}`}
           />
         )}
 
@@ -485,7 +485,7 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, userRole = "admin" }) => {
             className={`
               flex items-center justify-center shrink-0 w-10 h-10 
               rounded-xl shadow-md
-              bg-gradient-to-br ${theme.gradient}
+              bg-linear-to-br ${theme.gradient}
               transition-transform duration-300 hover:scale-105
             `}>
             <GraduationCap size={22} strokeWidth={2.5} className="text-white" />
@@ -524,7 +524,7 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, userRole = "admin" }) => {
               px-4 py-3 rounded-xl font-semibold text-white 
               shadow-lg hover:shadow-xl 
               transition-all duration-300 hover:scale-[1.02] active:scale-95
-              bg-gradient-to-r ${theme.gradient}
+              bg-linear-to-r ${theme.gradient}
             `}
             title="View Schedule">
             <Calendar size={20} strokeWidth={2.5} />
@@ -567,7 +567,7 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, userRole = "admin" }) => {
               className={`
                 flex items-center justify-center w-10 h-10 
                 rounded-xl shadow-md
-                bg-gradient-to-br ${theme.gradient}
+                bg-linear-to-br ${theme.gradient}
               `}>
               <GraduationCap
                 size={22}
@@ -614,7 +614,7 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, userRole = "admin" }) => {
               w-full flex items-center justify-center gap-2 
               px-4 py-3 rounded-xl font-semibold text-white 
               shadow-lg transition-all duration-300 active:scale-95
-              bg-gradient-to-r ${theme.gradient}
+              bg-linear-to-r ${theme.gradient}
             `}>
             <Calendar size={20} strokeWidth={2.5} />
             <span>Schedule</span>
