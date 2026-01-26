@@ -34,7 +34,8 @@ import {
 } from "@ant-design/icons";
 import { PageHeader, DataTable } from "../../../components/UI";
 import {
-  getAllUsers,
+  getAllParents,
+  getAllStudents,
   linkChildToParent,
   unlinkChildFromParent,
 } from "../../../services/admin.service";
@@ -59,28 +60,12 @@ const ParentChildMappingPage = () => {
     setLoading(true);
     try {
       const [parentsRes, studentsRes] = await Promise.all([
-        getAllUsers({ role: "parent" }),
-        getAllUsers({ role: "student" }),
+        getAllParents(),
+        getAllStudents(),
       ]);
 
-      // Transform plain User objects to match expected structure
-      const parentUsers = (parentsRes.data || []).map((user) => ({
-        _id: user._id,
-        userId: user, // Wrap user in userId for compatibility
-        children: [], // Will be populated from student relationships
-      }));
-
-      const studentUsers = (studentsRes.data || []).map((user) => ({
-        _id: user._id,
-        userId: user, // Wrap user in userId for compatibility
-        classId: null,
-        section: null,
-        rollNumber: null,
-        parentId: null,
-      }));
-
-      setParents(parentUsers);
-      setStudents(studentUsers);
+      setParents(parentsRes.data || []);
+      setStudents(studentsRes.data || []);
     } catch (error) {
       message.error(error.message || "Error fetching data");
     } finally {

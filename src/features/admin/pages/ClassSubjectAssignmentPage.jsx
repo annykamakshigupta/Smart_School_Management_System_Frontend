@@ -33,7 +33,7 @@ import {
 } from "@ant-design/icons";
 import { PageHeader, DataTable } from "../../../components/UI";
 import {
-  getUsersByRole,
+  getAllTeachers,
   assignClassTeacher,
   assignTeacherToSubject,
   getTeacherAssignments,
@@ -68,7 +68,7 @@ const ClassSubjectAssignmentPage = () => {
       const [classesRes, subjectsRes, teachersRes] = await Promise.all([
         getAllClasses(),
         getAllSubjects(),
-        getUsersByRole("teacher"),
+        getAllTeachers(),
       ]);
       setClasses(classesRes.data || []);
       setSubjects(subjectsRes.data || []);
@@ -111,7 +111,7 @@ const ClassSubjectAssignmentPage = () => {
               icon={<UserOutlined />}
               className="bg-blue-100"
             />
-            <span>{teacher.name}</span>
+            <span>{teacher.userId?.name || "N/A"}</span>
           </div>
         ) : (
           <Tag color="default">Not Assigned</Tag>
@@ -197,7 +197,7 @@ const ClassSubjectAssignmentPage = () => {
               icon={<UserOutlined />}
               className="bg-blue-100"
             />
-            <span>{teacher.name}</span>
+            <span>{teacher.userId?.name || "N/A"}</span>
           </div>
         ) : (
           <Tag color="default">Not Assigned</Tag>
@@ -359,8 +359,12 @@ const ClassSubjectAssignmentPage = () => {
                     className="bg-blue-100 text-blue-600"
                   />
                   <div className="flex-1">
-                    <div className="font-medium">{teacher.name}</div>
-                    <div className="text-xs text-gray-500">{teacher.email}</div>
+                    <div className="font-medium">
+                      {teacher.userId?.name || "N/A"}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {teacher.userId?.email || ""}
+                    </div>
                   </div>
                   <Button size="small">View</Button>
                 </div>
@@ -491,7 +495,8 @@ const ClassSubjectAssignmentPage = () => {
               optionFilterProp="children">
               {teachers.map((teacher) => (
                 <Select.Option key={teacher._id} value={teacher._id}>
-                  {teacher.name} ({teacher.email})
+                  {teacher.userId?.name || "N/A"} ({teacher.userId?.email || ""}
+                  )
                 </Select.Option>
               ))}
             </Select>
@@ -515,74 +520,76 @@ const ClassSubjectAssignmentPage = () => {
         </Form>
       </Modal>
 
-      {/* Assign Subject Teacher Modal */
-      <Modal
-        title={`Assign Teacher - ${selectedSubject?.name}`}
-        open={isAssignSubjectTeacherModalOpen}
-        onCancel={() => {
-          setIsAssignSubjectTeacherModalOpen(false);
-          setSelectedSubject(null);
-          subjectForm.resetFields();
-        }}
-        footer={null}
-        width={500}>
-        <Form
-          form={subjectForm}
-          layout="vertical"
-          onFinish={handleAssignSubjectTeacher}
-          className="mt-4">
-          <div className="mb-4 p-3 bg-green-50 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <BookOutlined className="text-green-600" />
-              </div>
-              <div>
-                <div className="font-medium">{selectedSubject?.name}</div>
-                <div className="text-xs text-gray-500">
-                  Code: {selectedSubject?.code} | Class:{" "}
-                  {selectedSubject?.classId?.name || "N/A"}
+      {
+        /* Assign Subject Teacher Modal */
+        <Modal
+          title={`Assign Teacher - ${selectedSubject?.name}`}
+          open={isAssignSubjectTeacherModalOpen}
+          onCancel={() => {
+            setIsAssignSubjectTeacherModalOpen(false);
+            setSelectedSubject(null);
+            subjectForm.resetFields();
+          }}
+          footer={null}
+          width={500}>
+          <Form
+            form={subjectForm}
+            layout="vertical"
+            onFinish={handleAssignSubjectTeacher}
+            className="mt-4">
+            <div className="mb-4 p-3 bg-green-50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                  <BookOutlined className="text-green-600" />
+                </div>
+                <div>
+                  <div className="font-medium">{selectedSubject?.name}</div>
+                  <div className="text-xs text-gray-500">
+                    Code: {selectedSubject?.code} | Class:{" "}
+                    {selectedSubject?.classId?.name || "N/A"}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <Form.Item
-            name="teacherId"
-            label="Select Teacher"
-            rules={[{ required: true, message: "Please select a teacher" }]}>
-            <Select
-              placeholder="Select teacher"
-              showSearch
-              optionFilterProp="children">
-              {teachers.map((teacher) => (
-                <Select.Option key={teacher._id} value={teacher._id}>
-                  {teacher.name} ({teacher.email})
-                </Select.Option>
-              ))}
-            </Select>
-          </Form.Item>
+            <Form.Item
+              name="teacherId"
+              label="Select Teacher"
+              rules={[{ required: true, message: "Please select a teacher" }]}>
+              <Select
+                placeholder="Select teacher"
+                showSearch
+                optionFilterProp="children">
+                {teachers.map((teacher) => (
+                  <Select.Option key={teacher._id} value={teacher._id}>
+                    {teacher.userId?.name || "N/A"} (
+                    {teacher.userId?.email || ""})
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-          <Form.Item className="mb-0 text-right">
-            <Space>
-              <Button
-                onClick={() => {
-                  setIsAssignSubjectTeacherModalOpen(false);
-                  setSelectedSubject(null);
-                  subjectForm.resetFields();
-                }}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit">
-                Assign Teacher
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
-      </Modal>
-}
+            <Form.Item className="mb-0 text-right">
+              <Space>
+                <Button
+                  onClick={() => {
+                    setIsAssignSubjectTeacherModalOpen(false);
+                    setSelectedSubject(null);
+                    subjectForm.resetFields();
+                  }}>
+                  Cancel
+                </Button>
+                <Button type="primary" htmlType="submit">
+                  Assign Teacher
+                </Button>
+              </Space>
+            </Form.Item>
+          </Form>
+        </Modal>
+      }
       {/* Teacher Assignments Modal */}
       <Modal
-        title={`Assignments - ${selectedTeacher?.name}`}
+        title={`Assignments - ${selectedTeacher?.userId?.name || "N/A"}`}
         open={!!teacherAssignments}
         onCancel={() => {
           setTeacherAssignments(null);
@@ -639,6 +646,6 @@ const ClassSubjectAssignmentPage = () => {
       </Modal>
     </div>
   );
-}
+};
 
-export default ClassSubjectAssignmentPage
+export default ClassSubjectAssignmentPage;

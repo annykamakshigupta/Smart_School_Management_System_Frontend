@@ -38,7 +38,8 @@ import {
 } from "@ant-design/icons";
 import { PageHeader, DataTable } from "../../../components/UI";
 import {
-  getAllUsers,
+  getAllStudents,
+  getAllParents,
   createStudent,
   updateStudent,
   generatePassword,
@@ -67,28 +68,14 @@ const StudentEnrollmentPage = () => {
     setLoading(true);
     try {
       const [studentsRes, classesRes, parentsRes] = await Promise.all([
-        getAllUsers({ role: "student" }),
+        getAllStudents(),
         getAllClasses(),
-        getAllUsers({ role: "parent" }),
+        getAllParents(),
       ]);
 
-      const studentUsers = (studentsRes.data || []).map((user) => ({
-        _id: user._id,
-        userId: user,
-        classId: null,
-        section: null,
-        rollNumber: null,
-        parentId: null,
-      }));
-
-      const parentUsers = (parentsRes.data || []).map((user) => ({
-        _id: user._id,
-        userId: user,
-      }));
-
-      setStudents(studentUsers);
+      setStudents(studentsRes.data || []);
       setClasses(classesRes.data || []);
-      setParents(parentUsers);
+      setParents(parentsRes.data || []);
     } catch (error) {
       message.error(error.message || "Error fetching data");
     } finally {
@@ -118,7 +105,7 @@ const StudentEnrollmentPage = () => {
       title: "Roll Number",
       dataIndex: "rollNumber",
       key: "rollNumber",
-      render: (roll) => <Tag color="blue">{roll}</Tag>,
+      render: (roll) => <Tag color="blue">{roll || "N/A"}</Tag>,
     },
     {
       title: "Class",
@@ -143,7 +130,7 @@ const StudentEnrollmentPage = () => {
         parent ? (
           <div className="flex items-center gap-2">
             <Avatar size="small" icon={<TeamOutlined />} />
-            <span className="text-sm">{parent.name}</span>
+            <span className="text-sm">{parent.userId?.name || "N/A"}</span>
           </div>
         ) : (
           <Tag color="default">Not Assigned</Tag>
@@ -154,13 +141,7 @@ const StudentEnrollmentPage = () => {
       dataIndex: "userId",
       key: "status",
       render: (user) => (
-        <Badge
-          status={user?.status === "active" ? "success" : "default"}
-          text={
-            user?.status?.charAt(0).toUpperCase() + user?.status?.slice(1) ||
-            "Active"
-          }
-        />
+        <Badge status={user ? "success" : "default"} text="Active" />
       ),
     },
     {
@@ -217,7 +198,9 @@ const StudentEnrollmentPage = () => {
   const handleChangeClass = (student) => {
     setSelectedStudent(student);
     changeClassForm.setFieldsValue({
-      currentClass: `${student.classId?.name} - ${student.classId?.section}`,
+      currentClass: student.classId
+        ? `${student.classId?.name} - ${student.classId?.section}`
+        : "Not assigned",
       newClassId: null,
       newSection: student.section,
       newRollNumber: "",
@@ -590,7 +573,7 @@ const StudentEnrollmentPage = () => {
               optionFilterProp="children">
               {parents.map((p) => (
                 <Select.Option key={p._id} value={p._id}>
-                  {p.name} ({p.email})
+                  {p.userId?.name || "N/A"} ({p.userId?.email || "N/A"})
                 </Select.Option>
               ))}
             </Select>

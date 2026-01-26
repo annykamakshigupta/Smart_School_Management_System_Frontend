@@ -33,9 +33,9 @@ import {
   PhoneOutlined,
   LockOutlined,
   ReloadOutlined,
-  StopOutlined,
-  CheckCircleOutlined,
   TeamOutlined,
+  CheckCircleOutlined,
+  StopOutlined,
   BookOutlined,
   UserSwitchOutlined,
   CopyOutlined,
@@ -45,7 +45,6 @@ import {
   getAllUsers,
   createUser,
   updateUser,
-  deactivateUser,
   resetUserPassword,
   deleteUser,
   generatePassword,
@@ -105,15 +104,6 @@ const UserManagementPage = () => {
     return colors[role] || "default";
   };
 
-  const getStatusColor = (status) => {
-    const colors = {
-      active: "success",
-      suspended: "warning",
-      inactive: "default",
-    };
-    return colors[status] || "default";
-  };
-
   const columns = [
     {
       title: "User",
@@ -124,25 +114,25 @@ const UserManagementPage = () => {
           <Avatar
             icon={<UserOutlined />}
             className={`bg-${getRoleColor(record.role)}-100 text-${getRoleColor(
-              record.role
+              record.role,
             )}-600`}
             style={{
               backgroundColor:
                 record.role === "admin"
                   ? "#fee2e2"
                   : record.role === "teacher"
-                  ? "#dbeafe"
-                  : record.role === "student"
-                  ? "#dcfce7"
-                  : "#f3e8ff",
+                    ? "#dbeafe"
+                    : record.role === "student"
+                      ? "#dcfce7"
+                      : "#f3e8ff",
               color:
                 record.role === "admin"
                   ? "#dc2626"
                   : record.role === "teacher"
-                  ? "#2563eb"
-                  : record.role === "student"
-                  ? "#16a34a"
-                  : "#9333ea",
+                    ? "#2563eb"
+                    : record.role === "student"
+                      ? "#16a34a"
+                      : "#9333ea",
             }}
           />
           <div>
@@ -165,23 +155,6 @@ const UserManagementPage = () => {
         <Tag color={getRoleColor(role)}>
           {role.charAt(0).toUpperCase() + role.slice(1)}
         </Tag>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Badge
-          status={
-            status === "active"
-              ? "success"
-              : status === "suspended"
-              ? "warning"
-              : "default"
-          }
-          text={status?.charAt(0).toUpperCase() + status?.slice(1) || "Active"}
-        />
       ),
     },
     {
@@ -210,32 +183,6 @@ const UserManagementPage = () => {
               onClick={() => handleResetPassword(record)}
             />
           </Tooltip>
-          {record.status === "active" ? (
-            <Tooltip title="Suspend">
-              <Popconfirm
-                title="Suspend this user?"
-                description="User will not be able to log in."
-                onConfirm={() => handleStatusChange(record._id, "suspended")}
-                okText="Yes"
-                cancelText="No">
-                <Button type="text" danger icon={<StopOutlined />} />
-              </Popconfirm>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Activate">
-              <Popconfirm
-                title="Activate this user?"
-                onConfirm={() => handleStatusChange(record._id, "active")}
-                okText="Yes"
-                cancelText="No">
-                <Button
-                  type="text"
-                  icon={<CheckCircleOutlined />}
-                  style={{ color: "#16a34a" }}
-                />
-              </Popconfirm>
-            </Tooltip>
-          )}
           <Tooltip title="Delete">
             <Popconfirm
               title="Delete this user?"
@@ -259,7 +206,6 @@ const UserManagementPage = () => {
       email: user.email,
       phone: user.phone,
       role: user.role,
-      status: user.status || "active",
     });
     setIsModalOpen(true);
   };
@@ -270,18 +216,6 @@ const UserManagementPage = () => {
     setGeneratedPassword(newPassword);
     passwordForm.setFieldsValue({ newPassword });
     setIsPasswordModalOpen(true);
-  };
-
-  const handleStatusChange = async (userId, status) => {
-    try {
-      await deactivateUser(userId, status);
-      message.success(
-        `User ${status === "active" ? "activated" : "suspended"} successfully`
-      );
-      fetchUsers();
-    } catch (error) {
-      message.error(error.message || "Error changing user status");
-    }
   };
 
   const handleDelete = async (userId) => {
@@ -544,14 +478,6 @@ const UserManagementPage = () => {
                 <Select.Option value="teacher">Teacher</Select.Option>
                 <Select.Option value="student">Student</Select.Option>
                 <Select.Option value="parent">Parent</Select.Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item name="status" label="Status" initialValue="active">
-              <Select>
-                <Select.Option value="active">Active</Select.Option>
-                <Select.Option value="suspended">Suspended</Select.Option>
-                <Select.Option value="inactive">Inactive</Select.Option>
               </Select>
             </Form.Item>
           </div>

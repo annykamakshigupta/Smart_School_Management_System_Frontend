@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { PageHeader } from "../../../components/UI";
 import * as classService from "../../../services/class.service";
-import * as userService from "../../../services/user.service";
+import { getAllTeachers } from "../../../services/admin.service";
 import { Plus, Edit, Trash2, X } from "lucide-react";
 import { message } from "antd";
 
@@ -41,8 +41,7 @@ const ClassesPage = () => {
 
   const fetchTeachers = async () => {
     try {
-      const response = await userService.getAllTeachers();
-      console.log("Fetched teachers:", response.data);
+      const response = await getAllTeachers();
       setTeachers(response.data || []);
     } catch (error) {
       console.error("Error fetching teachers:", error);
@@ -105,12 +104,15 @@ const ClassesPage = () => {
     e.preventDefault();
     if (!validate()) return;
 
+    const payload = { ...formData };
+    if (!payload.classTeacher) delete payload.classTeacher;
+
     try {
       if (editingClass) {
-        await classService.updateClass(editingClass._id, formData);
+        await classService.updateClass(editingClass._id, payload);
         message.success("Class updated successfully!");
       } else {
-        await classService.createClass(formData);
+        await classService.createClass(payload);
         message.success("Class created successfully!");
       }
       handleCloseModal();
@@ -199,7 +201,7 @@ const ClassesPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {classItem.classTeacher
-                        ? classItem.classTeacher.name || "Not Assigned"
+                        ? classItem.classTeacher.userId?.name || "Not Assigned"
                         : "Not Assigned"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -312,7 +314,8 @@ const ClassesPage = () => {
                   <option value="">Select a teacher</option>
                   {teachers.map((teacher) => (
                     <option key={teacher._id} value={teacher._id}>
-                      {teacher.firstName} {teacher.lastName} ({teacher.email})
+                      {teacher.userId?.name || "N/A"} (
+                      {teacher.userId?.email || ""})
                     </option>
                   ))}
                 </select>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { PageHeader } from "../../../components/UI";
 import * as subjectService from "../../../services/subject.service";
 import * as classService from "../../../services/class.service";
-import * as userService from "../../../services/user.service";
+import { getAllTeachers } from "../../../services/admin.service";
 import { Plus, Edit, Trash2, X } from "lucide-react";
 import { message } from "antd";
 
@@ -52,7 +52,7 @@ const SubjectsPage = () => {
 
   const fetchTeachers = async () => {
     try {
-      const response = await userService.getAllTeachers();
+      const response = await getAllTeachers();
       setTeachers(response.data || []);
     } catch (error) {
       console.error("Error fetching teachers:", error);
@@ -121,12 +121,16 @@ const SubjectsPage = () => {
     e.preventDefault();
     if (!validate()) return;
 
+    const payload = { ...formData };
+    if (!payload.classId) delete payload.classId;
+    if (!payload.assignedTeacher) delete payload.assignedTeacher;
+
     try {
       if (editingSubject) {
-        await subjectService.updateSubject(editingSubject._id, formData);
+        await subjectService.updateSubject(editingSubject._id, payload);
         message.success("Subject updated successfully!");
       } else {
-        await subjectService.createSubject(formData);
+        await subjectService.createSubject(payload);
         message.success("Subject created successfully!");
       }
       handleCloseModal();
@@ -218,8 +222,7 @@ const SubjectsPage = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {subject.assignedTeacher
-                        ? subject.assignedTeacher.name ||
-                          `${subject.assignedTeacher.firstName || ""} ${subject.assignedTeacher.lastName || ""}`.trim()
+                        ? subject.assignedTeacher.userId?.name || "N/A"
                         : "Not Assigned"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -350,7 +353,8 @@ const SubjectsPage = () => {
                   <option value="">Select a teacher</option>
                   {teachers.map((teacher) => (
                     <option key={teacher._id} value={teacher._id}>
-                      {teacher.firstName} {teacher.lastName} ({teacher.email})
+                      {teacher.userId?.name || "N/A"} (
+                      {teacher.userId?.email || ""})
                     </option>
                   ))}
                 </select>

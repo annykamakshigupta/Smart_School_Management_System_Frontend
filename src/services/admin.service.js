@@ -23,7 +23,6 @@ export const getAllUsers = async (filters = {}) => {
   try {
     const params = new URLSearchParams();
     if (filters.role) params.append("role", filters.role);
-    if (filters.status) params.append("status", filters.status);
     if (filters.search) params.append("search", filters.search);
     if (filters.page) params.append("page", filters.page);
     if (filters.limit) params.append("limit", filters.limit);
@@ -99,22 +98,6 @@ export const updateUser = async (userId, userData) => {
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error updating user");
-  }
-};
-
-/**
- * Deactivate/Suspend user
- */
-export const deactivateUser = async (userId, status = "suspended") => {
-  try {
-    const response = await axios.patch(
-      `${API_URL}/users/${userId}/status`,
-      { status },
-      getAuthHeaders(),
-    );
-    return response.data;
-  } catch (error) {
-    throw new Error(error.response?.data?.message || "Error deactivating user");
   }
 };
 
@@ -275,6 +258,20 @@ export const changeStudentClass = async (
     throw new Error(
       error.response?.data?.message || "Error changing student class",
     );
+  }
+};
+
+// ============ PARENT MANAGEMENT ============
+
+/**
+ * Get all parents (Parent profiles)
+ */
+export const getAllParents = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/parents`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || "Error fetching parents");
   }
 };
 
@@ -508,7 +505,6 @@ export default {
   getUsersByRole,
   getUserById,
   updateUser,
-  deactivateUser,
   resetUserPassword,
   deleteUser,
   // Student management

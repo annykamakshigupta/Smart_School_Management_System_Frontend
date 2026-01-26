@@ -17,7 +17,11 @@ const getAuthHeaders = () => {
 // Create a new subject
 export const createSubject = async (subjectData) => {
   try {
-    const response = await axios.post(API_URL, subjectData, getAuthHeaders());
+    const payload = { ...subjectData };
+    if (payload.assignedTeacher === "") delete payload.assignedTeacher;
+    if (payload.classId === "") delete payload.classId;
+
+    const response = await axios.post(API_URL, payload, getAuthHeaders());
     return response.data;
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error creating subject");
@@ -54,7 +58,7 @@ export const getSubjectById = async (subjectId) => {
   try {
     const response = await axios.get(
       `${API_URL}/${subjectId}`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -65,10 +69,14 @@ export const getSubjectById = async (subjectId) => {
 // Update subject
 export const updateSubject = async (subjectId, updateData) => {
   try {
+    const payload = { ...updateData };
+    if (payload.assignedTeacher === "") delete payload.assignedTeacher;
+    if (payload.classId === "") delete payload.classId;
+
     const response = await axios.put(
       `${API_URL}/${subjectId}`,
-      updateData,
-      getAuthHeaders()
+      payload,
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -81,7 +89,7 @@ export const deleteSubject = async (subjectId) => {
   try {
     const response = await axios.delete(
       `${API_URL}/${subjectId}`,
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
@@ -95,7 +103,7 @@ export const assignTeacher = async (subjectId, teacherId) => {
     const response = await axios.post(
       `${API_URL}/${subjectId}/assign-teacher`,
       { teacherId },
-      getAuthHeaders()
+      getAuthHeaders(),
     );
     return response.data;
   } catch (error) {
