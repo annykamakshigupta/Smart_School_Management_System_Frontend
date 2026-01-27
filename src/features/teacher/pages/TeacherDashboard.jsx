@@ -22,7 +22,6 @@ import {
   CheckCircleOutlined,
   FileTextOutlined,
   CalendarOutlined,
-  ClockCircleOutlined,
   BookOutlined,
   UserOutlined,
   MailOutlined,
@@ -185,7 +184,7 @@ const TeacherDashboard = () => {
         {teacherData.classTeacherOf.length > 0 && (
           <Col xs={24}>
             <Card className="mb-4">
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+              <div className="bg-linear-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
                   <IdcardOutlined className="text-2xl" />
                   <h3 className="text-xl font-semibold m-0">Class Teacher</h3>

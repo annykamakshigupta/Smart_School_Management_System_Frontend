@@ -3,7 +3,7 @@
  * Main dashboard view for students - Shows real data from API
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Row,
   Col,
@@ -33,8 +33,8 @@ import { StatCard, PageHeader } from "../../../components/UI";
 import {
   getMyStudentProfile,
   getMyAttendance,
-  getMyTimetable,
 } from "../../../services/student.service";
+import scheduleService from "../../../services/schedule.service";
 import { getMyResults } from "../../../services/result.service";
 import { getMyFees } from "../../../services/fee.service";
 
@@ -45,29 +45,9 @@ const StudentDashboard = () => {
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [results, setResults] = useState([]);
   const [fees, setFees] = useState({ data: [], summary: {} });
+  const [todaySchedule, setTodaySchedule] = useState([]);
 
-  useEffect(() => {
-    fetchStudentData();
-  }, []);
-
-  const fetchStudentData = async () => {
-    try {
-      setLoading(true);
-      const profileRes = await getMyStudentProfile();
-      setStudentProfile(profileRes.data);
-
-      if (profileRes.data?._id) {
-        fetchAdditionalData(profileRes.data._id, profileRes.data.classId?._id);
-      }
-    } catch (error) {
-      console.error("Error fetching student data:", error);
-      message.error("Failed to load student profile");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAdditionalData = async (studentId, classId) => {
+  const fetchAdditionalData = useCallback(async () => {
     setAttendanceLoading(true);
     try {
       const startDate = new Date();
@@ -75,24 +55,53 @@ const StudentDashboard = () => {
       const endDate = new Date();
 
       // Fetch attendance, results, and fees in parallel
-      const [attendanceRes, resultsRes, feesRes] = await Promise.all([
-        getMyAttendance({
-          startDate: startDate.toISOString().split("T")[0],
-          endDate: endDate.toISOString().split("T")[0],
-        }).catch(() => ({ data: [] })),
-        getMyResults().catch(() => ({ data: [] })),
-        getMyFees().catch(() => ({ data: [], summary: {} })),
-      ]);
+      const [attendanceRes, resultsRes, feesRes, scheduleRes] =
+        await Promise.all([
+          getMyAttendance({
+            startDate: startDate.toISOString().split("T")[0],
+            endDate: endDate.toISOString().split("T")[0],
+          }).catch(() => ({ data: [] })),
+          getMyResults().catch(() => ({ data: [] })),
+          getMyFees().catch(() => ({ data: [], summary: {} })),
+          scheduleService
+            .getStudentSchedules()
+            .catch(() => ({ data: { groupedByDay: {} } })),
+        ]);
 
       setAttendance(attendanceRes.data || []);
       setResults(resultsRes.data || []);
       setFees(feesRes);
+
+      const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
+      const grouped = scheduleRes.data?.groupedByDay || {};
+      setTodaySchedule(grouped[today] || []);
     } catch (error) {
       console.error("Error fetching additional data:", error);
     } finally {
       setAttendanceLoading(false);
     }
-  };
+  }, []);
+
+  const fetchStudentData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const profileRes = await getMyStudentProfile();
+      setStudentProfile(profileRes.data);
+
+      if (profileRes.data?._id) {
+        fetchAdditionalData();
+      }
+    } catch (error) {
+      console.error("Error fetching student data:", error);
+      message.error("Failed to load student profile");
+    } finally {
+      setLoading(false);
+    }
+  }, [fetchAdditionalData]);
+
+  useEffect(() => {
+    fetchStudentData();
+  }, [fetchStudentData]);
 
   const calculateAttendanceRate = () => {
     if (!attendance || attendance.length === 0) return 0;
@@ -231,6 +240,56 @@ const StudentDashboard = () => {
           />
         </Col>
       </Row>
+
+      {/* Today's Timetable */}
+      <Card className="mb-6">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <div className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+              <CalendarOutlined className="text-indigo-600" />
+              Today's Timetable
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              {new Date().toLocaleDateString("en-US", { weekday: "long" })}
+            </div>
+          </div>
+          <Link
+            to="/student/timetable"
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+            View full timetable
+          </Link>
+        </div>
+
+        <div className="mt-4">
+          {todaySchedule.length ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+              {todaySchedule.slice(0, 6).map((s) => (
+                <div
+                  key={s._id}
+                  className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                  <div className="text-sm font-semibold text-slate-900 truncate">
+                    {s.subjectId?.name || "Untitled"}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-600">
+                    {s.startTime} - {s.endTime}
+                  </div>
+                  <div className="mt-2 text-xs text-slate-600">
+                    Teacher: {s.teacherId?.name || "-"}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-600">
+                    Room: {s.room || "-"}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Empty
+              description="No classes scheduled for today"
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+            />
+          )}
+        </div>
+      </Card>
 
       <Row gutter={[16, 16]}>
         {/* Class Teacher Info */}

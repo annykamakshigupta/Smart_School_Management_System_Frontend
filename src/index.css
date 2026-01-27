@@ -9,7 +9,9 @@
   -webkit-backdrop-filter: saturate(180%) blur(12px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.3s ease;
 }
 
 .glass-card {
@@ -52,6 +54,41 @@
 .dashboard-main {
   padding: 24px;
   min-height: calc(100vh - 64px);
+}
+
+/* ========================================
+   SCROLLBAR UTILITIES
+======================================== */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #e2e8f0 transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #e2e8f0;
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #cbd5e1;
 }
 
 /* ========================================
@@ -236,9 +273,6 @@
   --theme-gradient: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
 }
 
-
-
-
 /* ========================================
    UTILITY CLASSES
 ======================================== */
@@ -251,7 +285,6 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-
 
 .shadow-card {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
@@ -416,8 +449,6 @@
   max-width: 420px;
 }
 
-
-
 .auth-card-body {
   padding: 32px;
 }
@@ -482,7 +513,6 @@
   border: 3px solid #6366f1;
 }
 
-
 /**
  * DashboardHeader Premium Styles
  * Advanced glassmorphism, animations, and micro-interactions
@@ -502,7 +532,8 @@
 
 .dashboard-header-glass.scrolled {
   background: rgba(255, 255, 255, 0.85);
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05),
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.05),
     0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
@@ -568,7 +599,8 @@
   outline: none;
   background: white;
   border-color: rgba(99, 102, 241, 0.5);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1),
+  box-shadow:
+    0 0 0 3px rgba(99, 102, 241, 0.1),
     0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
@@ -587,7 +619,6 @@
 .header-search-wrapper:focus-within .header-search-icon {
   color: #6366f1;
 }
-
 
 /* ===========================
    MOBILE SEARCH OVERLAY
@@ -765,16 +796,19 @@
 }
 
 .header-shadow-sm {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.02),
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.02),
     0 1px 2px 0 rgba(0, 0, 0, 0.03);
 }
 
 .header-shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.05),
     0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
 .header-shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08),
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.08),
     0 4px 6px -2px rgba(0, 0, 0, 0.04);
 }

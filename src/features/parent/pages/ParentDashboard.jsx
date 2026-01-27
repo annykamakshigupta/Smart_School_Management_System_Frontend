@@ -36,14 +36,32 @@ import {
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
 import { StatCard, PageHeader } from "../../../components/UI";
-import { getMyChildren, getChildAttendance, getChildTimetable } from "../../../services/parent.service";
+import {
+  getMyChildren,
+  getChildAttendance,
+} from "../../../services/parent.service";
+import scheduleService from "../../../services/schedule.service";
+import { ScheduleTimetable } from "../../../components/Schedule";
 
 const ParentDashboard = () => {
+  const EMPTY_GROUPED = {
+    Monday: [],
+    Tuesday: [],
+    Wednesday: [],
+    Thursday: [],
+    Friday: [],
+    Saturday: [],
+    Sunday: [],
+  };
+
   const [loading, setLoading] = useState(true);
   const [children, setChildren] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const [childAttendance, setChildAttendance] = useState([]);
-  const [childTimetable, setChildTimetable] = useState([]);
+  const [childScheduleData, setChildScheduleData] = useState({
+    items: [],
+    groupedByDay: EMPTY_GROUPED,
+  });
   const [attendanceLoading, setAttendanceLoading] = useState(false);
 
   useEffect(() => {
@@ -75,25 +93,36 @@ const ParentDashboard = () => {
 
   const fetchChildDetails = async () => {
     if (!selectedChild) return;
-    
+
     setAttendanceLoading(true);
     try {
       const startDate = new Date();
       startDate.setDate(1);
       const endDate = new Date();
-      
+
       const [attendanceRes, timetableRes] = await Promise.all([
         getChildAttendance(selectedChild._id, {
-          startDate: startDate.toISOString().split('T')[0],
-          endDate: endDate.toISOString().split('T')[0],
+          startDate: startDate.toISOString().split("T")[0],
+          endDate: endDate.toISOString().split("T")[0],
         }).catch(() => ({ data: [] })),
-        selectedChild.classId?._id 
-          ? getChildTimetable(selectedChild.classId._id).catch(() => ({ data: [] }))
-          : { data: [] },
+        scheduleService
+          .getParentSchedules()
+          .catch(() => ({ data: { children: [] } })),
       ]);
-      
+
       setChildAttendance(attendanceRes.data || []);
-      setChildTimetable(timetableRes.data || []);
+      const childrenSchedules = timetableRes.data?.children || [];
+      const match = childrenSchedules.find(
+        (c) => c?.student?._id === selectedChild._id,
+      );
+      if (match) {
+        setChildScheduleData({
+          items: match.items || [],
+          groupedByDay: match.groupedByDay || EMPTY_GROUPED,
+        });
+      } else {
+        setChildScheduleData({ items: [], groupedByDay: EMPTY_GROUPED });
+      }
     } catch (error) {
       console.error("Error fetching child details:", error);
     } finally {
@@ -103,7 +132,9 @@ const ParentDashboard = () => {
 
   const calculateAttendanceRate = () => {
     if (!childAttendance || childAttendance.length === 0) return 0;
-    const presentDays = childAttendance.filter(a => a.status === 'present').length;
+    const presentDays = childAttendance.filter(
+      (a) => a.status === "present",
+    ).length;
     return Math.round((presentDays / childAttendance.length) * 100);
   };
 
@@ -147,16 +178,19 @@ const ParentDashboard = () => {
             <Select
               value={selectedChild?._id}
               onChange={(value) => {
-                const child = children.find(c => c._id === value);
+                const child = children.find((c) => c._id === value);
                 setSelectedChild(child);
               }}
               style={{ width: 300 }}
-              size="large"
-            >
+              size="large">
               {children.map((child) => (
                 <Select.Option key={child._id} value={child._id}>
                   <div className="flex items-center gap-2">
-                    <Avatar size="small" icon={<UserOutlined />} className="bg-indigo-100" />
+                    <Avatar
+                      size="small"
+                      icon={<UserOutlined />}
+                      className="bg-indigo-100"
+                    />
                     <span>{child.userId?.name}</span>
                     <Tag color="blue" size="small">
                       {child.classId?.name} - {child.section}
@@ -174,7 +208,7 @@ const ParentDashboard = () => {
         <Tabs
           activeKey={selectedChild?._id}
           onChange={(key) => {
-            const child = children.find(c => c._id === key);
+            const child = children.find((c) => c._id === key);
             setSelectedChild(child);
           }}
           items={children.map((child) => ({
@@ -196,7 +230,9 @@ const ParentDashboard = () => {
                       className="bg-white/20 border-2 border-white/30"
                     />
                     <div className="flex-1">
-                      <h2 className="text-2xl font-bold mb-1">{child.userId?.name}</h2>
+                      <h2 className="text-2xl font-bold mb-1">
+                        {child.userId?.name}
+                      </h2>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                         <div>
                           <div className="text-white/70 text-xs">Class</div>
@@ -205,18 +241,34 @@ const ParentDashboard = () => {
                           </div>
                         </div>
                         <div>
-                          <div className="text-white/70 text-xs">Roll Number</div>
-                          <div className="font-semibold">{child.rollNumber}</div>
+                          <div className="text-white/70 text-xs">
+                            Roll Number
+                          </div>
+                          <div className="font-semibold">
+                            {child.rollNumber}
+                          </div>
                         </div>
                         <div>
-                          <div className="text-white/70 text-xs">Academic Year</div>
-                          <div className="font-semibold">{child.academicYear}</div>
+                          <div className="text-white/70 text-xs">
+                            Academic Year
+                          </div>
+                          <div className="font-semibold">
+                            {child.academicYear}
+                          </div>
                         </div>
                         <div>
                           <div className="text-white/70 text-xs">Status</div>
-                          <Badge 
-                            status={child.userId?.status === 'active' ? 'success' : 'warning'} 
-                            text={<span className="text-white">{child.userId?.status || 'Active'}</span>}
+                          <Badge
+                            status={
+                              child.userId?.status === "active"
+                                ? "success"
+                                : "warning"
+                            }
+                            text={
+                              <span className="text-white">
+                                {child.userId?.status || "Active"}
+                              </span>
+                            }
                           />
                         </div>
                       </div>
@@ -235,7 +287,7 @@ const ParentDashboard = () => {
                         title="Attendance"
                         value={calculateAttendanceRate()}
                         suffix="%"
-                        valueStyle={{ color: '#22c55e' }}
+                        valueStyle={{ color: "#22c55e" }}
                       />
                     </Card>
                   </Col>
@@ -247,7 +299,7 @@ const ParentDashboard = () => {
                       <Statistic
                         title="Subjects"
                         value={child.classId?.subjects?.length || 0}
-                        valueStyle={{ color: '#3b82f6' }}
+                        valueStyle={{ color: "#3b82f6" }}
                       />
                     </Card>
                   </Col>
@@ -259,8 +311,10 @@ const ParentDashboard = () => {
                       <Statistic
                         title="Class Teacher"
                         value={child.classId?.classTeacher?.name ? 1 : 0}
-                        formatter={() => child.classId?.classTeacher?.name || 'Not Assigned'}
-                        valueStyle={{ fontSize: '14px' }}
+                        formatter={() =>
+                          child.classId?.classTeacher?.name || "Not Assigned"
+                        }
+                        valueStyle={{ fontSize: "14px" }}
                       />
                     </Card>
                   </Col>
@@ -271,25 +325,46 @@ const ParentDashboard = () => {
                       </div>
                       <Statistic
                         title="Admission Date"
-                        value={child.admissionDate ? new Date(child.admissionDate).toLocaleDateString() : 'N/A'}
-                        valueStyle={{ fontSize: '14px' }}
+                        value={
+                          child.admissionDate
+                            ? new Date(child.admissionDate).toLocaleDateString()
+                            : "N/A"
+                        }
+                        valueStyle={{ fontSize: "14px" }}
                       />
                     </Card>
                   </Col>
                 </Row>
 
+                {/* Timetable */}
+                <Card
+                  className="mb-6"
+                  title={
+                    <span className="flex items-center gap-2">
+                      <ClockCircleOutlined className="text-indigo-600" />
+                      Timetable
+                    </span>
+                  }>
+                  <ScheduleTimetable
+                    groupedByDay={childScheduleData.groupedByDay}
+                    showTeacher={true}
+                    showClass={false}
+                    emptyTitle="No timetable published"
+                    emptySubtitle="This child’s class schedule will appear once the admin publishes it."
+                  />
+                </Card>
+
                 <Row gutter={[16, 16]}>
                   {/* Class Teacher Info */}
                   <Col xs={24} md={12}>
-                    <Card 
+                    <Card
                       title={
                         <span className="flex items-center gap-2">
                           <TeamOutlined className="text-indigo-600" />
                           Class Teacher
                         </span>
                       }
-                      className="h-full"
-                    >
+                      className="h-full">
                       {child.classId?.classTeacher ? (
                         <div className="flex items-center gap-4">
                           <Avatar
@@ -314,7 +389,7 @@ const ParentDashboard = () => {
                           </div>
                         </div>
                       ) : (
-                        <Empty 
+                        <Empty
                           description="No class teacher assigned yet"
                           image={Empty.PRESENTED_IMAGE_SIMPLE}
                         />
@@ -324,23 +399,26 @@ const ParentDashboard = () => {
 
                   {/* Child Contact Info */}
                   <Col xs={24} md={12}>
-                    <Card 
+                    <Card
                       title={
                         <span className="flex items-center gap-2">
                           <IdcardOutlined className="text-indigo-600" />
                           Student Information
                         </span>
                       }
-                      className="h-full"
-                    >
+                      className="h-full">
                       <List size="small">
                         <List.Item>
                           <span className="text-gray-500">Email:</span>
-                          <span className="font-medium">{child.userId?.email || 'N/A'}</span>
+                          <span className="font-medium">
+                            {child.userId?.email || "N/A"}
+                          </span>
                         </List.Item>
                         <List.Item>
                           <span className="text-gray-500">Phone:</span>
-                          <span className="font-medium">{child.userId?.phone || 'N/A'}</span>
+                          <span className="font-medium">
+                            {child.userId?.phone || "N/A"}
+                          </span>
                         </List.Item>
                         <List.Item>
                           <span className="text-gray-500">Section:</span>
@@ -348,7 +426,9 @@ const ParentDashboard = () => {
                         </List.Item>
                         <List.Item>
                           <span className="text-gray-500">Academic Year:</span>
-                          <span className="font-medium">{child.academicYear}</span>
+                          <span className="font-medium">
+                            {child.academicYear}
+                          </span>
                         </List.Item>
                       </List>
                     </Card>
@@ -356,7 +436,7 @@ const ParentDashboard = () => {
 
                   {/* Recent Attendance */}
                   <Col xs={24} md={12}>
-                    <Card 
+                    <Card
                       title={
                         <span className="flex items-center gap-2">
                           <CheckCircleOutlined className="text-green-600" />
@@ -364,12 +444,13 @@ const ParentDashboard = () => {
                         </span>
                       }
                       extra={
-                        <Link to="/parent/attendance" className="text-indigo-600">
+                        <Link
+                          to="/parent/attendance"
+                          className="text-indigo-600">
                           View All
                         </Link>
                       }
-                      loading={attendanceLoading}
-                    >
+                      loading={attendanceLoading}>
                       {childAttendance.length > 0 ? (
                         <List
                           size="small"
@@ -380,15 +461,23 @@ const ParentDashboard = () => {
                                 <span className="text-gray-600">
                                   {new Date(record.date).toLocaleDateString()}
                                 </span>
-                                <Tag color={record.status === 'present' ? 'success' : record.status === 'absent' ? 'error' : 'warning'}>
-                                  {record.status?.charAt(0).toUpperCase() + record.status?.slice(1)}
+                                <Tag
+                                  color={
+                                    record.status === "present"
+                                      ? "success"
+                                      : record.status === "absent"
+                                        ? "error"
+                                        : "warning"
+                                  }>
+                                  {record.status?.charAt(0).toUpperCase() +
+                                    record.status?.slice(1)}
                                 </Tag>
                               </div>
                             </List.Item>
                           )}
                         />
                       ) : (
-                        <Empty 
+                        <Empty
                           description="No attendance records found"
                           image={Empty.PRESENTED_IMAGE_SIMPLE}
                         />
@@ -398,14 +487,13 @@ const ParentDashboard = () => {
 
                   {/* Subjects */}
                   <Col xs={24} md={12}>
-                    <Card 
+                    <Card
                       title={
                         <span className="flex items-center gap-2">
                           <BookOutlined className="text-blue-600" />
                           Class Subjects
                         </span>
-                      }
-                    >
+                      }>
                       {child.classId?.subjects?.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {child.classId.subjects.map((subject, index) => (
@@ -415,7 +503,7 @@ const ParentDashboard = () => {
                           ))}
                         </div>
                       ) : (
-                        <Empty 
+                        <Empty
                           description="No subjects assigned yet"
                           image={Empty.PRESENTED_IMAGE_SIMPLE}
                         />
@@ -437,7 +525,9 @@ const ParentDashboard = () => {
               <div className="p-4 bg-green-50 rounded-xl text-center hover:bg-green-100 transition-all hover:shadow-md cursor-pointer">
                 <CheckCircleOutlined className="text-3xl text-green-600 mb-2" />
                 <div className="font-medium text-gray-900">View Attendance</div>
-                <div className="text-xs text-gray-500">Check attendance records</div>
+                <div className="text-xs text-gray-500">
+                  Check attendance records
+                </div>
               </div>
             </Link>
           </Col>
@@ -446,7 +536,9 @@ const ParentDashboard = () => {
               <div className="p-4 bg-purple-50 rounded-xl text-center hover:bg-purple-100 transition-all hover:shadow-md cursor-pointer">
                 <TeamOutlined className="text-3xl text-purple-600 mb-2" />
                 <div className="font-medium text-gray-900">My Children</div>
-                <div className="text-xs text-gray-500">View all children details</div>
+                <div className="text-xs text-gray-500">
+                  View all children details
+                </div>
               </div>
             </Link>
           </Col>
@@ -455,7 +547,9 @@ const ParentDashboard = () => {
               <div className="p-4 bg-blue-50 rounded-xl text-center hover:bg-blue-100 transition-all hover:shadow-md cursor-pointer">
                 <TrophyOutlined className="text-3xl text-blue-600 mb-2" />
                 <div className="font-medium text-gray-900">Grades</div>
-                <div className="text-xs text-gray-500">View academic performance</div>
+                <div className="text-xs text-gray-500">
+                  View academic performance
+                </div>
               </div>
             </Link>
           </Col>
@@ -464,7 +558,9 @@ const ParentDashboard = () => {
               <div className="p-4 bg-yellow-50 rounded-xl text-center hover:bg-yellow-100 transition-all hover:shadow-md cursor-pointer">
                 <CalendarOutlined className="text-3xl text-yellow-600 mb-2" />
                 <div className="font-medium text-gray-900">Fee Status</div>
-                <div className="text-xs text-gray-500">Check payment status</div>
+                <div className="text-xs text-gray-500">
+                  Check payment status
+                </div>
               </div>
             </Link>
           </Col>

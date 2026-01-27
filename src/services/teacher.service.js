@@ -69,12 +69,12 @@ export const getStudentsByClass = async (classId) => {
  */
 export const getMySchedule = async () => {
   try {
-    const teacherId = getTeacherProfileId();
     const response = await axios.get(
-      `${API_URL}/schedules?teacherId=${teacherId}`,
+      `${API_URL}/schedules/teacher`,
       getAuthHeaders(),
     );
-    return response.data;
+    // Normalize to legacy shape expected by TeacherDashboard (array)
+    return { data: response.data?.data?.items || [] };
   } catch (error) {
     throw new Error(error.response?.data?.message || "Error fetching schedule");
   }
