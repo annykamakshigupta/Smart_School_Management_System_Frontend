@@ -130,7 +130,7 @@ const TeacherDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
+      <div className="bg-indigo-600 rounded-2xl p-8 text-white shadow-xl">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
@@ -226,7 +226,7 @@ const TeacherDashboard = () => {
         {teacherData.classTeacherOf.length > 0 && (
           <Col xs={24}>
             <Card className="mb-4 shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0">
-              <div className="bg-linear-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+              <div className="bg-indigo-500 rounded-xl p-6 text-white">
                 <div className="flex items-center gap-3 mb-4">
                   <IdcardOutlined className="text-2xl" />
                   <h3 className="text-xl font-semibold m-0">Class Teacher</h3>

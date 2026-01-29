@@ -141,7 +141,7 @@ const StudentDashboard = () => {
   return (
     <div className="space-y-6">
       {/* Welcome Header */}
-      <div className="bg-linear-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-2xl p-8 text-white shadow-xl">
+      <div className="bg-indigo-600 rounded-2xl p-8 text-white shadow-xl">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
@@ -168,7 +168,7 @@ const StudentDashboard = () => {
 
       {/* Profile Header Card */}
       <Card className="mb-6 shadow-lg rounded-2xl border-0">
-        <div className="bg-linear-to-r from-indigo-500 to-purple-600 rounded-xl p-6 text-white">
+        <div className="bg-indigo-500 rounded-xl p-6 text-white">
           <div className="flex flex-col md:flex-row items-start gap-6">
             <Avatar
               size={80}
