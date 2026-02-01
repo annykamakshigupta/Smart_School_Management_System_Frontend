@@ -255,7 +255,7 @@ const TeacherAttendancePage = () => {
       {/* Filter Card */}
       <Card className="border border-slate-200 shadow-sm">
         <div className="flex flex-wrap gap-4 items-end">
-          <div className="flex-1 min-w-[150px]">
+          <div className="flex-1 min-w-37.5">
             <label className="block text-sm font-medium text-slate-700 mb-2">
               <FilterOutlined className="mr-1" /> Class
             </label>
@@ -272,7 +272,7 @@ const TeacherAttendancePage = () => {
             />
           </div>
 
-          <div className="flex-1 min-w-[150px]">
+          <div className="flex-1 min-w-37.5">
             <label className="block text-sm font-medium text-slate-700 mb-2">
               Subject
             </label>
@@ -287,7 +287,7 @@ const TeacherAttendancePage = () => {
             />
           </div>
 
-          <div className="flex-1 min-w-[200px]">
+          <div className="flex-1 min-w-50">
             <label className="block text-sm font-medium text-slate-700 mb-2">
               <CalendarOutlined className="mr-1" /> Date Range
             </label>

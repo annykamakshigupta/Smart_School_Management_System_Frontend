@@ -1,6 +1,6 @@
 /**
- * Parent Child Mapping Page
- * Admin page for linking parents to students
+ * Parent Child Mapping Page - Redesigned Modern UI
+ * Professional SaaS-style admin interface for linking parents to students
  */
 
 import { useState, useEffect } from "react";
@@ -21,6 +21,9 @@ import {
   Col,
   Divider,
   Popconfirm,
+  Dropdown,
+  Skeleton,
+  Input,
 } from "antd";
 import {
   PlusOutlined,
@@ -31,8 +34,9 @@ import {
   DisconnectOutlined,
   MailOutlined,
   PhoneOutlined,
+  MoreOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
-import { PageHeader, DataTable } from "../../../components/UI";
 import {
   getAllParents,
   getAllStudents,
@@ -49,6 +53,7 @@ const ParentChildMappingPage = () => {
   const [selectedParent, setSelectedParent] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [assignLoading, setAssignLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const [form] = Form.useForm();
   const [quickAssignForm] = Form.useForm();
 
@@ -72,77 +77,6 @@ const ParentChildMappingPage = () => {
       setLoading(false);
     }
   };
-
-  const columns = [
-    {
-      title: "Parent",
-      dataIndex: "userId",
-      key: "parent",
-      render: (user) => (
-        <div className="flex items-center gap-3">
-          <Avatar
-            icon={<TeamOutlined />}
-            className="bg-purple-100 text-purple-600"
-          />
-          <div>
-            <div className="font-medium">{user?.name || "N/A"}</div>
-            <div className="text-xs text-gray-500">{user?.email || "N/A"}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Phone",
-      dataIndex: "userId",
-      key: "phone",
-      render: (user) => user?.phone || "N/A",
-    },
-    {
-      title: "Children",
-      dataIndex: "children",
-      key: "children",
-      render: (children) => (
-        <div className="flex flex-wrap gap-1">
-          {children && children.length > 0 ? (
-            children.map((child, index) => (
-              <Tag key={index} color="green">
-                {child?.userId?.name || "Unknown"} (
-                {child?.classId?.name || "N/A"})
-              </Tag>
-            ))
-          ) : (
-            <Tag color="default">No children assigned</Tag>
-          )}
-        </div>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 200,
-      render: (_, record) => (
-        <Space>
-          <Tooltip title="Assign Children">
-            <Button
-              type="primary"
-              size="small"
-              icon={<PlusOutlined />}
-              onClick={() => handleOpenLinkModal(record)}>
-              Assign Child
-            </Button>
-          </Tooltip>
-          <Tooltip title="View Children">
-            <Button
-              size="small"
-              icon={<TeamOutlined />}
-              onClick={() => handleViewDetails(record)}>
-              View
-            </Button>
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ];
 
   const handleOpenLinkModal = (parent) => {
     setSelectedParent(parent);
@@ -268,164 +202,286 @@ const ParentChildMappingPage = () => {
   const studentsWithParent = students.filter((s) => s.parentId).length;
   const studentsWithoutParent = students.length - studentsWithParent;
 
+  const getActionItems = (parent) => [
+    {
+      key: "assign",
+      label: "Assign Children",
+      icon: <PlusOutlined />,
+      onClick: () => handleOpenLinkModal(parent),
+    },
+    {
+      key: "view",
+      label: "View Children",
+      icon: <TeamOutlined />,
+      onClick: () => handleViewDetails(parent),
+    },
+  ];
+
+  const filteredParents = parents.filter(
+    (parent) =>
+      parent.userId?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      parent.userId?.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
-    <div>
-      <PageHeader
-        title="Parent-Child Mapping"
-        subtitle="Link parents to their children for attendance and academic tracking"
-        breadcrumbs={[
-          { label: "Admin", path: "/admin/dashboard" },
-          { label: "User Management", path: "/admin/users" },
-          { label: "Parent-Child Mapping" },
-        ]}
-        actions={
-          <Button icon={<ReloadOutlined />} onClick={fetchData}>
-            Refresh
-          </Button>
-        }
-      />
+    <div className="min-h-screen bg-slate-50 -m-6 p-6">
+      {/* Header Section - Sticky */}
+      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Parent-Child Mapping
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Link parents to their children for attendance and academic
+                tracking
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={fetchData}
+                className="hover:border-blue-500 hover:text-blue-500">
+                Refresh
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Stats */}
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <TeamOutlined className="text-purple-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{parents.length}</div>
-                <div className="text-xs text-gray-500">Total Parents</div>
-              </div>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-2xl text-purple-600" />
             </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <LinkOutlined className="text-green-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{parentsWithChildren}</div>
-                <div className="text-xs text-gray-500">With Children</div>
-              </div>
+            <div>
+              <p className="text-slate-500 text-sm">Total Parents</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {parents.length}
+              </p>
             </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <DisconnectOutlined className="text-yellow-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  {parentsWithoutChildren}
-                </div>
-                <div className="text-xs text-gray-500">Without Children</div>
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                <UserOutlined className="text-red-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  {studentsWithoutParent}
-                </div>
-                <div className="text-xs text-gray-500">Students No Parent</div>
-              </div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+          </div>
+        </Card>
 
-      {/* Parent-Child Mapping Table */}
-      <Card>
-        <DataTable
-          columns={columns}
-          data={parents}
-          loading={loading}
-          rowKey="_id"
-        />
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+              <LinkOutlined className="text-2xl text-green-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">With Children</p>
+              <p className="text-2xl font-bold text-green-600">
+                {parentsWithChildren}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+              <DisconnectOutlined className="text-2xl text-orange-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Without Children</p>
+              <p className="text-2xl font-bold text-orange-600">
+                {parentsWithoutChildren}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
+              <UserOutlined className="text-2xl text-red-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Students No Parent</p>
+              <p className="text-2xl font-bold text-red-600">
+                {studentsWithoutParent}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Content Card */}
+      <Card className="border-0 shadow-sm mb-6">
+        {/* Search Bar */}
+        <div className="mb-6">
+          <Input.Search
+            placeholder="Search parents by name or email..."
+            size="large"
+            allowClear
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
+        </div>
+
+        {/* Parent Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="border border-slate-200">
+                <Skeleton avatar active />
+              </Card>
+            ))}
+          </div>
+        ) : filteredParents.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span className="text-slate-500">
+                {searchQuery
+                  ? "No parents found matching your search"
+                  : "No parents registered yet"}
+              </span>
+            }
+            className="my-12"
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredParents.map((parent) => (
+              <Card
+                key={parent._id}
+                className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
+                bodyStyle={{ padding: "20px" }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      size={48}
+                      icon={<TeamOutlined />}
+                      style={{
+                        backgroundColor: "#f3e8ff",
+                        color: "#9333ea",
+                      }}
+                    />
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">
+                        {parent.userId?.name || "N/A"}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {parent.userId?.email || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <Dropdown
+                    menu={{ items: getActionItems(parent) }}
+                    trigger={["click"]}
+                    placement="bottomRight">
+                    <Button
+                      type="text"
+                      icon={<MoreOutlined />}
+                      className="hover:bg-slate-100"
+                    />
+                  </Dropdown>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <PhoneOutlined className="text-slate-400" />
+                    <span>{parent.userId?.phone || "N/A"}</span>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    <p className="text-xs text-slate-500 mb-2">Children:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {parent.children && parent.children.length > 0 ? (
+                        parent.children.map((child, idx) => (
+                          <Tag
+                            key={idx}
+                            icon={<UserOutlined />}
+                            color="green"
+                            style={{ fontWeight: 500 }}>
+                            {child?.userId?.name || "Unknown"}
+                          </Tag>
+                        ))
+                      ) : (
+                        <Tag color="default">No children assigned</Tag>
+                      )}
+                    </div>
+                  </div>
+
+                  {parent.children && parent.children.length > 0 && (
+                    <div className="text-xs text-slate-400 mt-2">
+                      <TeamOutlined className="mr-1" />
+                      {parent.children.length} child
+                      {parent.children.length !== 1 ? "ren" : ""}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* Students Without Parent Section */}
       {studentsWithoutParent > 0 && (
         <Card
-          className="mt-6"
+          className="border-0 shadow-sm"
           title={
             <div className="flex items-center gap-2">
               <UserOutlined className="text-orange-600" />
               <span>Students Without Parent ({studentsWithoutParent})</span>
             </div>
           }>
-          <List
-            grid={{
-              gutter: 16,
-              xs: 1,
-              sm: 2,
-              md: 3,
-              lg: 4,
-              xl: 4,
-              xxl: 6,
-            }}
-            dataSource={students.filter((s) => !s.parentId)}
-            renderItem={(student) => (
-              <List.Item>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {students
+              .filter((s) => !s.parentId)
+              .map((student) => (
                 <Card
+                  key={student._id}
                   size="small"
-                  hoverable
-                  className="border border-orange-200"
-                  actions={[
-                    <Button
-                      key="assign"
-                      type="link"
-                      icon={<LinkOutlined />}
-                      onClick={() => handleQuickAssign(student)}>
-                      Assign Parent
-                    </Button>,
-                  ]}>
-                  <Card.Meta
-                    avatar={
-                      <Avatar
-                        icon={<UserOutlined />}
-                        style={{ backgroundColor: "#f97316" }}
-                      />
-                    }
-                    title={student.userId?.name || "Unknown"}
-                    description={
-                      <div className="text-xs">
-                        <div>{student.userId?.email || "N/A"}</div>
-                        <div className="mt-1">
-                          <Tag color="blue" className="text-xs">
-                            {student.classId?.name || "No Class"}
-                          </Tag>
-                          {student.section && (
-                            <Tag color="green" className="text-xs">
-                              {student.section}
-                            </Tag>
-                          )}
-                        </div>
+                  className="border border-orange-200 hover:shadow-md transition-all hover:border-orange-400">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Avatar
+                      icon={<UserOutlined />}
+                      style={{ backgroundColor: "#f97316", color: "white" }}
+                    />
+                    <div className="flex-1">
+                      <div className="font-medium text-sm">
+                        {student.userId?.name || "Unknown"}
                       </div>
-                    }
-                  />
+                      <div className="text-xs text-slate-500">
+                        {student.userId?.email || "N/A"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    <Tag color="blue" className="text-xs">
+                      {student.classId?.name || "No Class"}
+                    </Tag>
+                    {student.section && (
+                      <Tag color="green" className="text-xs">
+                        {student.section}
+                      </Tag>
+                    )}
+                  </div>
+                  <Button
+                    type="primary"
+                    size="small"
+                    block
+                    icon={<LinkOutlined />}
+                    onClick={() => handleQuickAssign(student)}
+                    className="bg-orange-600 hover:bg-orange-700">
+                    Assign Parent
+                  </Button>
                 </Card>
-              </List.Item>
-            )}
-          />
+              ))}
+          </div>
         </Card>
       )}
 
       {/* Assign Children Modal */}
       <Modal
         title={
-          <div className="flex items-center gap-2">
+          <div className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <TeamOutlined className="text-purple-600" />
             Assign Students to Parent
           </div>
@@ -437,14 +493,14 @@ const ParentChildMappingPage = () => {
           form.resetFields();
         }}
         footer={null}
-        width={600}
-        className="rounded-lg">
+        width={600}>
         <div className="mb-4 p-4 bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
           <div className="flex items-center gap-3">
             <Avatar
               size={48}
               icon={<TeamOutlined />}
               className="bg-purple-500"
+              style={{ backgroundColor: "#9333ea" }}
             />
             <div>
               <div className="font-semibold text-lg">
@@ -481,13 +537,14 @@ const ParentChildMappingPage = () => {
         <Form form={form} layout="vertical" onFinish={handleLinkChild}>
           <Form.Item
             name="studentIds"
-            label="Students (Multi-select)"
+            label={<span className="font-medium">Students (Multi-select)</span>}
             rules={[
               { required: true, message: "Please select at least one student" },
             ]}
             extra="You can select multiple students to assign at once">
             <Select
               mode="multiple"
+              size="large"
               placeholder="Search and select students..."
               showSearch
               optionFilterProp="children"
@@ -533,7 +590,8 @@ const ParentChildMappingPage = () => {
                 type="primary"
                 htmlType="submit"
                 icon={<LinkOutlined />}
-                loading={assignLoading}>
+                loading={assignLoading}
+                className="bg-blue-600 hover:bg-blue-700">
                 Assign Children
               </Button>
             </div>
@@ -544,7 +602,7 @@ const ParentChildMappingPage = () => {
       {/* Quick Assign Modal (from student to parent) */}
       <Modal
         title={
-          <div className="flex items-center gap-2">
+          <div className="text-lg font-semibold text-slate-900 flex items-center gap-2">
             <UserOutlined className="text-green-600" />
             Assign Student to Parent
           </div>
@@ -556,8 +614,7 @@ const ParentChildMappingPage = () => {
           quickAssignForm.resetFields();
         }}
         footer={null}
-        width={500}
-        className="rounded-lg">
+        width={500}>
         {selectedStudent && (
           <>
             <div className="mb-4 p-4 bg-linear-to-r from-green-50 to-blue-50 rounded-xl border border-green-100">
@@ -566,6 +623,7 @@ const ParentChildMappingPage = () => {
                   size={48}
                   icon={<UserOutlined />}
                   className="bg-green-500"
+                  style={{ backgroundColor: "#16a34a" }}
                 />
                 <div>
                   <div className="font-semibold text-lg">
@@ -592,9 +650,10 @@ const ParentChildMappingPage = () => {
               onFinish={handleQuickAssignSubmit}>
               <Form.Item
                 name="parentId"
-                label="Parent"
+                label={<span className="font-medium">Parent</span>}
                 rules={[{ required: true, message: "Please select a parent" }]}>
                 <Select
+                  size="large"
                   placeholder="Search and select parent..."
                   showSearch
                   optionFilterProp="children"
@@ -625,7 +684,8 @@ const ParentChildMappingPage = () => {
                     type="primary"
                     htmlType="submit"
                     icon={<LinkOutlined />}
-                    loading={assignLoading}>
+                    loading={assignLoading}
+                    className="bg-blue-600 hover:bg-blue-700">
                     Assign to Parent
                   </Button>
                 </div>

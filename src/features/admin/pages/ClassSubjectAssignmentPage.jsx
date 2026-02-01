@@ -1,6 +1,6 @@
 /**
- * Class Subject Assignment Page
- * Admin page for managing class-teacher and subject-teacher assignments
+ * Class Subject Assignment Page - Redesigned Modern UI
+ * Professional SaaS-style admin interface for managing class-teacher and subject-teacher assignments
  */
 
 import { useState, useEffect } from "react";
@@ -22,6 +22,9 @@ import {
   List,
   Empty,
   Badge,
+  Dropdown,
+  Skeleton,
+  Input,
 } from "antd";
 import {
   UserOutlined,
@@ -30,8 +33,8 @@ import {
   BookOutlined,
   UserSwitchOutlined,
   CheckCircleOutlined,
+  MoreOutlined,
 } from "@ant-design/icons";
-import { PageHeader, DataTable } from "../../../components/UI";
 import {
   getAllTeachers,
   assignClassTeacher,
@@ -55,6 +58,7 @@ const ClassSubjectAssignmentPage = () => {
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
   const [teacherAssignments, setTeacherAssignments] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [form] = Form.useForm();
   const [subjectForm] = Form.useForm();
 
@@ -79,157 +83,6 @@ const ClassSubjectAssignmentPage = () => {
       setLoading(false);
     }
   };
-
-  const classColumns = [
-    {
-      title: "Class",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-            <BookOutlined className="text-purple-600" />
-          </div>
-          <div>
-            <div className="font-medium">
-              {text} - {record.section}
-            </div>
-            <div className="text-xs text-gray-500">{record.academicYear}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Class Teacher",
-      dataIndex: "classTeacher",
-      key: "classTeacher",
-      render: (teacher) =>
-        teacher ? (
-          <div className="flex items-center gap-2">
-            <Avatar
-              size="small"
-              icon={<UserOutlined />}
-              className="bg-blue-100"
-            />
-            <span>{teacher.userId?.name || "N/A"}</span>
-          </div>
-        ) : (
-          <Tag color="default">Not Assigned</Tag>
-        ),
-    },
-    {
-      title: "Subjects",
-      dataIndex: "subjects",
-      key: "subjects",
-      render: (subjects) => (
-        <Badge count={subjects?.length || 0} showZero>
-          <Tag color="blue">Subjects</Tag>
-        </Badge>
-      ),
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "status",
-      render: (isActive) => (
-        <Tag color={isActive ? "success" : "default"}>
-          {isActive ? "Active" : "Inactive"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 150,
-      render: (_, record) => (
-        <Tooltip title="Assign Class Teacher">
-          <Button
-            type="primary"
-            size="small"
-            icon={<UserSwitchOutlined />}
-            onClick={() => handleOpenAssignTeacher(record)}>
-            Assign Teacher
-          </Button>
-        </Tooltip>
-      ),
-    },
-  ];
-
-  const subjectColumns = [
-    {
-      title: "Subject",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record) => (
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-            <BookOutlined className="text-green-600" />
-          </div>
-          <div>
-            <div className="font-medium">{text}</div>
-            <div className="text-xs text-gray-500">Code: {record.code}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Class",
-      dataIndex: "classId",
-      key: "class",
-      render: (classData) =>
-        classData ? (
-          <Tag color="purple">
-            {classData.name} - {classData.section}
-          </Tag>
-        ) : (
-          <Tag color="default">Not Assigned</Tag>
-        ),
-    },
-    {
-      title: "Assigned Teacher",
-      dataIndex: "assignedTeacher",
-      key: "teacher",
-      render: (teacher) =>
-        teacher ? (
-          <div className="flex items-center gap-2">
-            <Avatar
-              size="small"
-              icon={<UserOutlined />}
-              className="bg-blue-100"
-            />
-            <span>{teacher.userId?.name || "N/A"}</span>
-          </div>
-        ) : (
-          <Tag color="default">Not Assigned</Tag>
-        ),
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "status",
-      render: (isActive) => (
-        <Tag color={isActive ? "success" : "default"}>
-          {isActive ? "Active" : "Inactive"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 150,
-      render: (_, record) => (
-        <Tooltip title="Assign Teacher">
-          <Button
-            type="primary"
-            size="small"
-            icon={<UserSwitchOutlined />}
-            onClick={() => handleOpenAssignSubjectTeacher(record)}>
-            Assign Teacher
-          </Button>
-        </Tooltip>
-      ),
-    },
-  ];
 
   const handleOpenAssignTeacher = (classRecord) => {
     setSelectedClass(classRecord);
@@ -287,30 +140,146 @@ const ClassSubjectAssignmentPage = () => {
   const classesWithTeacher = classes.filter((c) => c.classTeacher).length;
   const subjectsWithTeacher = subjects.filter((s) => s.assignedTeacher).length;
 
+  const getClassActionItems = (classRecord) => [
+    {
+      key: "assign",
+      label: "Assign Class Teacher",
+      icon: <UserSwitchOutlined />,
+      onClick: () => handleOpenAssignTeacher(classRecord),
+    },
+  ];
+
+  const getSubjectActionItems = (subject) => [
+    {
+      key: "assign",
+      label: "Assign Teacher",
+      icon: <UserSwitchOutlined />,
+      onClick: () => handleOpenAssignSubjectTeacher(subject),
+    },
+  ];
+
+  const filteredClasses = classes.filter((cls) =>
+    `${cls.name} ${cls.section}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase()),
+  );
+
+  const filteredSubjects = subjects.filter((sub) =>
+    `${sub.name} ${sub.code}`.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   const tabItems = [
     {
       key: "classes",
       label: (
-        <span>
+        <span className="flex items-center gap-2">
           <BookOutlined /> Classes
           <Badge count={classes.length} showZero className="ml-2" />
         </span>
       ),
       children: (
-        <DataTable
-          columns={classColumns}
-          data={classes}
-          loading={loading}
-          showSearch
-          searchPlaceholder="Search classes..."
-          rowKey="_id"
-        />
+        <div>
+          <div className="mb-6">
+            <Input.Search
+              placeholder="Search classes..."
+              size="large"
+              allowClear
+              value={activeTab === "classes" ? searchQuery : ""}
+              onChange={(e) =>
+                activeTab === "classes" && setSearchQuery(e.target.value)
+              }
+              className="max-w-md"
+            />
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="border border-slate-200">
+                  <Skeleton avatar active />
+                </Card>
+              ))}
+            </div>
+          ) : filteredClasses.length === 0 ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="No classes found"
+              className="my-12"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredClasses.map((cls) => (
+                <Card
+                  key={cls._id}
+                  className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
+                  bodyStyle={{ padding: "20px" }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+                        <BookOutlined className="text-2xl text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900 text-base">
+                          {cls.name} - {cls.section}
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          {cls.academicYear}
+                        </p>
+                      </div>
+                    </div>
+                    <Dropdown
+                      menu={{ items: getClassActionItems(cls) }}
+                      trigger={["click"]}
+                      placement="bottomRight">
+                      <Button
+                        type="text"
+                        icon={<MoreOutlined />}
+                        className="hover:bg-slate-100"
+                      />
+                    </Dropdown>
+                  </div>
+
+                  <div className="space-y-2">
+                    {cls.classTeacher ? (
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          size="small"
+                          icon={<UserOutlined />}
+                          style={{
+                            backgroundColor: "#dbeafe",
+                            color: "#2563eb",
+                          }}
+                        />
+                        <span className="text-sm text-slate-700">
+                          {cls.classTeacher.userId?.name || "N/A"}
+                        </span>
+                      </div>
+                    ) : (
+                      <Tag color="default">No Class Teacher</Tag>
+                    )}
+
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
+                      <Tag color="blue" style={{ fontWeight: 500 }}>
+                        {cls.subjects?.length || 0} Subjects
+                      </Tag>
+                      <Tag
+                        color={cls.isActive ? "success" : "default"}
+                        style={{ fontWeight: 500 }}>
+                        {cls.isActive ? "Active" : "Inactive"}
+                      </Tag>
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       ),
     },
     {
       key: "subjects",
       label: (
-        <span>
+        <span className="flex items-center gap-2">
           <BookOutlined /> Subjects
           <Badge
             count={subjects.length}
@@ -321,20 +290,109 @@ const ClassSubjectAssignmentPage = () => {
         </span>
       ),
       children: (
-        <DataTable
-          columns={subjectColumns}
-          data={subjects}
-          loading={loading}
-          showSearch
-          searchPlaceholder="Search subjects..."
-          rowKey="_id"
-        />
+        <div>
+          <div className="mb-6">
+            <Input.Search
+              placeholder="Search subjects..."
+              size="large"
+              allowClear
+              value={activeTab === "subjects" ? searchQuery : ""}
+              onChange={(e) =>
+                activeTab === "subjects" && setSearchQuery(e.target.value)
+              }
+              className="max-w-md"
+            />
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3].map((i) => (
+                <Card key={i} className="border border-slate-200">
+                  <Skeleton avatar active />
+                </Card>
+              ))}
+            </div>
+          ) : filteredSubjects.length === 0 ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="No subjects found"
+              className="my-12"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredSubjects.map((subject) => (
+                <Card
+                  key={subject._id}
+                  className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
+                  bodyStyle={{ padding: "20px" }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+                        <BookOutlined className="text-2xl text-green-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900 text-base">
+                          {subject.name}
+                        </h3>
+                        <p className="text-xs text-slate-500">
+                          Code: {subject.code}
+                        </p>
+                      </div>
+                    </div>
+                    <Dropdown
+                      menu={{ items: getSubjectActionItems(subject) }}
+                      trigger={["click"]}
+                      placement="bottomRight">
+                      <Button
+                        type="text"
+                        icon={<MoreOutlined />}
+                        className="hover:bg-slate-100"
+                      />
+                    </Dropdown>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {subject.classId ? (
+                        <Tag color="purple" style={{ fontWeight: 500 }}>
+                          {subject.classId.name} - {subject.classId.section}
+                        </Tag>
+                      ) : (
+                        <Tag color="default">No Class</Tag>
+                      )}
+                    </div>
+
+                    <div className="mt-3 pt-3 border-t border-slate-100">
+                      {subject.assignedTeacher ? (
+                        <div className="flex items-center gap-2">
+                          <Avatar
+                            size="small"
+                            icon={<UserOutlined />}
+                            style={{
+                              backgroundColor: "#dbeafe",
+                              color: "#2563eb",
+                            }}
+                          />
+                          <span className="text-sm text-slate-700">
+                            {subject.assignedTeacher.userId?.name || "N/A"}
+                          </span>
+                        </div>
+                      ) : (
+                        <Tag color="default">No Teacher</Tag>
+                      )}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       ),
     },
     {
       key: "teachers",
       label: (
-        <span>
+        <span className="flex items-center gap-2">
           <TeamOutlined /> Teachers
           <Badge
             count={teachers.length}
@@ -351,12 +409,16 @@ const ClassSubjectAssignmentPage = () => {
               <Card
                 size="small"
                 hoverable
+                className="border border-slate-200 hover:shadow-md transition-all"
                 onClick={() => handleViewTeacherAssignments(teacher)}>
                 <div className="flex items-center gap-3">
                   <Avatar
                     size="large"
                     icon={<UserOutlined />}
-                    className="bg-blue-100 text-blue-400"
+                    style={{
+                      backgroundColor: "#dbeafe",
+                      color: "#2563eb",
+                    }}
                   />
                   <div className="flex-1">
                     <div className="font-medium">
@@ -377,85 +439,110 @@ const ClassSubjectAssignmentPage = () => {
   ];
 
   return (
-    <div>
-      <PageHeader
-        title="Class & Subject Assignment"
-        subtitle="Assign teachers to classes and subjects"
-        breadcrumbs={[
-          { label: "Admin", path: "/admin/dashboard" },
-          { label: "Academics", path: "/admin/academics/classes" },
-          { label: "Assignments" },
-        ]}
-        actions={
-          <Button icon={<ReloadOutlined />} onClick={fetchData}>
-            Refresh
-          </Button>
-        }
-      />
+    <div className="min-h-screen bg-slate-50 -m-6 p-6">
+      {/* Header Section - Sticky */}
+      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Class & Subject Assignment
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Assign teachers to classes and subjects
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={fetchData}
+                className="hover:border-blue-500 hover:text-blue-500">
+                Refresh
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Stats */}
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BookOutlined className="text-purple-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{classes.length}</div>
-                <div className="text-xs text-gray-500">Total Classes</div>
-              </div>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-2xl text-purple-600" />
             </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircleOutlined className="text-green-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{classesWithTeacher}</div>
-                <div className="text-xs text-gray-500">With Class Teacher</div>
-              </div>
+            <div>
+              <p className="text-slate-500 text-sm">Total Classes</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {classes.length}
+              </p>
             </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <BookOutlined className="text-blue-400 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{subjects.length}</div>
-                <div className="text-xs text-gray-500">Total Subjects</div>
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <TeamOutlined className="text-yellow-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{teachers.length}</div>
-                <div className="text-xs text-gray-500">Total Teachers</div>
-              </div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+          </div>
+        </Card>
 
-      <Card>
-        <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+              <CheckCircleOutlined className="text-2xl text-green-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">With Class Teacher</p>
+              <p className="text-2xl font-bold text-green-600">
+                {classesWithTeacher}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-2xl text-blue-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Total Subjects</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {subjects.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-2xl text-orange-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Total Teachers</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {teachers.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      <Card className="border-0 shadow-sm">
+        <Tabs
+          activeKey={activeTab}
+          onChange={(key) => {
+            setActiveTab(key);
+            setSearchQuery("");
+          }}
+          items={tabItems}
+          size="large"
+        />
       </Card>
 
       {/* Assign Class Teacher Modal */}
       <Modal
-        title={`Assign Class Teacher - ${selectedClass?.name} ${selectedClass?.section}`}
+        title={
+          <div className="text-lg font-semibold text-slate-900">
+            Assign Class Teacher - {selectedClass?.name}{" "}
+            {selectedClass?.section}
+          </div>
+        }
         open={isAssignTeacherModalOpen}
         onCancel={() => {
           setIsAssignTeacherModalOpen(false);
@@ -487,9 +574,10 @@ const ClassSubjectAssignmentPage = () => {
 
           <Form.Item
             name="teacherId"
-            label="Select Teacher"
+            label={<span className="font-medium">Select Teacher</span>}
             rules={[{ required: true, message: "Please select a teacher" }]}>
             <Select
+              size="large"
               placeholder="Select teacher"
               showSearch
               optionFilterProp="children">
@@ -512,7 +600,10 @@ const ClassSubjectAssignmentPage = () => {
                 }}>
                 Cancel
               </Button>
-              <Button type="primary" htmlType="submit">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="bg-blue-600 hover:bg-blue-700">
                 Assign Teacher
               </Button>
             </Space>
@@ -520,73 +611,79 @@ const ClassSubjectAssignmentPage = () => {
         </Form>
       </Modal>
 
-      {
-        /* Assign Subject Teacher Modal */
-        <Modal
-          title={`Assign Teacher - ${selectedSubject?.name}`}
-          open={isAssignSubjectTeacherModalOpen}
-          onCancel={() => {
-            setIsAssignSubjectTeacherModalOpen(false);
-            setSelectedSubject(null);
-            subjectForm.resetFields();
-          }}
-          footer={null}
-          width={500}>
-          <Form
-            form={subjectForm}
-            layout="vertical"
-            onFinish={handleAssignSubjectTeacher}
-            className="mt-4">
-            <div className="mb-4 p-3 bg-green-50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                  <BookOutlined className="text-green-600" />
-                </div>
-                <div>
-                  <div className="font-medium">{selectedSubject?.name}</div>
-                  <div className="text-xs text-gray-500">
-                    Code: {selectedSubject?.code} | Class:{" "}
-                    {selectedSubject?.classId?.name || "N/A"}
-                  </div>
+      {/* Assign Subject Teacher Modal */}
+      <Modal
+        title={
+          <div className="text-lg font-semibold text-slate-900">
+            Assign Teacher - {selectedSubject?.name}
+          </div>
+        }
+        open={isAssignSubjectTeacherModalOpen}
+        onCancel={() => {
+          setIsAssignSubjectTeacherModalOpen(false);
+          setSelectedSubject(null);
+          subjectForm.resetFields();
+        }}
+        footer={null}
+        width={500}>
+        <Form
+          form={subjectForm}
+          layout="vertical"
+          onFinish={handleAssignSubjectTeacher}
+          className="mt-4">
+          <div className="mb-4 p-3 bg-green-50 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                <BookOutlined className="text-green-600" />
+              </div>
+              <div>
+                <div className="font-medium">{selectedSubject?.name}</div>
+                <div className="text-xs text-gray-500">
+                  Code: {selectedSubject?.code} | Class:{" "}
+                  {selectedSubject?.classId?.name || "N/A"}
                 </div>
               </div>
             </div>
+          </div>
 
-            <Form.Item
-              name="teacherId"
-              label="Select Teacher"
-              rules={[{ required: true, message: "Please select a teacher" }]}>
-              <Select
-                placeholder="Select teacher"
-                showSearch
-                optionFilterProp="children">
-                {teachers.map((teacher) => (
-                  <Select.Option key={teacher._id} value={teacher._id}>
-                    {teacher.userId?.name || "N/A"} (
-                    {teacher.userId?.email || ""})
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
+          <Form.Item
+            name="teacherId"
+            label={<span className="font-medium">Select Teacher</span>}
+            rules={[{ required: true, message: "Please select a teacher" }]}>
+            <Select
+              size="large"
+              placeholder="Select teacher"
+              showSearch
+              optionFilterProp="children">
+              {teachers.map((teacher) => (
+                <Select.Option key={teacher._id} value={teacher._id}>
+                  {teacher.userId?.name || "N/A"} ({teacher.userId?.email || ""}
+                  )
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
 
-            <Form.Item className="mb-0 text-right">
-              <Space>
-                <Button
-                  onClick={() => {
-                    setIsAssignSubjectTeacherModalOpen(false);
-                    setSelectedSubject(null);
-                    subjectForm.resetFields();
-                  }}>
-                  Cancel
-                </Button>
-                <Button type="primary" htmlType="submit">
-                  Assign Teacher
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        </Modal>
-      }
+          <Form.Item className="mb-0 text-right">
+            <Space>
+              <Button
+                onClick={() => {
+                  setIsAssignSubjectTeacherModalOpen(false);
+                  setSelectedSubject(null);
+                  subjectForm.resetFields();
+                }}>
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="bg-blue-600 hover:bg-blue-700">
+                Assign Teacher
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
       {/* Teacher Assignments Modal */}
       <Modal
         title={`Assignments - ${selectedTeacher?.userId?.name || "N/A"}`}

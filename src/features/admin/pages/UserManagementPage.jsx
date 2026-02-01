@@ -1,6 +1,6 @@
 /**
- * User Management Page
- * Comprehensive admin page for managing all users in the system
+ * User Management Page - Redesigned Modern UI
+ * Professional SaaS-style admin interface for managing system users
  */
 
 import { useState, useEffect } from "react";
@@ -14,15 +14,13 @@ import {
   Space,
   message,
   Avatar,
-  Tabs,
   Card,
   Tooltip,
   Popconfirm,
   Badge,
-  Divider,
-  Row,
-  Col,
-  Statistic,
+  Dropdown,
+  Empty,
+  Skeleton,
 } from "antd";
 import {
   PlusOutlined,
@@ -39,6 +37,10 @@ import {
   BookOutlined,
   UserSwitchOutlined,
   CopyOutlined,
+  MoreOutlined,
+  CloseCircleOutlined,
+  SafetyOutlined,
+  IdcardOutlined,
 } from "@ant-design/icons";
 import { PageHeader, DataTable } from "../../../components/UI";
 import {
@@ -61,8 +63,8 @@ const UserManagementPage = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [stats, setStats] = useState({});
   const [generatedPassword, setGeneratedPassword] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [form] = Form.useForm();
-  const [passwordForm] = Form.useForm();
 
   useEffect(() => {
     fetchUsers();
@@ -94,110 +96,59 @@ const UserManagementPage = () => {
     }
   };
 
-  const getRoleColor = (role) => {
-    const colors = {
-      admin: "red",
-      teacher: "blue",
-      student: "green",
-      parent: "purple",
+  const getRoleConfig = (role) => {
+    const configs = {
+      admin: {
+        color: "#dc2626",
+        bgColor: "#fee2e2",
+        label: "Admin",
+        icon: <SafetyOutlined />,
+      },
+      teacher: {
+        color: "#2563eb",
+        bgColor: "#dbeafe",
+        label: "Teacher",
+        icon: <BookOutlined />,
+      },
+      student: {
+        color: "#16a34a",
+        bgColor: "#dcfce7",
+        label: "Student",
+        icon: <UserOutlined />,
+      },
+      parent: {
+        color: "#9333ea",
+        bgColor: "#f3e8ff",
+        label: "Parent",
+        icon: <TeamOutlined />,
+      },
     };
-    return colors[role] || "default";
+    return configs[role] || configs.student;
   };
 
-  const columns = [
-    {
-      title: "User",
-      dataIndex: "name",
-      key: "name",
-      render: (text, record) => (
-        <div className="flex items-center gap-3">
-          <Avatar
-            icon={<UserOutlined />}
-            className={`bg-${getRoleColor(record.role)}-100 text-${getRoleColor(
-              record.role,
-            )}-600`}
-            style={{
-              backgroundColor:
-                record.role === "admin"
-                  ? "#fee2e2"
-                  : record.role === "teacher"
-                    ? "#dbeafe"
-                    : record.role === "student"
-                      ? "#dcfce7"
-                      : "#f3e8ff",
-              color:
-                record.role === "admin"
-                  ? "#dc2626"
-                  : record.role === "teacher"
-                    ? "#2563eb"
-                    : record.role === "student"
-                      ? "#16a34a"
-                      : "#9333ea",
-            }}
-          />
-          <div>
-            <div className="font-medium">{text}</div>
-            <div className="text-xs text-gray-500">{record.email}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-      render: (role) => (
-        <Tag color={getRoleColor(role)}>
-          {role.charAt(0).toUpperCase() + role.slice(1)}
-        </Tag>
-      ),
-    },
-    {
-      title: "Created",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date) => new Date(date).toLocaleDateString(),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 200,
-      render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="Edit">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Reset Password">
-            <Button
-              type="text"
-              icon={<LockOutlined />}
-              onClick={() => handleResetPassword(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete this user?"
-              description="This action cannot be undone."
-              onConfirm={() => handleDelete(record._id)}
-              okText="Delete"
-              okType="danger"
-              cancelText="Cancel">
-              <Button type="text" danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ];
+  const getStatusConfig = (status) => {
+    const configs = {
+      active: {
+        color: "#16a34a",
+        bgColor: "#dcfce7",
+        label: "Active",
+        icon: <CheckCircleOutlined />,
+      },
+      suspended: {
+        color: "#ea580c",
+        bgColor: "#ffedd5",
+        label: "Suspended",
+        icon: <StopOutlined />,
+      },
+      inactive: {
+        color: "#6b7280",
+        bgColor: "#f3f4f6",
+        label: "Inactive",
+        icon: <CloseCircleOutlined />,
+      },
+    };
+    return configs[status] || configs.active;
+  };
 
   const handleEdit = (user) => {
     setEditingUser(user);
@@ -214,7 +165,6 @@ const UserManagementPage = () => {
     setSelectedUser(user);
     const newPassword = generatePassword();
     setGeneratedPassword(newPassword);
-    passwordForm.setFieldsValue({ newPassword });
     setIsPasswordModalOpen(true);
   };
 
@@ -223,6 +173,7 @@ const UserManagementPage = () => {
       await deleteUser(userId);
       message.success("User deleted successfully");
       fetchUsers();
+      fetchStats();
     } catch (error) {
       message.error(error.message || "Error deleting user");
     }
@@ -240,6 +191,7 @@ const UserManagementPage = () => {
       setIsModalOpen(false);
       setEditingUser(null);
       form.resetFields();
+      setGeneratedPassword("");
       fetchUsers();
       fetchStats();
     } catch (error) {
@@ -247,13 +199,18 @@ const UserManagementPage = () => {
     }
   };
 
-  const handlePasswordReset = async (values) => {
+  const handlePasswordReset = async () => {
     try {
-      await resetUserPassword(selectedUser._id, values.newPassword);
+      if (!selectedUser?._id || !generatedPassword) {
+        message.error("Missing user or generated password");
+        return;
+      }
+
+      await resetUserPassword(selectedUser._id, generatedPassword);
       message.success("Password reset successfully");
       setIsPasswordModalOpen(false);
       setSelectedUser(null);
-      passwordForm.resetFields();
+      setGeneratedPassword("");
     } catch (error) {
       message.error(error.message || "Error resetting password");
     }
@@ -267,349 +224,498 @@ const UserManagementPage = () => {
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
-    message.success("Password copied to clipboard");
+    message.success("Copied to clipboard!");
   };
 
-  const tabItems = [
+  const getActionItems = (user) => [
     {
-      key: "all",
-      label: (
-        <span>
-          <TeamOutlined /> All Users
-          <Badge count={stats.totalUsers} showZero className="ml-2" />
-        </span>
-      ),
+      key: "edit",
+      label: "Edit User",
+      icon: <EditOutlined />,
+      onClick: () => handleEdit(user),
     },
     {
-      key: "admin",
-      label: (
-        <span>
-          <UserSwitchOutlined /> Admins
-        </span>
-      ),
+      key: "reset",
+      label: "Reset Password",
+      icon: <LockOutlined />,
+      onClick: () => handleResetPassword(user),
     },
     {
-      key: "teacher",
-      label: (
-        <span>
-          <BookOutlined /> Teachers
-          <Badge
-            count={stats.totalTeachers}
-            showZero
-            className="ml-2"
-            style={{ backgroundColor: "#3b82f6" }}
-          />
-        </span>
-      ),
+      type: "divider",
     },
     {
-      key: "student",
-      label: (
-        <span>
-          <UserOutlined /> Students
-          <Badge
-            count={stats.totalStudents}
-            showZero
-            className="ml-2"
-            style={{ backgroundColor: "#22c55e" }}
-          />
-        </span>
-      ),
-    },
-    {
-      key: "parent",
-      label: (
-        <span>
-          <TeamOutlined /> Parents
-          <Badge
-            count={stats.totalParents}
-            showZero
-            className="ml-2"
-            style={{ backgroundColor: "#a855f7" }}
-          />
-        </span>
-      ),
+      key: "delete",
+      label: "Delete User",
+      icon: <DeleteOutlined />,
+      danger: true,
+      onClick: () => {
+        Modal.confirm({
+          title: "Delete User",
+          content: `Are you sure you want to delete ${user.name}? This action cannot be undone.`,
+          okText: "Delete",
+          okType: "danger",
+          onOk: () => handleDelete(user._id),
+        });
+      },
     },
   ];
 
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const tabs = [
+    { key: "all", label: "All Users", count: stats.totalUsers || 0 },
+    { key: "admin", label: "Admins", count: null },
+    { key: "teacher", label: "Teachers", count: stats.totalTeachers || 0 },
+    { key: "student", label: "Students", count: stats.totalStudents || 0 },
+    { key: "parent", label: "Parents", count: stats.totalParents || 0 },
+  ];
+
   return (
-    <div>
-      <PageHeader
-        title="User Management"
-        subtitle="Create, manage, and configure all system users"
-        breadcrumbs={[
-          { label: "Admin", path: "/admin/dashboard" },
-          { label: "User Management" },
-        ]}
-        actions={
-          <Space>
-            <Button icon={<ReloadOutlined />} onClick={fetchUsers}>
-              Refresh
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                setEditingUser(null);
-                form.resetFields();
-                setGeneratedPassword("");
-                setIsModalOpen(true);
-              }}>
-              Add User
-            </Button>
-          </Space>
-        }
-      />
+    <div className="min-h-screen bg-slate-50 -m-6 p-6">
+      {/* Header Section - Sticky */}
+      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                User Management
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Manage all system users, roles, and permissions
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={fetchUsers}
+                className="hover:border-blue-500 hover:text-blue-500">
+                Refresh
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingUser(null);
+                  form.resetFields();
+                  setGeneratedPassword("");
+                  setIsModalOpen(true);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 shadow-sm">
+                Add User
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Stats Cards */}
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Total Users"
-              value={stats.totalUsers || 0}
-              prefix={<TeamOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Active"
-              value={stats.activeUsers || 0}
-              valueStyle={{ color: "#22c55e" }}
-              prefix={<CheckCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Suspended"
-              value={stats.suspendedUsers || 0}
-              valueStyle={{ color: "#f59e0b" }}
-              prefix={<StopOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6}>
-          <Card size="small">
-            <Statistic
-              title="Classes"
-              value={stats.totalClasses || 0}
-              prefix={<BookOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-2xl text-blue-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Total Users</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {stats.totalUsers || 0}
+              </p>
+            </div>
+          </div>
+        </Card>
 
-      <Card>
-        <Tabs
-          activeKey={activeTab}
-          onChange={setActiveTab}
-          items={tabItems}
-          className="mb-4"
-        />
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
+              <CheckCircleOutlined className="text-2xl text-emerald-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Active</p>
+              <p className="text-2xl font-bold text-emerald-600">
+                {stats.activeUsers || 0}
+              </p>
+            </div>
+          </div>
+        </Card>
 
-        <DataTable
-          columns={columns}
-          data={users}
-          loading={loading}
-          showSearch
-          searchPlaceholder="Search users by name or email..."
-          rowKey="_id"
-        />
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+              <StopOutlined className="text-2xl text-orange-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Suspended</p>
+              <p className="text-2xl font-bold text-orange-600">
+                {stats.suspendedUsers || 0}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-2xl text-purple-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Classes</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {stats.totalClasses || 0}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Content Card */}
+      <Card className="border-0 shadow-sm">
+        {/* Tabs */}
+        <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-slate-200">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                activeTab === tab.key
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+              }`}>
+              {tab.label}
+              {tab.count !== null && (
+                <span
+                  style={{
+                    marginLeft: 8,
+                    display: "inline-flex",
+                    alignItems: "center",
+                  }}>
+                  <Badge
+                    count={tab.count}
+                    style={{
+                      backgroundColor:
+                        activeTab === tab.key ? "white" : "#e2e8f0",
+                      color: activeTab === tab.key ? "#2563eb" : "#475569",
+                    }}
+                  />
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Search Bar */}
+        <div className="mb-6">
+          <Input.Search
+            placeholder="Search by name or email..."
+            size="large"
+            allowClear
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
+        </div>
+
+        {/* User Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="border border-slate-200">
+                <Skeleton avatar active />
+              </Card>
+            ))}
+          </div>
+        ) : filteredUsers.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span className="text-slate-500">
+                {searchQuery
+                  ? "No users found matching your search"
+                  : "No users in this category"}
+              </span>
+            }
+            className="my-12"
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredUsers.map((user) => {
+              const roleConfig = getRoleConfig(user.role);
+              const statusConfig = getStatusConfig(user.status || "active");
+
+              return (
+                <Card
+                  key={user._id}
+                  className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
+                  bodyStyle={{ padding: "20px" }}>
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        size={48}
+                        icon={roleConfig.icon}
+                        style={{
+                          backgroundColor: roleConfig.bgColor,
+                          color: roleConfig.color,
+                        }}
+                      />
+                      <div>
+                        <h3 className="font-semibold text-slate-900 text-base">
+                          {user.name}
+                        </h3>
+                        <p className="text-xs text-slate-500">{user.email}</p>
+                      </div>
+                    </div>
+                    <Dropdown
+                      menu={{ items: getActionItems(user) }}
+                      trigger={["click"]}
+                      placement="bottomRight">
+                      <Button
+                        type="text"
+                        icon={<MoreOutlined />}
+                        className="hover:bg-slate-100"
+                      />
+                    </Dropdown>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-slate-600">
+                      <PhoneOutlined className="text-slate-400" />
+                      <span>{user.phone || "N/A"}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <Tag
+                        icon={roleConfig.icon}
+                        style={{
+                          backgroundColor: roleConfig.bgColor,
+                          color: roleConfig.color,
+                          border: "none",
+                          fontWeight: 500,
+                        }}>
+                        {roleConfig.label}
+                      </Tag>
+                      <Tag
+                        icon={statusConfig.icon}
+                        style={{
+                          backgroundColor: statusConfig.bgColor,
+                          color: statusConfig.color,
+                          border: "none",
+                          fontWeight: 500,
+                        }}>
+                        {statusConfig.label}
+                      </Tag>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-slate-400 mt-3 pt-3 border-t border-slate-100">
+                      <IdcardOutlined />
+                      <span>
+                        Joined {new Date(user.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </Card>
 
       {/* Create/Edit User Modal */}
       <Modal
-        title={editingUser ? "Edit User" : "Create New User"}
+        title={
+          <div className="text-lg font-semibold text-slate-900">
+            {editingUser ? "Edit User" : "Create New User"}
+          </div>
+        }
         open={isModalOpen}
+        onOk={handleSubmit}
         onCancel={() => {
           setIsModalOpen(false);
-          setEditingUser(null);
-          form.resetFields();
+          setGeneratedPassword("");
         }}
-        footer={null}
-        width={600}>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          className="mt-4">
-          <Form.Item
-            name="name"
-            label="Full Name"
-            rules={[{ required: true, message: "Please enter full name" }]}>
-            <Input prefix={<UserOutlined />} placeholder="Enter full name" />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Please enter email" },
-              { type: "email", message: "Please enter a valid email" },
-            ]}>
-            <Input
-              prefix={<MailOutlined />}
-              placeholder="Enter email address"
-              disabled={!!editingUser}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="phone"
-            label="Phone Number"
-            rules={[{ required: true, message: "Please enter phone number" }]}>
-            <Input
-              prefix={<PhoneOutlined />}
-              placeholder="Enter phone number"
-            />
-          </Form.Item>
-
+        width={700}
+        okText={editingUser ? "Update User" : "Create User"}
+        okButtonProps={{
+          className: "bg-blue-600 hover:bg-blue-700",
+        }}
+        confirmLoading={loading}>
+        <Form form={form} layout="vertical" className="mt-6" autoComplete="off">
           <div className="grid grid-cols-2 gap-4">
             <Form.Item
+              name="name"
+              label={<span className="font-medium">Full Name</span>}
+              rules={[{ required: true, message: "Please enter user's name" }]}>
+              <Input
+                size="large"
+                placeholder="Enter full name"
+                prefix={<UserOutlined className="text-slate-400" />}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="email"
+              label={<span className="font-medium">Email Address</span>}
+              rules={[
+                { required: true, message: "Please enter email" },
+                { type: "email", message: "Please enter a valid email" },
+              ]}>
+              <Input
+                size="large"
+                placeholder="user@example.com"
+                prefix={<MailOutlined className="text-slate-400" />}
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="phone"
+              label={<span className="font-medium">Phone Number</span>}
+              rules={[
+                { required: true, message: "Please enter phone number" },
+              ]}>
+              <Input
+                size="large"
+                placeholder="Enter phone number"
+                prefix={<PhoneOutlined className="text-slate-400" />}
+              />
+            </Form.Item>
+
+            <Form.Item
               name="role"
-              label="Role"
-              rules={[{ required: true, message: "Please select role" }]}>
-              <Select placeholder="Select role" disabled={!!editingUser}>
-                <Select.Option value="admin">Admin</Select.Option>
-                <Select.Option value="teacher">Teacher</Select.Option>
-                <Select.Option value="student">Student</Select.Option>
-                <Select.Option value="parent">Parent</Select.Option>
+              label={<span className="font-medium">Role</span>}
+              rules={[{ required: true, message: "Please select a role" }]}>
+              <Select
+                size="large"
+                placeholder="Select role"
+                suffixIcon={<TeamOutlined className="text-slate-400" />}>
+                <Select.Option value="admin">
+                  <UserSwitchOutlined /> Admin
+                </Select.Option>
+                <Select.Option value="teacher">
+                  <BookOutlined /> Teacher
+                </Select.Option>
+                <Select.Option value="student">
+                  <UserOutlined /> Student
+                </Select.Option>
+                <Select.Option value="parent">
+                  <TeamOutlined /> Parent
+                </Select.Option>
               </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="address"
+              label={<span className="font-medium">Address</span>}
+              className="col-span-2">
+              <Input.TextArea
+                size="large"
+                placeholder="Enter address"
+                rows={2}
+              />
             </Form.Item>
           </div>
 
           {!editingUser && (
-            <Form.Item
-              name="password"
-              label="Password"
-              rules={[
-                { required: true, message: "Please enter password" },
-                { min: 6, message: "Password must be at least 6 characters" },
-              ]}>
-              <Input.Password
-                prefix={<LockOutlined />}
-                placeholder="Enter password"
-                addonAfter={
-                  <Tooltip title="Generate Password">
-                    <Button
-                      type="text"
-                      size="small"
-                      icon={<ReloadOutlined />}
-                      onClick={handleGeneratePassword}
-                    />
-                  </Tooltip>
-                }
-              />
-            </Form.Item>
-          )}
-
-          {generatedPassword && !editingUser && (
-            <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
-              <span className="text-sm">
-                Generated: <strong>{generatedPassword}</strong>
-              </span>
-              <Button
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={() => copyToClipboard(generatedPassword)}>
-                Copy
-              </Button>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
+              <div className="flex items-start gap-3">
+                <LockOutlined className="text-blue-600 mt-1" />
+                <div className="flex-1">
+                  <p className="font-medium text-blue-900 mb-2">
+                    Auto-Generated Password
+                  </p>
+                  {generatedPassword ? (
+                    <div className="bg-white rounded-lg p-3 border border-blue-200">
+                      <div className="flex items-center justify-between gap-3">
+                        <code className="text-sm font-mono text-blue-700 font-semibold">
+                          {generatedPassword}
+                        </code>
+                        <Button
+                          type="text"
+                          size="small"
+                          icon={<CopyOutlined />}
+                          onClick={() => copyToClipboard(generatedPassword)}
+                          className="hover:bg-blue-100 text-blue-600">
+                          Copy
+                        </Button>
+                      </div>
+                      <p className="text-xs text-blue-600 mt-2">
+                        ⚠️ Save this password - it will only be shown once!
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-blue-700">
+                      A secure password will be generated automatically when you
+                      create the user.
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           )}
-
-          <Divider />
-
-          <Form.Item className="mb-0 text-right">
-            <Space>
-              <Button
-                onClick={() => {
-                  setIsModalOpen(false);
-                  setEditingUser(null);
-                  form.resetFields();
-                }}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit">
-                {editingUser ? "Update User" : "Create User"}
-              </Button>
-            </Space>
-          </Form.Item>
         </Form>
       </Modal>
 
       {/* Reset Password Modal */}
       <Modal
-        title={`Reset Password for ${selectedUser?.name}`}
+        title={
+          <div className="text-lg font-semibold text-slate-900">
+            <LockOutlined className="mr-2" />
+            Reset Password
+          </div>
+        }
         open={isPasswordModalOpen}
+        onOk={handlePasswordReset}
         onCancel={() => {
           setIsPasswordModalOpen(false);
           setSelectedUser(null);
-          passwordForm.resetFields();
+          setGeneratedPassword("");
         }}
-        footer={null}
-        width={450}>
-        <Form
-          form={passwordForm}
-          layout="vertical"
-          onFinish={handlePasswordReset}
-          className="mt-4">
-          <Form.Item
-            name="newPassword"
-            label="New Password"
-            rules={[
-              { required: true, message: "Please enter new password" },
-              { min: 6, message: "Password must be at least 6 characters" },
-            ]}>
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="Enter new password"
-            />
-          </Form.Item>
-
-          <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
-            <span className="text-sm">
-              Generated: <strong>{generatedPassword}</strong>
+        okText="Reset Password"
+        okButtonProps={{
+          className: "bg-orange-600 hover:bg-orange-700",
+        }}
+        confirmLoading={loading}>
+        <div className="py-4">
+          <p className="text-slate-600 mb-4">
+            Are you sure you want to reset the password for{" "}
+            <span className="font-semibold text-slate-900">
+              {selectedUser?.name}
             </span>
-            <Space>
-              <Button
-                size="small"
-                icon={<ReloadOutlined />}
-                onClick={() => {
-                  const newPass = generatePassword();
-                  setGeneratedPassword(newPass);
-                  passwordForm.setFieldsValue({ newPassword: newPass });
-                }}>
-                New
-              </Button>
-              <Button
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={() => copyToClipboard(generatedPassword)}>
-                Copy
-              </Button>
-            </Space>
-          </div>
+            ?
+          </p>
 
-          <Form.Item className="mb-0 text-right">
-            <Space>
-              <Button
-                onClick={() => {
-                  setIsPasswordModalOpen(false);
-                  setSelectedUser(null);
-                  passwordForm.resetFields();
-                }}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit">
-                Reset Password
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
+          {generatedPassword && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <LockOutlined className="text-orange-600 mt-1" />
+                <div className="flex-1">
+                  <p className="font-medium text-orange-900 mb-2">
+                    New Password Generated
+                  </p>
+                  <div className="bg-white rounded-lg p-3 border border-orange-200">
+                    <div className="flex items-center justify-between gap-3">
+                      <code className="text-sm font-mono text-orange-700 font-semibold">
+                        {generatedPassword}
+                      </code>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CopyOutlined />}
+                        onClick={() => copyToClipboard(generatedPassword)}
+                        className="hover:bg-orange-100 text-orange-600">
+                        Copy
+                      </Button>
+                    </div>
+                    <p className="text-xs text-orange-600 mt-2">
+                      ⚠️ Save this password - it will only be shown once!
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </Modal>
     </div>
   );

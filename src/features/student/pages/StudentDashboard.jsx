@@ -33,6 +33,7 @@ import { StatCard, PageHeader } from "../../../components/UI";
 import {
   getMyStudentProfile,
   getMyAttendance,
+  getMySubjects,
 } from "../../../services/student.service";
 import scheduleService from "../../../services/schedule.service";
 import { getMyResults } from "../../../services/result.service";
@@ -46,16 +47,19 @@ const StudentDashboard = () => {
   const [results, setResults] = useState([]);
   const [fees, setFees] = useState({ data: [], summary: {} });
   const [todaySchedule, setTodaySchedule] = useState([]);
+  const [subjects, setSubjects] = useState([]);
 
-  const fetchAdditionalData = useCallback(async () => {
+  const fetchAdditionalData = useCallback(async (profile) => {
     setAttendanceLoading(true);
     try {
       const startDate = new Date();
       startDate.setDate(1);
       const endDate = new Date();
 
-      // Fetch attendance, results, and fees in parallel
-      const [attendanceRes, resultsRes, feesRes, scheduleRes] =
+      const classId = profile?.class?._id || profile?.classId?._id;
+
+      // Fetch attendance, results, fees, subjects and schedule in parallel
+      const [attendanceRes, resultsRes, feesRes, scheduleRes, subjectsRes] =
         await Promise.all([
           getMyAttendance({
             startDate: startDate.toISOString().split("T")[0],
@@ -66,11 +70,15 @@ const StudentDashboard = () => {
           scheduleService
             .getStudentSchedules()
             .catch(() => ({ data: { groupedByDay: {} } })),
+          classId
+            ? getMySubjects(classId).catch(() => ({ data: [] }))
+            : Promise.resolve({ data: [] }),
         ]);
 
       setAttendance(attendanceRes.data || []);
       setResults(resultsRes.data || []);
       setFees(feesRes);
+      setSubjects(subjectsRes.data || []);
 
       const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
       const grouped = scheduleRes.data?.groupedByDay || {};
@@ -86,10 +94,11 @@ const StudentDashboard = () => {
     try {
       setLoading(true);
       const profileRes = await getMyStudentProfile();
-      setStudentProfile(profileRes.data);
+      const profile = profileRes.data;
+      setStudentProfile(profile);
 
-      if (profileRes.data?._id) {
-        fetchAdditionalData();
+      if (profile?._id) {
+        await fetchAdditionalData(profile);
       }
     } catch (error) {
       console.error("Error fetching student data:", error);
@@ -497,12 +506,15 @@ const StudentDashboard = () => {
               </div>
             }
             className="shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0">
-            {classInfo?.subjects?.length > 0 ? (
+            {subjects.length > 0 ? (
               <div className="flex flex-wrap gap-2">
-                {classInfo.subjects.map((subject, index) => (
-                  <Tag key={index} color="blue" className="py-2 px-4 text-sm">
+                {subjects.map((subject) => (
+                  <Tag
+                    key={subject._id}
+                    color="blue"
+                    className="py-2 px-4 text-sm">
                     <BookOutlined className="mr-1" />
-                    {subject.name || subject}
+                    {subject.name || "Untitled"}
                   </Tag>
                 ))}
               </div>

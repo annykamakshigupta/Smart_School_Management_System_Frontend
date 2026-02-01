@@ -8,3 +8,4 @@ export { default as MarkAttendancePage } from "./pages/MarkAttendancePage";
 export { default as MyStudentsPage } from "./pages/MyStudentsPage";
 export { default as MySchedulePage } from "./pages/MySchedulePage";
 export { default as TeacherAssignmentsPage } from "./pages/TeacherAssignmentsPage";
+export { default as TeacherProfilePage } from "./pages/TeacherProfilePage";

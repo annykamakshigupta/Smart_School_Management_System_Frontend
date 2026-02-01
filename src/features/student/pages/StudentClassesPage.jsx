@@ -4,7 +4,17 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, Spin, Empty, Tag, Avatar, message } from "antd";
+import {
+  Card,
+  Spin,
+  Empty,
+  Tag,
+  Avatar,
+  message,
+  Button,
+  Input,
+  Skeleton,
+} from "antd";
 import {
   BookOutlined,
   UserOutlined,
@@ -12,8 +22,8 @@ import {
   ClockCircleOutlined,
   CalendarOutlined,
   MailOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
-import { PageHeader } from "../../../components/UI";
 import {
   getMyStudentProfile,
   getMySubjects,
@@ -29,11 +39,13 @@ const StudentClassesPage = () => {
     try {
       setLoading(true);
       const profileRes = await getMyStudentProfile();
-      setStudentProfile(profileRes.data);
+      const profile = profileRes.data;
+      setStudentProfile(profile);
 
-      if (profileRes.data?.class?._id) {
+      const classId = profile?.class?._id || profile?.classId?._id;
+      if (classId) {
         setSubjectsLoading(true);
-        const subjectsRes = await getMySubjects(profileRes.data.class._id);
+        const subjectsRes = await getMySubjects(classId);
         setSubjects(subjectsRes.data || []);
         setSubjectsLoading(false);
       }
@@ -51,31 +63,96 @@ const StudentClassesPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-100">
-        <Spin size="large" />
+      <div className="min-h-screen bg-slate-50 -m-6 p-6">
+        <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">My Class</h1>
+                <p className="text-slate-500 mt-1">
+                  View your class details, subjects, and teachers
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={fetchData}
+                  className="hover:border-blue-500 hover:text-blue-500">
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Card className="border-0 shadow-sm">
+          <div className="flex items-center justify-center py-16">
+            <Spin size="large" />
+          </div>
+        </Card>
       </div>
     );
   }
 
   if (!studentProfile) {
     return (
-      <div className="p-6">
-        <Empty description="No class information found" />
+      <div className="min-h-screen bg-slate-50 -m-6 p-6">
+        <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-slate-900">My Class</h1>
+                <p className="text-slate-500 mt-1">
+                  View your class details, subjects, and teachers
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  icon={<ReloadOutlined />}
+                  onClick={fetchData}
+                  className="hover:border-blue-500 hover:text-blue-500">
+                  Refresh
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Card className="border-0 shadow-sm">
+          <Empty description="No class information found" />
+        </Card>
       </div>
     );
   }
 
-  const classInfo = studentProfile.class;
+  const classInfo = studentProfile.class || studentProfile.classId;
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="My Class"
-        subtitle="View your class details, subjects, and teachers"
-      />
+    <div className="min-h-screen bg-slate-50 -m-6 p-6">
+      {/* Header Section - Sticky */}
+      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">My Class</h1>
+              <p className="text-slate-500 mt-1">
+                View your class details, subjects, and teachers
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={fetchData}
+                className="hover:border-blue-500 hover:text-blue-500">
+                Refresh
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Class Overview Card */}
-      <Card className="border border-slate-200 shadow-sm">
+      <Card className="border-0 shadow-sm">
         <div className="flex flex-col md:flex-row gap-6">
           {/* Class Icon */}
           <div className="shrink-0">
@@ -167,7 +244,7 @@ const StudentClassesPage = () => {
               <span>Class Teacher</span>
             </div>
           }
-          className="border border-slate-200 shadow-sm">
+          className="border-0 shadow-sm">
           <div className="flex items-center gap-4">
             <Avatar
               size={64}
@@ -204,7 +281,7 @@ const StudentClassesPage = () => {
             </Tag>
           </div>
         }
-        className="border border-slate-200 shadow-sm">
+        className="border-0 shadow-sm">
         {subjectsLoading ? (
           <div className="flex items-center justify-center py-12">
             <Spin />

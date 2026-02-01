@@ -20,3 +20,4 @@ export { default as UserManagementPage } from "./pages/UserManagementPage";
 export { default as StudentEnrollmentPage } from "./pages/StudentEnrollmentPage";
 export { default as ParentChildMappingPage } from "./pages/ParentChildMappingPage";
 export { default as ClassSubjectAssignmentPage } from "./pages/ClassSubjectAssignmentPage";
+export { default as AdminProfilePage } from "./pages/AdminProfilePage";

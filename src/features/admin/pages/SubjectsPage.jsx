@@ -1,10 +1,37 @@
+/**
+ * Subjects Page - Redesigned Modern UI
+ * Professional SaaS-style admin interface for managing school subjects
+ */
+
 import React, { useState, useEffect } from "react";
-import { PageHeader } from "../../../components/UI";
 import * as subjectService from "../../../services/subject.service";
 import * as classService from "../../../services/class.service";
 import { getAllTeachers } from "../../../services/admin.service";
-import { Plus, Edit, Trash2, X } from "lucide-react";
-import { message } from "antd";
+import {
+  Button,
+  Modal,
+  Form,
+  Input,
+  Select,
+  message,
+  Card,
+  Avatar,
+  Tag,
+  Dropdown,
+  Empty,
+  Skeleton,
+} from "antd";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  BookOutlined,
+  UserOutlined,
+  TeamOutlined,
+  MoreOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  IdcardOutlined,
+} from "@ant-design/icons";
 
 const SubjectsPage = () => {
   const [subjects, setSubjects] = useState([]);
@@ -13,15 +40,8 @@ const SubjectsPage = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSubject, setEditingSubject] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    code: "",
-    classId: "",
-    assignedTeacher: "",
-    academicYear: "",
-    description: "",
-  });
-  const [errors, setErrors] = useState({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [form] = Form.useForm();
 
   useEffect(() => {
     fetchSubjects();
@@ -62,7 +82,7 @@ const SubjectsPage = () => {
   const handleOpenModal = (subject = null) => {
     if (subject) {
       setEditingSubject(subject);
-      setFormData({
+      form.setFieldsValue({
         name: subject.name,
         code: subject.code,
         classId: subject.classId?._id || "",
@@ -72,56 +92,19 @@ const SubjectsPage = () => {
       });
     } else {
       setEditingSubject(null);
-      setFormData({
-        name: "",
-        code: "",
-        classId: "",
-        assignedTeacher: "",
-        academicYear: "",
-        description: "",
-      });
+      form.resetFields();
     }
-    setErrors({});
     setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingSubject(null);
-    setFormData({
-      name: "",
-      code: "",
-      classId: "",
-      assignedTeacher: "",
-      academicYear: "",
-      description: "",
-    });
-    setErrors({});
+    form.resetFields();
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const validate = () => {
-    const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Subject name is required";
-    if (!formData.code.trim()) newErrors.code = "Subject code is required";
-    if (!formData.academicYear.trim())
-      newErrors.academicYear = "Academic year is required";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validate()) return;
-
-    const payload = { ...formData };
+  const handleSubmit = async (values) => {
+    const payload = { ...values };
     if (!payload.classId) delete payload.classId;
     if (!payload.assignedTeacher) delete payload.assignedTeacher;
 
@@ -141,256 +124,346 @@ const SubjectsPage = () => {
   };
 
   const handleDelete = async (subjectId) => {
-    if (!window.confirm("Are you sure you want to delete this subject?"))
-      return;
-
-    try {
-      await subjectService.deleteSubject(subjectId);
-      message.success("Subject deleted successfully!");
-      fetchSubjects();
-    } catch (error) {
-      message.error(error.message);
-    }
+    Modal.confirm({
+      title: "Delete Subject",
+      content: "Are you sure you want to delete this subject?",
+      okText: "Delete",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          await subjectService.deleteSubject(subjectId);
+          message.success("Subject deleted successfully!");
+          fetchSubjects();
+        } catch (error) {
+          message.error(error.message);
+        }
+      },
+    });
   };
 
+  const getActionItems = (subject) => [
+    {
+      key: "edit",
+      label: "Edit Subject",
+      icon: <EditOutlined />,
+      onClick: () => handleOpenModal(subject),
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "delete",
+      label: "Delete Subject",
+      icon: <DeleteOutlined />,
+      danger: true,
+      onClick: () => handleDelete(subject._id),
+    },
+  ];
+
+  const filteredSubjects = subjects.filter((sub) =>
+    `${sub.name} ${sub.code} ${sub.academicYear}`
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase()),
+  );
+
   return (
-    <div className="p-6">
-      <PageHeader
-        title="Subject Management"
-        description="Manage school subjects, assign teachers, and link to classes"
-      />
-
-      <div className="mt-6 bg-white rounded-lg shadow">
-        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">All Subjects</h2>
-          <button
-            onClick={() => handleOpenModal()}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            <Plus size={20} />
-            Add Subject
-          </button>
+    <div className="min-h-screen bg-slate-50 -m-6 p-6">
+      {/* Header Section - Sticky */}
+      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Subject Management
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Manage school subjects, assign teachers, and link to classes
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={fetchSubjects}
+                className="hover:border-blue-500 hover:text-blue-500">
+                Refresh
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => handleOpenModal()}
+                className="bg-blue-600 hover:bg-blue-700 shadow-sm">
+                Add Subject
+              </Button>
+            </div>
+          </div>
         </div>
-
-        {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-400"></div>
-          </div>
-        ) : subjects.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <p>No subjects found. Create your first subject to get started.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Subject Name
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Code
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Class
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Teacher
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Academic Year
-                  </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {subjects.map((subject) => (
-                  <tr
-                    key={subject._id || Math.random()}
-                    className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {subject.name}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {subject.code}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {subject.classId
-                        ? `${subject.classId.name} - ${subject.classId.section}`
-                        : "Not Assigned"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {subject.assignedTeacher
-                        ? subject.assignedTeacher.userId?.name || "N/A"
-                        : "Not Assigned"}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {subject.academicYear}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleOpenModal(subject)}
-                        className="text-blue-400 hover:text-blue-900 mr-4">
-                        <Edit size={18} />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(subject._id)}
-                        className="text-red-600 hover:text-red-900">
-                        <Trash2 size={18} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h3 className="text-xl font-bold text-gray-800">
-                {editingSubject ? "Edit Subject" : "Add New Subject"}
-              </h3>
-              <button
-                onClick={handleCloseModal}
-                className="text-gray-500 hover:text-gray-700">
-                <X size={24} />
-              </button>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-2xl text-green-600" />
             </div>
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject Name <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder="e.g., Mathematics"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.name ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.name && (
-                  <p className="text-red-500 text-xs mt-1">{errors.name}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Subject Code <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="code"
-                  value={formData.code}
-                  onChange={handleChange}
-                  placeholder="e.g., MATH101"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.code ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.code && (
-                  <p className="text-red-500 text-xs mt-1">{errors.code}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Academic Year <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="academicYear"
-                  value={formData.academicYear}
-                  onChange={handleChange}
-                  placeholder="e.g., 2024-2025"
-                  className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.academicYear ? "border-red-500" : "border-gray-300"
-                  }`}
-                />
-                {errors.academicYear && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.academicYear}
-                  </p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Class (Optional)
-                </label>
-                <select
-                  name="classId"
-                  value={formData.classId}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                  <option value="">Select a class</option>
-                  {classes.map((cls) => (
-                    <option key={cls._id} value={cls._id}>
-                      {cls.name} - {cls.section} ({cls.academicYear})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Assigned Teacher (Optional)
-                </label>
-                <select
-                  name="assignedTeacher"
-                  value={formData.assignedTeacher}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                  <option value="">Select a teacher</option>
-                  {teachers.map((teacher) => (
-                    <option key={teacher._id} value={teacher._id}>
-                      {teacher.userId?.name || "N/A"} (
-                      {teacher.userId?.email || ""})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description (Optional)
-                </label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows="3"
-                  placeholder="Enter subject description"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={handleCloseModal}
-                  className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-2 bg-blue-400 text-white rounded-lg hover:bg-blue-700 transition-colors">
-                  {editingSubject ? "Update" : "Create"} Subject
-                </button>
-              </div>
-            </form>
+            <div>
+              <p className="text-slate-500 text-sm">Total Subjects</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {subjects.length}
+              </p>
+            </div>
           </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+              <UserOutlined className="text-2xl text-blue-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">With Teachers</p>
+              <p className="text-2xl font-bold text-blue-600">
+                {subjects.filter((s) => s.assignedTeacher).length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-2xl text-purple-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Total Classes</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {classes.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+              <IdcardOutlined className="text-2xl text-orange-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Assigned to Class</p>
+              <p className="text-2xl font-bold text-orange-600">
+                {subjects.filter((s) => s.classId).length}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Content Card */}
+      <Card className="border-0 shadow-sm">
+        {/* Search Bar */}
+        <div className="mb-6">
+          <Input.Search
+            placeholder="Search subjects by name, code, or year..."
+            size="large"
+            allowClear
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
         </div>
-      )}
+
+        {/* Subject Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="border border-slate-200">
+                <Skeleton avatar active />
+              </Card>
+            ))}
+          </div>
+        ) : filteredSubjects.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span className="text-slate-500">
+                {searchQuery
+                  ? "No subjects found matching your search"
+                  : "No subjects found. Create your first subject to get started."}
+              </span>
+            }
+            className="my-12"
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredSubjects.map((subject) => (
+              <Card
+                key={subject._id}
+                className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
+                bodyStyle={{ padding: "20px" }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+                      <BookOutlined className="text-2xl text-green-600" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">
+                        {subject.name}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        Code: {subject.code}
+                      </p>
+                    </div>
+                  </div>
+                  <Dropdown
+                    menu={{ items: getActionItems(subject) }}
+                    trigger={["click"]}
+                    placement="bottomRight">
+                    <Button
+                      type="text"
+                      icon={<MoreOutlined />}
+                      className="hover:bg-slate-100"
+                    />
+                  </Dropdown>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {subject.classId ? (
+                      <Tag
+                        icon={<BookOutlined />}
+                        color="purple"
+                        style={{ fontWeight: 500 }}>
+                        {subject.classId.name} - {subject.classId.section}
+                      </Tag>
+                    ) : (
+                      <Tag color="default">No Class</Tag>
+                    )}
+                    <Tag color="cyan" style={{ fontWeight: 500 }}>
+                      {subject.academicYear}
+                    </Tag>
+                  </div>
+
+                  <div className="mt-3 pt-3 border-t border-slate-100">
+                    {subject.assignedTeacher ? (
+                      <div className="flex items-center gap-2">
+                        <Avatar
+                          size="small"
+                          icon={<UserOutlined />}
+                          style={{
+                            backgroundColor: "#dbeafe",
+                            color: "#2563eb",
+                          }}
+                        />
+                        <span className="text-sm text-slate-700">
+                          {subject.assignedTeacher.userId?.name || "N/A"}
+                        </span>
+                      </div>
+                    ) : (
+                      <Tag color="default">No Teacher Assigned</Tag>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+      </Card>
+
+      {/* Create/Edit Subject Modal */}
+      <Modal
+        title={
+          <div className="text-lg font-semibold text-slate-900">
+            {editingSubject ? "Edit Subject" : "Add New Subject"}
+          </div>
+        }
+        open={isModalOpen}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={600}>
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          className="mt-4">
+          <Form.Item
+            name="name"
+            label={<span className="font-medium">Subject Name</span>}
+            rules={[{ required: true, message: "Subject name is required" }]}>
+            <Input size="large" placeholder="e.g., Mathematics" />
+          </Form.Item>
+
+          <Form.Item
+            name="code"
+            label={<span className="font-medium">Subject Code</span>}
+            rules={[{ required: true, message: "Subject code is required" }]}>
+            <Input size="large" placeholder="e.g., MATH101" />
+          </Form.Item>
+
+          <Form.Item
+            name="academicYear"
+            label={<span className="font-medium">Academic Year</span>}
+            rules={[{ required: true, message: "Academic year is required" }]}>
+            <Input size="large" placeholder="e.g., 2024-2025" />
+          </Form.Item>
+
+          <Form.Item
+            name="classId"
+            label={<span className="font-medium">Class (Optional)</span>}>
+            <Select
+              size="large"
+              placeholder="Select a class"
+              allowClear
+              showSearch
+              optionFilterProp="children">
+              {classes.map((cls) => (
+                <Select.Option key={cls._id} value={cls._id}>
+                  {cls.name} - {cls.section} ({cls.academicYear})
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="assignedTeacher"
+            label={
+              <span className="font-medium">Assigned Teacher (Optional)</span>
+            }>
+            <Select
+              size="large"
+              placeholder="Select a teacher"
+              allowClear
+              showSearch
+              optionFilterProp="children">
+              {teachers.map((teacher) => (
+                <Select.Option key={teacher._id} value={teacher._id}>
+                  {teacher.userId?.name || "N/A"} ({teacher.userId?.email || ""}
+                  )
+                </Select.Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label={<span className="font-medium">Description (Optional)</span>}>
+            <Input.TextArea
+              rows={3}
+              size="large"
+              placeholder="Enter subject description"
+            />
+          </Form.Item>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <Button onClick={handleCloseModal}>Cancel</Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="bg-blue-600 hover:bg-blue-700">
+              {editingSubject ? "Update" : "Create"} Subject
+            </Button>
+          </div>
+        </Form>
+      </Modal>
     </div>
   );
 };

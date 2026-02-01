@@ -1,6 +1,6 @@
 /**
- * Student Enrollment Page
- * Admin page for enrolling students with class assignment
+ * Student Enrollment Page - Redesigned Modern UI
+ * Professional SaaS-style admin interface for managing student enrollment
  */
 
 import { useState, useEffect } from "react";
@@ -21,6 +21,9 @@ import {
   Row,
   Col,
   Badge,
+  Dropdown,
+  Empty,
+  Skeleton,
 } from "antd";
 import {
   PlusOutlined,
@@ -35,8 +38,9 @@ import {
   BookOutlined,
   SwapOutlined,
   CopyOutlined,
+  MoreOutlined,
+  IdcardOutlined,
 } from "@ant-design/icons";
-import { PageHeader, DataTable } from "../../../components/UI";
 import {
   getAllStudents,
   getAllParents,
@@ -57,6 +61,7 @@ const StudentEnrollmentPage = () => {
   const [editingStudent, setEditingStudent] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [generatedPassword, setGeneratedPassword] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [form] = Form.useForm();
   const [changeClassForm] = Form.useForm();
 
@@ -82,103 +87,6 @@ const StudentEnrollmentPage = () => {
       setLoading(false);
     }
   };
-
-  const columns = [
-    {
-      title: "Student",
-      dataIndex: "userId",
-      key: "student",
-      render: (user) => (
-        <div className="flex items-center gap-3">
-          <Avatar
-            icon={<UserOutlined />}
-            className="bg-green-100 text-green-600"
-          />
-          <div>
-            <div className="font-medium">{user?.name || "N/A"}</div>
-            <div className="text-xs text-gray-500">{user?.email || "N/A"}</div>
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Roll Number",
-      dataIndex: "rollNumber",
-      key: "rollNumber",
-      render: (roll) => <Tag color="blue">{roll || "N/A"}</Tag>,
-    },
-    {
-      title: "Class",
-      dataIndex: "classId",
-      key: "class",
-      render: (classData) => (
-        <Tag color="purple">
-          {classData?.name || "N/A"} - {classData?.section || ""}
-        </Tag>
-      ),
-    },
-    {
-      title: "Section",
-      dataIndex: "section",
-      key: "section",
-    },
-    {
-      title: "Parent",
-      dataIndex: "parentId",
-      key: "parent",
-      render: (parent) =>
-        parent ? (
-          <div className="flex items-center gap-2">
-            <Avatar size="small" icon={<TeamOutlined />} />
-            <span className="text-sm">{parent.userId?.name || "N/A"}</span>
-          </div>
-        ) : (
-          <Tag color="default">Not Assigned</Tag>
-        ),
-    },
-    {
-      title: "Status",
-      dataIndex: "userId",
-      key: "status",
-      render: (user) => (
-        <Badge status={user ? "success" : "default"} text="Active" />
-      ),
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 180,
-      render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="Edit">
-            <Button
-              type="text"
-              icon={<EditOutlined />}
-              onClick={() => handleEdit(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Change Class">
-            <Button
-              type="text"
-              icon={<SwapOutlined />}
-              onClick={() => handleChangeClass(record)}
-            />
-          </Tooltip>
-          <Tooltip title="Delete">
-            <Popconfirm
-              title="Delete this student?"
-              description="This will deactivate the student account."
-              onConfirm={() => handleDelete(record._id)}
-              okText="Delete"
-              okType="danger"
-              cancelText="Cancel">
-              <Button type="text" danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          </Tooltip>
-        </Space>
-      ),
-    },
-  ];
 
   const handleEdit = (student) => {
     setEditingStudent(student);
@@ -281,130 +189,274 @@ const StudentEnrollmentPage = () => {
     message.success("Password copied to clipboard");
   };
 
-  // Get sections from selected class
-  const getClassSections = (classId) => {
-    const selectedClass = classes.find((c) => c._id === classId);
-    if (selectedClass) {
-      return [selectedClass.section];
-    }
-    // Return unique sections from all classes
-    const sections = [...new Set(classes.map((c) => c.section))];
-    return sections;
-  };
+  const getActionItems = (student) => [
+    {
+      key: "edit",
+      label: "Edit Student",
+      icon: <EditOutlined />,
+      onClick: () => handleEdit(student),
+    },
+    {
+      key: "changeClass",
+      label: "Change Class",
+      icon: <SwapOutlined />,
+      onClick: () => handleChangeClass(student),
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "delete",
+      label: "Delete Student",
+      icon: <DeleteOutlined />,
+      danger: true,
+      onClick: () => {
+        Modal.confirm({
+          title: "Delete Student",
+          content: `Are you sure you want to delete ${student.userId?.name}? This will deactivate the student account.`,
+          okText: "Delete",
+          okType: "danger",
+          onOk: () => handleDelete(student._id),
+        });
+      },
+    },
+  ];
+
+  const filteredStudents = students.filter(
+    (student) =>
+      student.userId?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.userId?.email
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      student.rollNumber?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
 
   return (
-    <div>
-      <PageHeader
-        title="Student Enrollment"
-        subtitle="Enroll students and manage class assignments"
-        breadcrumbs={[
-          { label: "Admin", path: "/admin/dashboard" },
-          { label: "User Management", path: "/admin/users" },
-          { label: "Student Enrollment" },
-        ]}
-        actions={
-          <Space>
-            <Button icon={<ReloadOutlined />} onClick={fetchData}>
-              Refresh
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                setEditingStudent(null);
-                form.resetFields();
-                setGeneratedPassword("");
-                setIsModalOpen(true);
-              }}>
-              Enroll Student
-            </Button>
-          </Space>
-        }
-      />
+    <div className="min-h-screen bg-slate-50 -m-6 p-6">
+      {/* Header Section - Sticky */}
+      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                Student Enrollment
+              </h1>
+              <p className="text-slate-500 mt-1">
+                Enroll students and manage class assignments
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                icon={<ReloadOutlined />}
+                onClick={fetchData}
+                className="hover:border-blue-500 hover:text-blue-500">
+                Refresh
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setEditingStudent(null);
+                  form.resetFields();
+                  setGeneratedPassword("");
+                  setIsModalOpen(true);
+                }}
+                className="bg-blue-600 hover:bg-blue-700 shadow-sm">
+                Enroll Student
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      {/* Quick Stats */}
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <UserOutlined className="text-green-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{students.length}</div>
-                <div className="text-xs text-gray-500">Total Students</div>
-              </div>
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
+              <UserOutlined className="text-2xl text-green-600" />
             </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <BookOutlined className="text-purple-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{classes.length}</div>
-                <div className="text-xs text-gray-500">Classes</div>
-              </div>
+            <div>
+              <p className="text-slate-500 text-sm">Total Students</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {students.length}
+              </p>
             </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <TeamOutlined className="text-blue-400 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">{parents.length}</div>
-                <div className="text-xs text-gray-500">Parents</div>
-              </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-2xl text-purple-600" />
             </div>
-          </Card>
-        </Col>
-        <Col xs={12} md={6}>
-          <Card size="small">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <SwapOutlined className="text-yellow-600 text-lg" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold">
-                  {students.filter((s) => !s.parentId).length}
+            <div>
+              <p className="text-slate-500 text-sm">Classes</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {classes.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-2xl text-blue-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Parents</p>
+              <p className="text-2xl font-bold text-slate-900">
+                {parents.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
+              <SwapOutlined className="text-2xl text-orange-600" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm">Without Parent</p>
+              <p className="text-2xl font-bold text-orange-600">
+                {students.filter((s) => !s.parentId).length}
+              </p>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Main Content Card */}
+      <Card className="border-0 shadow-sm">
+        {/* Search Bar */}
+        <div className="mb-6">
+          <Input.Search
+            placeholder="Search by name, email, or roll number..."
+            size="large"
+            allowClear
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="max-w-md"
+          />
+        </div>
+
+        {/* Student Grid */}
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="border border-slate-200">
+                <Skeleton avatar active />
+              </Card>
+            ))}
+          </div>
+        ) : filteredStudents.length === 0 ? (
+          <Empty
+            image={Empty.PRESENTED_IMAGE_SIMPLE}
+            description={
+              <span className="text-slate-500">
+                {searchQuery
+                  ? "No students found matching your search"
+                  : "No students enrolled yet"}
+              </span>
+            }
+            className="my-12"
+          />
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredStudents.map((student) => (
+              <Card
+                key={student._id}
+                className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
+                bodyStyle={{ padding: "20px" }}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Avatar
+                      size={48}
+                      icon={<UserOutlined />}
+                      style={{
+                        backgroundColor: "#dcfce7",
+                        color: "#16a34a",
+                      }}
+                    />
+                    <div>
+                      <h3 className="font-semibold text-slate-900 text-base">
+                        {student.userId?.name || "N/A"}
+                      </h3>
+                      <p className="text-xs text-slate-500">
+                        {student.userId?.email || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <Dropdown
+                    menu={{ items: getActionItems(student) }}
+                    trigger={["click"]}
+                    placement="bottomRight">
+                    <Button
+                      type="text"
+                      icon={<MoreOutlined />}
+                      className="hover:bg-slate-100"
+                    />
+                  </Dropdown>
                 </div>
-                <div className="text-xs text-gray-500">Without Parent</div>
-              </div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
 
-      <Card>
-        <DataTable
-          columns={columns}
-          data={students}
-          loading={loading}
-          showSearch
-          showFilters
-          filterOptions={[
-            {
-              key: "classId",
-              label: "Class",
-              options: classes.map((c) => ({
-                value: c._id,
-                label: `${c.name} - ${c.section}`,
-              })),
-            },
-          ]}
-          searchPlaceholder="Search students..."
-          rowKey="_id"
-        />
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <Tag
+                      icon={<IdcardOutlined />}
+                      color="blue"
+                      style={{ fontWeight: 500 }}>
+                      Roll: {student.rollNumber || "N/A"}
+                    </Tag>
+                    {student.classId && (
+                      <Tag
+                        icon={<BookOutlined />}
+                        color="purple"
+                        style={{ fontWeight: 500 }}>
+                        {student.classId?.name} - {student.classId?.section}
+                      </Tag>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {student.parentId ? (
+                      <Tag
+                        icon={<TeamOutlined />}
+                        color="green"
+                        style={{ fontWeight: 500 }}>
+                        Has Parent
+                      </Tag>
+                    ) : (
+                      <Tag color="orange" style={{ fontWeight: 500 }}>
+                        No Parent
+                      </Tag>
+                    )}
+                    <Tag color="cyan" style={{ fontWeight: 500 }}>
+                      {student.academicYear || "2025-2026"}
+                    </Tag>
+                  </div>
+
+                  {student.parentId && (
+                    <div className="text-xs text-slate-400 mt-3 pt-3 border-t border-slate-100">
+                      <TeamOutlined className="mr-1" />
+                      Parent: {student.parentId.userId?.name || "N/A"}
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </Card>
 
       {/* Enroll/Edit Student Modal */}
       <Modal
-        title={editingStudent ? "Edit Student" : "Enroll New Student"}
+        title={
+          <div className="text-lg font-semibold text-slate-900">
+            {editingStudent ? "Edit Student" : "Enroll New Student"}
+          </div>
+        }
         open={isModalOpen}
         onCancel={() => {
           setIsModalOpen(false);
@@ -424,12 +476,13 @@ const StudentEnrollmentPage = () => {
             <Col span={12}>
               <Form.Item
                 name="name"
-                label="Full Name"
+                label={<span className="font-medium">Full Name</span>}
                 rules={[
                   { required: true, message: "Please enter student name" },
                 ]}>
                 <Input
-                  prefix={<UserOutlined />}
+                  size="large"
+                  prefix={<UserOutlined className="text-slate-400" />}
                   placeholder="Enter full name"
                   disabled={!!editingStudent}
                 />
@@ -438,13 +491,14 @@ const StudentEnrollmentPage = () => {
             <Col span={12}>
               <Form.Item
                 name="email"
-                label="Email"
+                label={<span className="font-medium">Email</span>}
                 rules={[
                   { required: true, message: "Please enter email" },
                   { type: "email", message: "Please enter a valid email" },
                 ]}>
                 <Input
-                  prefix={<MailOutlined />}
+                  size="large"
+                  prefix={<MailOutlined className="text-slate-400" />}
                   placeholder="Enter email"
                   disabled={!!editingStudent}
                 />
@@ -456,12 +510,13 @@ const StudentEnrollmentPage = () => {
             <Col span={12}>
               <Form.Item
                 name="phone"
-                label="Phone Number"
+                label={<span className="font-medium">Phone Number</span>}
                 rules={[
                   { required: true, message: "Please enter phone number" },
                 ]}>
                 <Input
-                  prefix={<PhoneOutlined />}
+                  size="large"
+                  prefix={<PhoneOutlined className="text-slate-400" />}
                   placeholder="Enter phone number"
                   disabled={!!editingStudent}
                 />
@@ -471,7 +526,7 @@ const StudentEnrollmentPage = () => {
               <Col span={12}>
                 <Form.Item
                   name="password"
-                  label="Password"
+                  label={<span className="font-medium">Password</span>}
                   rules={[
                     { required: true, message: "Please enter password" },
                     {
@@ -480,7 +535,8 @@ const StudentEnrollmentPage = () => {
                     },
                   ]}>
                   <Input.Password
-                    prefix={<LockOutlined />}
+                    size="large"
+                    prefix={<LockOutlined className="text-slate-400" />}
                     placeholder="Enter password"
                     addonAfter={
                       <Tooltip title="Generate Password">
@@ -499,16 +555,33 @@ const StudentEnrollmentPage = () => {
           </Row>
 
           {generatedPassword && !editingStudent && (
-            <div className="mb-4 p-3 bg-blue-50 rounded-lg flex items-center justify-between">
-              <span className="text-sm">
-                Generated: <strong>{generatedPassword}</strong>
-              </span>
-              <Button
-                size="small"
-                icon={<CopyOutlined />}
-                onClick={() => copyToClipboard(generatedPassword)}>
-                Copy
-              </Button>
+            <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-start gap-3">
+                <LockOutlined className="text-blue-600 mt-1" />
+                <div className="flex-1">
+                  <p className="font-medium text-blue-900 mb-2">
+                    Generated Password
+                  </p>
+                  <div className="bg-white rounded-lg p-3 border border-blue-200">
+                    <div className="flex items-center justify-between gap-3">
+                      <code className="text-sm font-mono text-blue-700 font-semibold">
+                        {generatedPassword}
+                      </code>
+                      <Button
+                        type="text"
+                        size="small"
+                        icon={<CopyOutlined />}
+                        onClick={() => copyToClipboard(generatedPassword)}
+                        className="hover:bg-blue-100 text-blue-600">
+                        Copy
+                      </Button>
+                    </div>
+                    <p className="text-xs text-blue-600 mt-2">
+                      ⚠️ Save this password - it will only be shown once!
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
 
@@ -518,9 +591,9 @@ const StudentEnrollmentPage = () => {
             <Col span={12}>
               <Form.Item
                 name="classId"
-                label="Class"
+                label={<span className="font-medium">Class</span>}
                 rules={[{ required: true, message: "Please select class" }]}>
-                <Select placeholder="Select class">
+                <Select size="large" placeholder="Select class">
                   {classes.map((c) => (
                     <Select.Option key={c._id} value={c._id}>
                       {c.name} - {c.section}
@@ -532,9 +605,12 @@ const StudentEnrollmentPage = () => {
             <Col span={12}>
               <Form.Item
                 name="section"
-                label="Section"
+                label={<span className="font-medium">Section</span>}
                 rules={[{ required: true, message: "Please enter section" }]}>
-                <Input placeholder="Enter section (e.g., A, B, C)" />
+                <Input
+                  size="large"
+                  placeholder="Enter section (e.g., A, B, C)"
+                />
               </Form.Item>
             </Col>
           </Row>
@@ -543,30 +619,33 @@ const StudentEnrollmentPage = () => {
             <Col span={12}>
               <Form.Item
                 name="rollNumber"
-                label="Roll Number"
+                label={<span className="font-medium">Roll Number</span>}
                 rules={[
                   { required: true, message: "Please enter roll number" },
                 ]}>
-                <Input placeholder="Enter roll number" />
+                <Input size="large" placeholder="Enter roll number" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="academicYear"
-                label="Academic Year"
+                label={<span className="font-medium">Academic Year</span>}
                 rules={[
                   { required: true, message: "Please enter academic year" },
                 ]}
                 initialValue="2025-2026">
-                <Input placeholder="e.g., 2025-2026" />
+                <Input size="large" placeholder="e.g., 2025-2026" />
               </Form.Item>
             </Col>
           </Row>
 
           <Divider orientation="left">Parent Assignment (Optional)</Divider>
 
-          <Form.Item name="parentId" label="Assign Parent">
+          <Form.Item
+            name="parentId"
+            label={<span className="font-medium">Assign Parent</span>}>
             <Select
+              size="large"
               placeholder="Select parent (optional)"
               allowClear
               showSearch
@@ -591,7 +670,10 @@ const StudentEnrollmentPage = () => {
                 }}>
                 Cancel
               </Button>
-              <Button type="primary" htmlType="submit">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="bg-blue-600 hover:bg-blue-700">
                 {editingStudent ? "Update Student" : "Enroll Student"}
               </Button>
             </Space>
@@ -601,7 +683,11 @@ const StudentEnrollmentPage = () => {
 
       {/* Change Class Modal */}
       <Modal
-        title={`Change Class for ${selectedStudent?.userId?.name}`}
+        title={
+          <div className="text-lg font-semibold text-slate-900">
+            Change Class for {selectedStudent?.userId?.name}
+          </div>
+        }
         open={isChangeClassModalOpen}
         onCancel={() => {
           setIsChangeClassModalOpen(false);
@@ -615,15 +701,17 @@ const StudentEnrollmentPage = () => {
           layout="vertical"
           onFinish={handleChangeClassSubmit}
           className="mt-4">
-          <Form.Item name="currentClass" label="Current Class">
-            <Input disabled />
+          <Form.Item
+            name="currentClass"
+            label={<span className="font-medium">Current Class</span>}>
+            <Input size="large" disabled />
           </Form.Item>
 
           <Form.Item
             name="newClassId"
-            label="New Class"
+            label={<span className="font-medium">New Class</span>}
             rules={[{ required: true, message: "Please select new class" }]}>
-            <Select placeholder="Select new class">
+            <Select size="large" placeholder="Select new class">
               {classes.map((c) => (
                 <Select.Option key={c._id} value={c._id}>
                   {c.name} - {c.section}
@@ -636,19 +724,19 @@ const StudentEnrollmentPage = () => {
             <Col span={12}>
               <Form.Item
                 name="newSection"
-                label="Section"
+                label={<span className="font-medium">Section</span>}
                 rules={[{ required: true, message: "Please enter section" }]}>
-                <Input placeholder="Enter section" />
+                <Input size="large" placeholder="Enter section" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 name="newRollNumber"
-                label="New Roll Number"
+                label={<span className="font-medium">New Roll Number</span>}
                 rules={[
                   { required: true, message: "Please enter new roll number" },
                 ]}>
-                <Input placeholder="Enter new roll number" />
+                <Input size="large" placeholder="Enter new roll number" />
               </Form.Item>
             </Col>
           </Row>
@@ -665,7 +753,10 @@ const StudentEnrollmentPage = () => {
                 }}>
                 Cancel
               </Button>
-              <Button type="primary" htmlType="submit">
+              <Button
+                type="primary"
+                htmlType="submit"
+                className="bg-blue-600 hover:bg-blue-700">
                 Change Class
               </Button>
             </Space>

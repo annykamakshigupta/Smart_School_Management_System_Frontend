@@ -36,6 +36,7 @@ import {
   StudentEnrollmentPage,
   ParentChildMappingPage,
   ClassSubjectAssignmentPage,
+  AdminProfilePage,
 } from "./features/admin";
 
 // Feature Pages - Teacher
@@ -46,6 +47,7 @@ import {
   MyStudentsPage,
   MySchedulePage,
   TeacherAssignmentsPage,
+  TeacherProfilePage,
 } from "./features/teacher";
 
 // Feature Pages - Student
@@ -55,6 +57,7 @@ import {
   TimetablePage,
   StudentAssignmentsPage,
   StudentClassesPage,
+  StudentProfilePage,
 } from "./features/student";
 
 // Assignment Detail Pages
@@ -69,6 +72,7 @@ import {
   ParentChildAttendancePage,
   ChildSchedulePage,
   ChildDetailsPage,
+  ParentProfilePage,
 } from "./features/parent";
 
 // Styles
@@ -203,10 +207,7 @@ function App() {
                     path="/admin/settings"
                     element={<AdminSettingsPage />}
                   />
-                  <Route
-                    path="/admin/profile"
-                    element={<PlaceholderPage title="Admin Profile" />}
-                  />
+                  <Route path="/admin/profile" element={<AdminProfilePage />} />
                 </Route>
               </Route>
 
@@ -264,7 +265,7 @@ function App() {
                   />
                   <Route
                     path="/teacher/profile"
-                    element={<PlaceholderPage title="Teacher Profile" />}
+                    element={<TeacherProfilePage />}
                   />
                   <Route
                     path="/teacher/settings"
@@ -326,7 +327,7 @@ function App() {
                   />
                   <Route
                     path="/student/profile"
-                    element={<PlaceholderPage title="Student Profile" />}
+                    element={<StudentProfilePage />}
                   />
                   <Route
                     path="/student/settings"
@@ -390,7 +391,7 @@ function App() {
                   />
                   <Route
                     path="/parent/profile"
-                    element={<PlaceholderPage title="Parent Profile" />}
+                    element={<ParentProfilePage />}
                   />
                   <Route
                     path="/parent/settings"

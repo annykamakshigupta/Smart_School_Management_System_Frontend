@@ -25,7 +25,7 @@ import {
 } from "@ant-design/icons";
 import { PageHeader } from "../../../components/UI";
 import {
-  getAttendanceByStudent,
+  getMyAttendance,
   getCurrentMonthRange,
 } from "../../../services/attendance.service";
 import {
@@ -52,8 +52,11 @@ const StudentAttendancePage = () => {
       setLoading(true);
       const profileRes = await getMyStudentProfile();
 
-      if (profileRes.data?.class?._id) {
-        const subjectsRes = await getMySubjects(profileRes.data.class._id);
+      const classId =
+        profileRes.data?.class?._id || profileRes.data?.classId?._id;
+
+      if (classId) {
+        const subjectsRes = await getMySubjects(classId);
         setSubjects(subjectsRes.data || []);
       }
     } catch (error) {
@@ -76,7 +79,7 @@ const StudentAttendancePage = () => {
         params.subjectId = selectedSubject;
       }
 
-      const response = await getAttendanceByStudent(params);
+      const response = await getMyAttendance(params);
       setAttendance(response.data || []);
     } catch (error) {
       message.error(error.message || "Error fetching attendance");
@@ -129,7 +132,7 @@ const StudentAttendancePage = () => {
     },
     {
       title: "Subject",
-      dataIndex: "subject",
+      dataIndex: "subjectId",
       key: "subject",
       render: (subject) => (
         <div className="flex items-center gap-2">
@@ -173,7 +176,7 @@ const StudentAttendancePage = () => {
 
   if (loading && attendance.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Spin size="large" />
       </div>
     );

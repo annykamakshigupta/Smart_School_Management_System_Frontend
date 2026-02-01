@@ -148,6 +148,32 @@ export const getAttendanceByStudent = async (params = {}) => {
 };
 
 /**
+ * Get attendance for the logged-in student
+ * Backend: GET /api/attendance/my
+ * @param {Object} params - { startDate?, endDate?, subjectId?, classId? }
+ * @returns {Promise}
+ */
+export const getMyAttendance = async (params = {}) => {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params.startDate) queryParams.append("startDate", params.startDate);
+    if (params.endDate) queryParams.append("endDate", params.endDate);
+    if (params.subjectId) queryParams.append("subjectId", params.subjectId);
+    if (params.classId) queryParams.append("classId", params.classId);
+
+    const suffix = queryParams.toString();
+    const url = suffix ? `${API_URL}/my?${suffix}` : `${API_URL}/my`;
+
+    const response = await axios.get(url, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error fetching my attendance",
+    );
+  }
+};
+
+/**
  * Get attendance for parent's child
  * @param {Object} params - { childId, startDate?, endDate?, subjectId? }
  * @returns {Promise}

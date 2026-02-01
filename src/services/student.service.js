@@ -3,6 +3,18 @@ import BASE_URL from "../config/baseUrl";
 
 const API_URL = `${BASE_URL}`;
 
+const normalizeStudentProfile = (profile) => {
+  if (!profile || typeof profile !== "object") return profile;
+
+  // Backend student profile uses `classId` (populated). Some pages expect `class`.
+  const classValue = profile.class || profile.classId || null;
+
+  return {
+    ...profile,
+    class: classValue,
+  };
+};
+
 // Helper to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem("ssms_token");
@@ -29,15 +41,22 @@ export const getMyStudentProfile = async () => {
 
     // If roleProfile exists, return it directly
     if (user.roleProfile) {
-      return { data: user.roleProfile, success: true };
+      return { data: normalizeStudentProfile(user.roleProfile), success: true };
     }
 
-    // Otherwise fetch from API
-    const response = await axios.get(
-      `${API_URL}/admin/students/user/${user._id || user.id}`,
-      getAuthHeaders(),
-    );
-    return response.data;
+    // Otherwise fetch from API (student-accessible)
+    const response = await axios.get(`${API_URL}/users/me`, getAuthHeaders());
+
+    // user.routes returns: { success, user, roleProfile }
+    if (response.data?.roleProfile) {
+      return {
+        data: normalizeStudentProfile(response.data.roleProfile),
+        success: true,
+      };
+    }
+
+    // Fallback to prevent undefined access in callers
+    return { data: null, success: false };
   } catch (error) {
     throw new Error(
       error.response?.data?.message || "Error fetching student profile",
