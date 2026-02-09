@@ -67,19 +67,7 @@ export const adminNavigation = [
     key: "fees",
     label: "Fee Management",
     icon: DollarOutlined,
-    children: [
-      {
-        key: "structure",
-        label: "Fee Structure",
-        path: "/admin/fees/structure",
-      },
-      {
-        key: "collection",
-        label: "Collection",
-        path: "/admin/fees/collection",
-      },
-      { key: "reports", label: "Reports", path: "/admin/fees/reports" },
-    ],
+    path: "/admin/fees",
   },
   {
     key: "reports",
@@ -239,16 +227,9 @@ export const parentNavigation = [
   },
   {
     key: "fees",
-    label: "Fee Status",
+    label: "Fee & Payments",
     icon: DollarOutlined,
-    children: [
-      { key: "status", label: "Payment Status", path: "/parent/fees/status" },
-      {
-        key: "history",
-        label: "Payment History",
-        path: "/parent/fees/history",
-      },
-    ],
+    path: "/parent/fees/status",
   },
   {
     key: "communication",

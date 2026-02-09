@@ -37,6 +37,7 @@ import {
   ParentChildMappingPage,
   ClassSubjectAssignmentPage,
   AdminProfilePage,
+  AdminFeeDashboardPage,
 } from "./features/admin";
 
 // Feature Pages - Teacher
@@ -58,6 +59,7 @@ import {
   StudentAssignmentsPage,
   StudentClassesPage,
   StudentProfilePage,
+  StudentFeePage,
 } from "./features/student";
 
 // Assignment Detail Pages
@@ -186,16 +188,20 @@ function App() {
 
                   {/* Fee Management */}
                   <Route
+                    path="/admin/fees"
+                    element={<AdminFeeDashboardPage />}
+                  />
+                  <Route
                     path="/admin/fees/structure"
-                    element={<PlaceholderPage title="Fee Structure" />}
+                    element={<AdminFeeDashboardPage />}
                   />
                   <Route
                     path="/admin/fees/collection"
-                    element={<PlaceholderPage title="Fee Collection" />}
+                    element={<AdminFeeDashboardPage />}
                   />
                   <Route
                     path="/admin/fees/reports"
-                    element={<PlaceholderPage title="Fee Reports" />}
+                    element={<AdminFeeDashboardPage />}
                   />
 
                   {/* Reports & Settings */}
@@ -317,10 +323,7 @@ function App() {
                     path="/student/classes"
                     element={<StudentClassesPage />}
                   />
-                  <Route
-                    path="/student/fees"
-                    element={<PlaceholderPage title="Fee Status" />}
-                  />
+                  <Route path="/student/fees" element={<StudentFeePage />} />
                   <Route
                     path="/student/notifications"
                     element={<PlaceholderPage title="Notifications" />}
@@ -378,7 +381,7 @@ function App() {
                   />
                   <Route
                     path="/parent/fees/history"
-                    element={<PlaceholderPage title="Payment History" />}
+                    element={<FeePaymentPage />}
                   />
                   {/* Other */}
                   <Route
