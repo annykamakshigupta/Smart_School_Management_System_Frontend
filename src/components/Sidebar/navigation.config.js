@@ -64,6 +64,12 @@ export const adminNavigation = [
     path: "/admin/attendance",
   },
   {
+    key: "results",
+    label: "Results",
+    icon: TrophyOutlined,
+    path: "/admin/results",
+  },
+  {
     key: "fees",
     label: "Fee Management",
     icon: DollarOutlined,

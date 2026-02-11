@@ -168,6 +168,12 @@ const UserManagementPage = () => {
     setIsPasswordModalOpen(true);
   };
 
+  const handleSetNewPassword = (user) => {
+    setSelectedUser(user);
+    setGeneratedPassword("");
+    setIsPasswordModalOpen(true);
+  };
+
   const handleDelete = async (userId) => {
     try {
       await deleteUser(userId);
@@ -185,7 +191,11 @@ const UserManagementPage = () => {
         await updateUser(editingUser._id, values);
         message.success("User updated successfully");
       } else {
-        await createUser(values);
+        const passwordToUse = generatedPassword || generatePassword();
+        if (!generatedPassword) {
+          setGeneratedPassword(passwordToUse);
+        }
+        await createUser({ ...values, password: passwordToUse });
         message.success("User created successfully");
       }
       setIsModalOpen(false);
@@ -239,6 +249,12 @@ const UserManagementPage = () => {
       label: "Reset Password",
       icon: <LockOutlined />,
       onClick: () => handleResetPassword(user),
+    },
+    {
+      key: "set-password",
+      label: "Set New Password",
+      icon: <LockOutlined />,
+      onClick: () => handleSetNewPassword(user),
     },
     {
       type: "divider",
@@ -302,6 +318,7 @@ const UserManagementPage = () => {
                   setEditingUser(null);
                   form.resetFields();
                   setGeneratedPassword("");
+                  handleGeneratePassword();
                   setIsModalOpen(true);
                 }}
                 className="bg-blue-600 hover:bg-blue-700 shadow-sm">
@@ -530,7 +547,7 @@ const UserManagementPage = () => {
           </div>
         }
         open={isModalOpen}
-        onOk={handleSubmit}
+        onOk={() => form.submit()}
         onCancel={() => {
           setIsModalOpen(false);
           setGeneratedPassword("");
@@ -541,7 +558,12 @@ const UserManagementPage = () => {
           className: "bg-blue-600 hover:bg-blue-700",
         }}
         confirmLoading={loading}>
-        <Form form={form} layout="vertical" className="mt-6" autoComplete="off">
+        <Form
+          form={form}
+          layout="vertical"
+          className="mt-6"
+          autoComplete="off"
+          onFinish={handleSubmit}>
           <div className="grid grid-cols-2 gap-4">
             <Form.Item
               name="name"
@@ -661,7 +683,7 @@ const UserManagementPage = () => {
         title={
           <div className="text-lg font-semibold text-slate-900">
             <LockOutlined className="mr-2" />
-            Reset Password
+            Set New Password
           </div>
         }
         open={isPasswordModalOpen}
@@ -671,50 +693,58 @@ const UserManagementPage = () => {
           setSelectedUser(null);
           setGeneratedPassword("");
         }}
-        okText="Reset Password"
+        okText="Update Password"
         okButtonProps={{
           className: "bg-orange-600 hover:bg-orange-700",
         }}
         confirmLoading={loading}>
         <div className="py-4">
           <p className="text-slate-600 mb-4">
-            Are you sure you want to reset the password for{" "}
+            Set a new password for{" "}
             <span className="font-semibold text-slate-900">
               {selectedUser?.name}
             </span>
-            ?
+            .
           </p>
 
-          {generatedPassword && (
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <LockOutlined className="text-orange-600 mt-1" />
-                <div className="flex-1">
-                  <p className="font-medium text-orange-900 mb-2">
-                    New Password Generated
-                  </p>
-                  <div className="bg-white rounded-lg p-3 border border-orange-200">
-                    <div className="flex items-center justify-between gap-3">
-                      <code className="text-sm font-mono text-orange-700 font-semibold">
-                        {generatedPassword}
-                      </code>
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <LockOutlined className="text-orange-600 mt-1" />
+              <div className="flex-1">
+                <p className="font-medium text-orange-900 mb-2">
+                  Set New Password
+                </p>
+                <div className="bg-white rounded-lg p-3 border border-orange-200">
+                  <div className="flex flex-col gap-3">
+                    <Input.Password
+                      size="large"
+                      placeholder="Enter new password (min 6 characters)"
+                      value={generatedPassword}
+                      onChange={(e) => setGeneratedPassword(e.target.value)}
+                    />
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        onClick={() => setGeneratedPassword(generatePassword())}
+                        className="hover:border-orange-500 hover:text-orange-600">
+                        Generate
+                      </Button>
                       <Button
                         type="text"
-                        size="small"
                         icon={<CopyOutlined />}
                         onClick={() => copyToClipboard(generatedPassword)}
+                        disabled={!generatedPassword}
                         className="hover:bg-orange-100 text-orange-600">
                         Copy
                       </Button>
                     </div>
-                    <p className="text-xs text-orange-600 mt-2">
-                      ⚠️ Save this password - it will only be shown once!
+                    <p className="text-xs text-orange-600">
+                      Password must be at least 6 characters.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </Modal>
     </div>

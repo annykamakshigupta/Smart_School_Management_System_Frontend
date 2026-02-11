@@ -9,3 +9,4 @@ export { default as ParentChildAttendancePage } from "./pages/ParentChildAttenda
 export { default as ChildSchedulePage } from "./pages/ChildSchedulePage";
 export { default as ChildDetailsPage } from "./pages/ChildDetailsPage";
 export { default as ParentProfilePage } from "./pages/ParentProfilePage";
+export { default as ParentResultsPage } from "./pages/ParentResultsPage";

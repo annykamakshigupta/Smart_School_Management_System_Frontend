@@ -102,6 +102,12 @@ const NAVIGATION_CONFIG = {
           path: "/admin/attendance",
           icon: ClipboardCheck,
         },
+        {
+          key: "results",
+          label: "Results",
+          path: "/admin/results",
+          icon: Award,
+        },
       ],
     },
     {
@@ -194,6 +200,12 @@ const NAVIGATION_CONFIG = {
           path: "/teacher/schedule",
           icon: Calendar,
         },
+        {
+          key: "results",
+          label: "Results",
+          path: "/teacher/grades/results",
+          icon: Award,
+        },
       ],
     },
   ],
@@ -233,7 +245,7 @@ const NAVIGATION_CONFIG = {
         {
           key: "results",
           label: "Results",
-          path: "/student/results",
+          path: "/student/academics/results",
           icon: Award,
         },
         {
@@ -289,10 +301,15 @@ const NAVIGATION_CONFIG = {
           path: "/parent/child-schedule",
           icon: Calendar,
         },
+      ],
+    },
+    {
+      section: "Performance",
+      items: [
         {
           key: "results",
           label: "Results",
-          path: "/parent/results",
+          path: "/parent/performance/grades",
           icon: Award,
         },
       ],
@@ -312,44 +329,48 @@ const NAVIGATION_CONFIG = {
 };
 
 /**
- * Role Theme Configuration - Solid colors only
+ * Role Theme Configuration - Modern gradient and color scheme
  */
 const ROLE_THEMES = {
   admin: {
-    primary: "bg-slate-900",
-    primaryHover: "hover:bg-slate-800",
-    accent: "bg-slate-800",
+    primary: "bg-gradient-to-br from-slate-800 to-slate-900",
+    primaryHover: "hover:from-slate-700 hover:to-slate-800",
+    accent: "bg-gradient-to-r from-slate-700 to-slate-800",
     accentText: "text-slate-900",
-    lightBg: "bg-slate-100",
-    lightText: "text-slate-700",
+    lightBg: "bg-gradient-to-br from-slate-50 to-slate-100",
+    lightText: "text-slate-800",
     border: "border-slate-200",
+    glow: "shadow-slate-500/20",
   },
   teacher: {
-    primary: "bg-blue-600",
-    primaryHover: "hover:bg-blue-700",
-    accent: "bg-blue-600",
-    accentText: "text-blue-600",
-    lightBg: "bg-blue-50",
-    lightText: "text-blue-700",
+    primary: "bg-gradient-to-br from-blue-600 to-blue-700",
+    primaryHover: "hover:from-blue-500 hover:to-blue-600",
+    accent: "bg-gradient-to-r from-blue-600 to-blue-700",
+    accentText: "text-blue-700",
+    lightBg: "bg-gradient-to-br from-blue-50 to-blue-100",
+    lightText: "text-blue-800",
     border: "border-blue-200",
+    glow: "shadow-blue-500/20",
   },
   student: {
-    primary: "bg-emerald-600",
-    primaryHover: "hover:bg-emerald-700",
-    accent: "bg-emerald-600",
-    accentText: "text-emerald-600",
-    lightBg: "bg-emerald-50",
-    lightText: "text-emerald-700",
+    primary: "bg-gradient-to-br from-emerald-600 to-emerald-700",
+    primaryHover: "hover:from-emerald-500 hover:to-emerald-600",
+    accent: "bg-gradient-to-r from-emerald-600 to-emerald-700",
+    accentText: "text-emerald-700",
+    lightBg: "bg-gradient-to-br from-emerald-50 to-emerald-100",
+    lightText: "text-emerald-800",
     border: "border-emerald-200",
+    glow: "shadow-emerald-500/20",
   },
   parent: {
-    primary: "bg-violet-600",
-    primaryHover: "hover:bg-violet-700",
-    accent: "bg-violet-600",
-    accentText: "text-violet-600",
-    lightBg: "bg-violet-50",
-    lightText: "text-violet-700",
+    primary: "bg-gradient-to-br from-violet-600 to-violet-700",
+    primaryHover: "hover:from-violet-500 hover:to-violet-600",
+    accent: "bg-gradient-to-r from-violet-600 to-violet-700",
+    accentText: "text-violet-700",
+    lightBg: "bg-gradient-to-br from-violet-50 to-violet-100",
+    lightText: "text-violet-800",
     border: "border-violet-200",
+    glow: "shadow-violet-500/20",
   },
 };
 
@@ -359,8 +380,9 @@ const ROLE_THEMES = {
 const NavItem = ({ item, collapsed, theme, onNavigate }) => {
   const location = useLocation();
   const Icon = item.icon;
-  
-  const isActive = location.pathname === item.path || 
+
+  const isActive =
+    location.pathname === item.path ||
     (item.path.includes("?") && location.pathname === item.path.split("?")[0]);
 
   return (
@@ -370,32 +392,35 @@ const NavItem = ({ item, collapsed, theme, onNavigate }) => {
       className="group relative block">
       <div
         className={`
-          flex items-center gap-3 px-3 py-2.5 rounded-lg
-          transition-all duration-200
+          flex items-center gap-3 px-3 py-2.5 rounded-xl
+          transition-all duration-300 ease-in-out
+          transform hover:scale-[1.02] active:scale-[0.98]
           ${
             isActive
-              ? `${theme.lightBg} ${theme.lightText} font-medium`
-              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+              ? `${theme.lightBg} ${theme.lightText} font-semibold shadow-sm`
+              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           }
           ${collapsed ? "justify-center" : ""}
         `}>
         {/* Active Indicator */}
         {isActive && (
           <div
-            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full ${theme.accent}`}
+            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-8 rounded-r-full ${theme.accent} shadow-lg animate-pulse`}
           />
         )}
 
         {/* Icon */}
         <Icon
           size={20}
-          strokeWidth={1.75}
-          className="shrink-0"
+          strokeWidth={isActive ? 2.5 : 1.75}
+          className={`shrink-0 transition-transform duration-300 ${
+            isActive ? "scale-110" : "group-hover:scale-105"
+          }`}
         />
 
         {/* Label */}
         {!collapsed && (
-          <span className="text-sm truncate">
+          <span className="text-sm truncate transition-all duration-300">
             {item.label}
           </span>
         )}
@@ -405,15 +430,18 @@ const NavItem = ({ item, collapsed, theme, onNavigate }) => {
       {collapsed && (
         <div
           className="
-            absolute left-full ml-3 px-3 py-2 
-            bg-slate-900 text-white text-sm font-medium 
-            rounded-lg shadow-lg 
+            absolute left-full ml-4 px-4 py-2.5
+            bg-linear-to-r from-slate-900 to-slate-800 text-white text-sm font-semibold 
+            rounded-xl shadow-2xl
             opacity-0 invisible group-hover:opacity-100 group-hover:visible 
-            transition-all duration-200 whitespace-nowrap z-50 
+            transition-all duration-300 ease-out
+            group-hover:translate-x-1
+            whitespace-nowrap z-50 
             pointer-events-none
+            border border-slate-700
           ">
           {item.label}
-          <div className="absolute right-full top-1/2 -translate-y-1/2 border-8 border-transparent border-r-slate-900" />
+          <div className="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-slate-900" />
         </div>
       )}
     </NavLink>
@@ -428,7 +456,7 @@ const NavSection = ({ section, collapsed, theme, onNavigate }) => {
     <div className="space-y-1">
       {/* Section Header */}
       {!collapsed && section.section && (
-        <div className="px-3 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <div className="px-3 py-2 text-xs font-bold text-slate-500 uppercase tracking-widest">
           {section.section}
         </div>
       )}
@@ -452,7 +480,13 @@ const NavSection = ({ section, collapsed, theme, onNavigate }) => {
 /**
  * Main Sidebar Component
  */
-const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" }) => {
+const Sidebar = ({
+  collapsed,
+  mobileOpen,
+  onClose,
+  onToggle,
+  userRole = "admin",
+}) => {
   const navigation = NAVIGATION_CONFIG[userRole] || NAVIGATION_CONFIG.admin;
   const theme = ROLE_THEMES[userRole] || ROLE_THEMES.admin;
   const navigate = useNavigate();
@@ -479,32 +513,36 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
       <aside
         className={`
           hidden lg:flex flex-col fixed top-0 left-0 h-full
-          bg-white border-r border-slate-200
-          transition-all duration-300 ease-out z-40
+          bg-white border-r border-slate-200 shadow-xl
+          transition-all duration-500 ease-in-out z-40
           ${collapsed ? "w-20" : "w-64"}
         `}>
         {/* Logo Section */}
         <div
           className={`
-            flex items-center h-16 px-4 border-b border-slate-200
+            flex items-center h-16 px-4 border-b border-slate-200 bg-linear-to-r from-slate-100 to-white
             ${collapsed ? "justify-center px-2" : "justify-between"}
           `}>
           <div className={`flex items-center ${collapsed ? "" : "gap-3"}`}>
             <div
               className={`
-                flex items-center justify-center shrink-0 w-10 h-10 
-                rounded-xl ${theme.primary}
-                transition-transform duration-300
+                flex items-center justify-center shrink-0 w-11 h-11
+                rounded-xl ${theme.primary} shadow-lg ${theme.glow}
+                transition-all duration-500 hover:scale-110 hover:rotate-6
               `}>
-              <GraduationCap size={22} strokeWidth={2} className="text-white" />
+              <GraduationCap
+                size={24}
+                strokeWidth={2.5}
+                className="text-white"
+              />
             </div>
 
             {!collapsed && (
-              <div className="overflow-hidden">
-                <div className="text-lg font-bold text-slate-900 tracking-tight">
+              <div className="overflow-hidden transition-all duration-300">
+                <div className="text-lg font-bold bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
                   SSMS
                 </div>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-slate-500 font-medium">
                   School Management
                 </div>
               </div>
@@ -515,9 +553,9 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
           {!collapsed && onToggle && (
             <button
               onClick={onToggle}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+              className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-300 hover:scale-110 active:scale-95"
               aria-label="Collapse sidebar">
-              <ChevronLeft size={18} />
+              <ChevronLeft size={18} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -526,14 +564,14 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
         {collapsed && onToggle && (
           <button
             onClick={onToggle}
-            className="mx-auto mt-3 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
+            className="mx-auto mt-3 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-300 hover:scale-110 active:scale-95 shadow-sm"
             aria-label="Expand sidebar">
-            <ChevronRight size={18} />
+            <ChevronRight size={18} strokeWidth={2} />
           </button>
         )}
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-300">
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6 scrollbar-thin scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400 scrollbar-track-transparent">
           {navigation.map((section, index) => (
             <NavSection
               key={index}
@@ -550,14 +588,15 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
             onClick={handleScheduleClick}
             className={`
               w-full flex items-center justify-center gap-2 
-              px-4 py-3 rounded-xl font-medium text-white 
-              shadow-sm hover:shadow-md
-              transition-all duration-200 active:scale-[0.98]
+              px-4 py-3.5 rounded-xl font-semibold text-white 
+              shadow-lg hover:shadow-xl ${theme.glow}
+              transition-all duration-300 ease-out
+              hover:scale-105 active:scale-95
               ${theme.primary} ${theme.primaryHover}
             `}
             title="View Schedule">
-            <Calendar size={18} strokeWidth={2} />
-            {!collapsed && <span>View Schedule</span>}
+            <Calendar size={19} strokeWidth={2.5} />
+            {!collapsed && <span className="tracking-wide">View Schedule</span>}
           </button>
         </div>
 
@@ -576,7 +615,7 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
       {/* Mobile Overlay */}
       {mobileOpen && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
+          className="lg:hidden fixed inset-0 bg-black/50 backdrop-blur-md z-40 transition-all duration-400 ease-out animate-in fade-in"
           onClick={onClose}
         />
       )}
@@ -584,26 +623,32 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
       {/* Mobile Sidebar */}
       <aside
         className={`
-          lg:hidden fixed top-0 left-0 h-full w-72 bg-white z-50
-          transform transition-transform duration-300 ease-out
-          shadow-xl
+          lg:hidden fixed top-0 left-0 h-full w-80 bg-white z-50
+          flex flex-col overflow-hidden
+          transform transition-transform duration-500 ease-in-out will-change-transform
+          shadow-2xl
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}>
         {/* Mobile Header */}
-        <div className="flex items-center justify-between h-16 px-4 border-b border-slate-200">
+        <div className="flex items-center justify-between h-16 px-5 border-b border-slate-200 bg-linear-to-r from-slate-50 to-white">
           <div className="flex items-center gap-3">
             <div
               className={`
-                flex items-center justify-center w-10 h-10 
-                rounded-xl ${theme.primary}
+                flex items-center justify-center w-11 h-11
+                rounded-xl ${theme.primary} shadow-lg ${theme.glow}
+                transition-all duration-500 hover:scale-110 hover:rotate-6
               `}>
-              <GraduationCap size={22} strokeWidth={2} className="text-white" />
+              <GraduationCap
+                size={24}
+                strokeWidth={2.5}
+                className="text-white"
+              />
             </div>
             <div>
-              <div className="text-lg font-bold text-slate-900 tracking-tight">
+              <div className="text-lg font-bold bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
                 SSMS
               </div>
-              <div className="text-xs text-slate-500">
+              <div className="text-xs text-slate-500 font-medium">
                 School Management
               </div>
             </div>
@@ -611,14 +656,14 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
 
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-100 transition-all duration-200"
+            className="p-2.5 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all duration-300 hover:scale-110 active:scale-95"
             aria-label="Close menu">
-            <X size={20} strokeWidth={2} />
+            <X size={20} strokeWidth={2.5} />
           </button>
         </div>
 
         {/* Mobile Navigation */}
-        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
+        <nav className="flex-1 min-h-0 overflow-y-auto py-4 px-4 space-y-6 overscroll-contain scrollbar-thin scrollbar-thumb-slate-300 hover:scrollbar-thumb-slate-400 scrollbar-track-transparent">
           {navigation.map((section, index) => (
             <NavSection
               key={index}
@@ -631,23 +676,25 @@ const Sidebar = ({ collapsed, mobileOpen, onClose, onToggle, userRole = "admin" 
         </nav>
 
         {/* Mobile Quick Action */}
-        <div className="px-3 pb-3">
+        <div className="px-4 pb-4">
           <button
             onClick={handleScheduleClick}
             className={`
               w-full flex items-center justify-center gap-2 
-              px-4 py-3 rounded-xl font-medium text-white 
-              transition-all duration-200 active:scale-[0.98]
+              px-4 py-3.5 rounded-xl font-semibold text-white 
+              shadow-lg hover:shadow-xl ${theme.glow}
+              transition-all duration-300 ease-out
+              hover:scale-105 active:scale-95
               ${theme.primary} ${theme.primaryHover}
             `}>
-            <Calendar size={18} strokeWidth={2} />
-            <span>View Schedule</span>
+            <Calendar size={19} strokeWidth={2.5} />
+            <span className="tracking-wide">View Schedule</span>
           </button>
         </div>
 
         {/* Mobile Footer */}
-        <div className="px-4 py-3 border-t border-slate-200">
-          <div className="text-xs text-slate-400">
+        <div className="px-5 py-3.5 border-t border-slate-200 bg-linear-to-r from-slate-50 to-white">
+          <div className="text-xs text-slate-500 font-medium text-center">
             © {new Date().getFullYear()} SSMS - Smart School System
           </div>
         </div>

@@ -41,7 +41,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-slate-900 via-indigo-950 to-slate-900 relative overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-slate-600 via-indigo-650 to-slate-600 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Gradient Orbs */}
@@ -60,10 +60,10 @@ const AuthPage = () => {
       </div>
 
       {/* Main Container */}
-      <div className="relative w-full max-w-7xl mx-4 my-8">
+      <div className="relative w-full max-w-7xl mx-4 my-6">
         <div className="flex flex-col lg:flex-row bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20">
           {/* Left Panel - Visual Branding */}
-          <div className="lg:w-1/2 relative overflow-hidden bg-linear-to-br from-slate-900 via-indigo-900 to-purple-900">
+          <div className="lg:w-1/2 relative overflow-hidden bg-linear-to-br from-slate-500 via-indigo-800 to-purple-500">
             {/* Background Image with Overlay */}
             <div className="absolute inset-0">
               <img
@@ -71,7 +71,7 @@ const AuthPage = () => {
                 alt="Education Background"
                 className="w-full h-full object-cover opacity-60"
               />
-              <div className="absolute inset-0 bg-linear-to-br from-indigo-900/90 via-purple-900/85 to-slate-900/90"></div>
+             
             </div>
 
             {/* Decorative Elements */}
@@ -79,12 +79,12 @@ const AuthPage = () => {
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-400/10 rounded-full translate-y-1/3 -translate-x-1/3 blur-2xl"></div>
 
             {/* Content */}
-            <div className="relative z-10 h-full flex flex-col justify-between p-8 lg:p-12 text-white">
+            <div className="relative z-10 h-full flex flex-col justify-between p-8 lg:p-12 text-amber-100">
               {/* Logo & Branding */}
               <div>
                 <div className="flex items-center gap-4 mb-8">
                   <div className="w-16 h-16 bg-linear-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-500/50 transform transition-all duration-300 hover:scale-110 hover:rotate-6">
-                    <FaGraduationCap className="text-3xl text-white" />
+                    <FaGraduationCap className="text-3xl text-amber-100" />
                   </div>
                   <div>
                     <h1 className="text-4xl font-bold tracking-tight bg-linear-to-r from-white to-indigo-200 bg-clip-text text-transparent">
@@ -98,17 +98,12 @@ const AuthPage = () => {
 
                 {/* Welcome Message */}
                 <div className="space-y-4 mb-12">
-                  <h2 className="text-3xl lg:text-4xl font-bold leading-tight">
+                  <h2 className="text-3xl lg:text-4xl font-bold leading-tight text-amber-100">
                     Welcome to the Future of
                     <span className="block bg-linear-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
                       Education Management
                     </span>
                   </h2>
-                  <p className="text-indigo-200 text-base lg:text-lg leading-relaxed max-w-md">
-                    Empowering schools with intelligent tools for seamless
-                    administration, enhanced learning, and stronger community
-                    connections.
-                  </p>
                 </div>
 
                 {/* Feature Cards */}
@@ -165,23 +160,6 @@ const AuthPage = () => {
                 </div>
               </div>
 
-              {/* Bottom Stats */}
-              <div className="grid grid-cols-3 gap-4 mt-8 pt-8 border-t border-white/10">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">99.9%</div>
-                  <div className="text-xs text-indigo-300 mt-1">Uptime</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">24/7</div>
-                  <div className="text-xs text-indigo-300 mt-1">Support</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-white">
-                    <SafetyOutlined className="text-2xl" />
-                  </div>
-                  <div className="text-xs text-indigo-300 mt-1">Secured</div>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -191,7 +169,7 @@ const AuthPage = () => {
               {/* Mobile Logo */}
               <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
                 <div className="w-14 h-14 bg-linear-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
-                  <FaGraduationCap className="text-2xl text-white" />
+                  <FaGraduationCap className="text-2xl text-amber-100" />
                 </div>
                 <div>
                   <div className="text-2xl font-bold bg-linear-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -308,23 +286,12 @@ const AuthPage = () => {
                 </Form.Item>
               </Form>
 
-              {/* Divider */}
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-200"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-4 bg-white text-gray-500 font-medium">
-                    Need access?
-                  </span>
-                </div>
-              </div>
 
               {/* Help Box */}
               <div className="bg-linear-to-br from-indigo-50 to-purple-50 rounded-2xl p-6 border border-indigo-100">
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shrink-0">
-                    <FaUsers className="text-white text-lg" />
+                    <FaUsers className="text-amber-100 text-lg" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-gray-900 mb-1">
@@ -356,10 +323,10 @@ const AuthPage = () => {
 
         {/* Bottom Info */}
         <div className="mt-8 text-center">
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-amber-100/60">
             © {new Date().getFullYear()} SSMS - Smart School Management System.
             <span className="mx-2">•</span>
-            <span className="text-white/80">Secure. Reliable. Trusted.</span>
+            <span className="text-amber-100/80">Secure. Reliable. Trusted.</span>
           </p>
         </div>
       </div>

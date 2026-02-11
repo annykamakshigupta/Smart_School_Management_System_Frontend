@@ -22,3 +22,4 @@ export { default as ParentChildMappingPage } from "./pages/ParentChildMappingPag
 export { default as ClassSubjectAssignmentPage } from "./pages/ClassSubjectAssignmentPage";
 export { default as AdminProfilePage } from "./pages/AdminProfilePage";
 export { default as AdminFeeDashboardPage } from "./pages/AdminFeeDashboardPage";
+export { default as AdminResultsPage } from "./pages/AdminResultsPage";

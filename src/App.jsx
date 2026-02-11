@@ -38,6 +38,7 @@ import {
   ClassSubjectAssignmentPage,
   AdminProfilePage,
   AdminFeeDashboardPage,
+  AdminResultsPage,
 } from "./features/admin";
 
 // Feature Pages - Teacher
@@ -46,9 +47,11 @@ import {
   AttendancePage as TeacherAttendancePage,
   MarkAttendancePage,
   MyStudentsPage,
+  MyClassesPage,
   MySchedulePage,
   TeacherAssignmentsPage,
   TeacherProfilePage,
+  TeacherResultsPage,
 } from "./features/teacher";
 
 // Feature Pages - Student
@@ -60,6 +63,7 @@ import {
   StudentClassesPage,
   StudentProfilePage,
   StudentFeePage,
+  StudentResultsPage,
 } from "./features/student";
 
 // Assignment Detail Pages
@@ -75,6 +79,7 @@ import {
   ChildSchedulePage,
   ChildDetailsPage,
   ParentProfilePage,
+  ParentResultsPage,
 } from "./features/parent";
 
 // Styles
@@ -205,6 +210,7 @@ function App() {
                   />
 
                   {/* Reports & Settings */}
+                  <Route path="/admin/results" element={<AdminResultsPage />} />
                   <Route
                     path="/admin/reports"
                     element={<PlaceholderPage title="Reports & Analytics" />}
@@ -245,11 +251,11 @@ function App() {
                   />
                   <Route
                     path="/teacher/grades/enter"
-                    element={<PlaceholderPage title="Enter Grades" />}
+                    element={<TeacherResultsPage />}
                   />
                   <Route
                     path="/teacher/grades/results"
-                    element={<PlaceholderPage title="Results" />}
+                    element={<TeacherResultsPage />}
                   />
 
                   {/* Other */}
@@ -261,6 +267,7 @@ function App() {
                     path="/teacher/students/:id"
                     element={<PlaceholderPage title="Student Details" />}
                   />
+                  <Route path="/teacher/classes" element={<MyClassesPage />} />
                   <Route
                     path="/teacher/schedule"
                     element={<MySchedulePage />}
@@ -311,7 +318,7 @@ function App() {
                   />
                   <Route
                     path="/student/academics/results"
-                    element={<PlaceholderPage title="Results" />}
+                    element={<StudentResultsPage />}
                   />
 
                   {/* Other */}
@@ -360,7 +367,7 @@ function App() {
                   {/* Performance */}
                   <Route
                     path="/parent/performance/grades"
-                    element={<PlaceholderPage title="Child Grades" />}
+                    element={<ParentResultsPage />}
                   />
 
                   {/* Attendance */}

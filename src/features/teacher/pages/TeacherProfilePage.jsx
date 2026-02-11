@@ -31,16 +31,13 @@ import {
   FileTextOutlined,
 } from "@ant-design/icons";
 import { PageHeader } from "../../../components/UI";
-import {
-  getMyAssignments,
-  getMyClasses,
-} from "../../../services/teacher.service";
+import { getMyAssignments } from "../../../services/teacher.service";
 
 const TeacherProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [teacherProfile, setTeacherProfile] = useState(null);
+  const [accountUser, setAccountUser] = useState(null);
   const [assignments, setAssignments] = useState([]);
-  const [classes, setClasses] = useState([]);
 
   const fetchProfileData = useCallback(async () => {
     try {
@@ -49,18 +46,16 @@ const TeacherProfilePage = () => {
       // Get teacher profile from localStorage
       const userData = localStorage.getItem("ssms_user");
       if (userData) {
-        const user = JSON.parse(userData);
-        setTeacherProfile(user.roleProfile || user);
+        const storedUser = JSON.parse(userData);
+        setAccountUser(storedUser);
+        setTeacherProfile(storedUser.roleProfile || null);
       }
 
       // Fetch assignments and classes
-      const [assignmentsRes, classesRes] = await Promise.all([
-        getMyAssignments().catch(() => ({ items: [] })),
-        getMyClasses().catch(() => ({ items: [] })),
-      ]);
-
+      const assignmentsRes = await getMyAssignments().catch(() => ({
+        items: [],
+      }));
       setAssignments(assignmentsRes.items || []);
-      setClasses(classesRes.items || []);
     } catch (error) {
       console.error("Error fetching profile data:", error);
       message.error("Failed to load profile");
@@ -115,7 +110,7 @@ const TeacherProfilePage = () => {
     );
   }
 
-  if (!teacherProfile) {
+  if (!accountUser) {
     return (
       <div className="space-y-6">
         <PageHeader
@@ -129,7 +124,8 @@ const TeacherProfilePage = () => {
     );
   }
 
-  const user = teacherProfile.userId || teacherProfile;
+  const user = accountUser;
+  const profile = teacherProfile || {};
 
   return (
     <div className="space-y-6">
@@ -154,18 +150,18 @@ const TeacherProfilePage = () => {
                 <Tag
                   icon={<IdcardOutlined />}
                   className="bg-white/20 text-white border-white/30 px-4 py-1.5 text-sm">
-                  Employee ID: {teacherProfile.employeeId || "N/A"}
+                  Employee ID: {profile.employeeId || "N/A"}
                 </Tag>
                 <Tag
                   icon={<BookOutlined />}
                   className="bg-white/20 text-white border-white/30 px-4 py-1.5 text-sm">
-                  {teacherProfile.qualification || "Teacher"}
+                  {profile.qualification || "Teacher"}
                 </Tag>
-                {teacherProfile.department && (
+                {profile.department && (
                   <Tag
                     icon={<TeamOutlined />}
                     className="bg-white/20 text-white border-white/30 px-4 py-1.5 text-sm">
-                    {teacherProfile.department}
+                    {profile.department}
                   </Tag>
                 )}
               </div>
@@ -257,7 +253,7 @@ const TeacherProfilePage = () => {
                     Phone
                   </span>
                 }>
-                {user?.phone || teacherProfile.phone || "N/A"}
+                {user?.phone || profile.phone || "N/A"}
               </Descriptions.Item>
               <Descriptions.Item
                 label={
