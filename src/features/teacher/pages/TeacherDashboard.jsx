@@ -71,22 +71,57 @@ const TeacherDashboard = () => {
       const scheduleRes = await getMySchedule().catch(() => ({ data: [] }));
       setScheduleLoading(false);
 
-      // Calculate total students from assigned classes
-      let totalStudents = 0;
-      const assignedClasses = assignmentsRes.data?.assignedClasses || [];
+      const rawAssignedClasses = assignmentsRes.data?.assignedClasses || [];
+      const rawAssignedSubjects = assignmentsRes.data?.assignedSubjects || [];
 
-      for (const cls of assignedClasses) {
-        try {
-          const studentsRes = await getStudentsByClass(cls._id || cls);
-          totalStudents += studentsRes.data?.length || 0;
-        } catch {
-          // Ignore errors for individual class student counts
-        }
-      }
+      // Prefer schedule-derived assignment items when available (deduped in teacher.service)
+      const assignedFromItems = Array.isArray(assignmentsRes.items)
+        ? assignmentsRes.items.map((x) => x?.classId).filter(Boolean)
+        : [];
+
+      const mergedAssignedClasses = [
+        ...rawAssignedClasses,
+        ...assignedFromItems,
+      ];
+
+      const uniqueAssignedClasses = [
+        ...new Map(
+          mergedAssignedClasses.filter(Boolean).map((cls) => {
+            const id = cls?._id || cls;
+            return [String(id), cls];
+          }),
+        ).values(),
+      ];
+
+      const uniqueAssignedSubjects = [
+        ...new Map(
+          rawAssignedSubjects.filter(Boolean).map((sub) => {
+            const id = sub?._id || sub;
+            return [String(id), sub];
+          }),
+        ).values(),
+      ];
+
+      // Calculate total students from assigned classes (unique)
+      const classIds = uniqueAssignedClasses
+        .map((cls) => cls?._id || cls)
+        .filter(Boolean);
+
+      const studentCounts = await Promise.all(
+        classIds.map(async (id) => {
+          try {
+            const studentsRes = await getStudentsByClass(id);
+            return studentsRes.data?.length || 0;
+          } catch {
+            return 0;
+          }
+        }),
+      );
+      const totalStudents = studentCounts.reduce((sum, n) => sum + n, 0);
 
       setTeacherData({
-        assignedClasses: assignedClasses,
-        assignedSubjects: assignmentsRes.data?.assignedSubjects || [],
+        assignedClasses: uniqueAssignedClasses,
+        assignedSubjects: uniqueAssignedSubjects,
         classTeacherOf: classTeacherRes.data || [],
         schedule: scheduleRes.data || [],
         totalStudents,
@@ -222,32 +257,6 @@ const TeacherDashboard = () => {
       </Row>
 
       <Row gutter={[16, 16]}>
-        {/* Class Teacher Status */}
-        {teacherData.classTeacherOf.length > 0 && (
-          <Col xs={24}>
-            <Card className="mb-4 shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0">
-              <div className="bg-indigo-500 rounded-xl p-6 text-white">
-                <div className="flex items-center gap-3 mb-4">
-                  <IdcardOutlined className="text-2xl" />
-                  <h3 className="text-xl font-semibold m-0">Class Teacher</h3>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {teacherData.classTeacherOf.map((cls) => (
-                    <div key={cls._id} className="bg-white/10 rounded-lg p-4">
-                      <div className="font-semibold text-lg">{cls.name}</div>
-                      <div className="text-white/70 text-sm">
-                        Section: {cls.section || "A"}
-                      </div>
-                      <div className="text-white/70 text-sm">
-                        Students: {cls.students?.length || 0}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          </Col>
-        )}
 
         {/* Today's Schedule */}
         <Col xs={24} lg={12}>

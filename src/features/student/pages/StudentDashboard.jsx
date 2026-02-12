@@ -143,7 +143,7 @@ const StudentDashboard = () => {
     );
   }
 
-  const classInfo = studentProfile.classId;
+  const classInfo = studentProfile.class || studentProfile.classId;
   const classTeacher = classInfo?.classTeacher;
   const parentInfo = studentProfile.parentId;
 
@@ -154,7 +154,7 @@ const StudentDashboard = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold mb-2">
-              Welcome Back, {studentProfile.userId?.name}! 👋
+              Welcome Back, {studentProfile.userId?.name || "Student"}! 👋
             </h1>
             <p className="text-indigo-100 text-lg">
               Your academic journey continues today
@@ -186,28 +186,29 @@ const StudentDashboard = () => {
             />
             <div className="flex-1">
               <h2 className="text-2xl font-bold mb-1">
-                {studentProfile.userId?.name}
+                {studentProfile.userId?.name || "N/A"}
               </h2>
               <div className="text-white/70 mb-4">
-                {studentProfile.userId?.email}
+                {studentProfile.userId?.email || "N/A"}
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div>
                   <div className="text-white/70 text-xs">Class</div>
                   <div className="font-semibold">
-                    {classInfo?.name} - {studentProfile.section}
+                    {classInfo?.name || "N/A"} -{" "}
+                    {studentProfile.section || "N/A"}
                   </div>
                 </div>
                 <div>
                   <div className="text-white/70 text-xs">Roll Number</div>
                   <div className="font-semibold">
-                    {studentProfile.rollNumber}
+                    {studentProfile.rollNumber || "N/A"}
                   </div>
                 </div>
                 <div>
                   <div className="text-white/70 text-xs">Academic Year</div>
                   <div className="font-semibold">
-                    {studentProfile.academicYear}
+                    {studentProfile.academicYear || "N/A"}
                   </div>
                 </div>
                 <div>
@@ -261,9 +262,7 @@ const StudentDashboard = () => {
                 Active
               </div>
             </div>
-            <h3 className="text-4xl font-bold mb-1">
-              {classInfo?.subjects?.length || 0}
-            </h3>
+            <h3 className="text-4xl font-bold mb-1">{subjects.length || 0}</h3>
             <p className="text-blue-100 text-sm font-medium">My Subjects</p>
           </div>
         </Col>

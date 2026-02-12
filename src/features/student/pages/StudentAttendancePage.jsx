@@ -1,6 +1,6 @@
 /**
- * Student Attendance Page
- * Modern, clean design for students to view their attendance records and statistics
+ * Student Attendance Page - Modern & Classy Design
+ * View attendance records with beautiful, clean interface
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -13,7 +13,12 @@ import {
   Table,
   Tag,
   Spin,
-  Progress,
+  Statistic,
+  Row,
+  Col,
+  Space,
+  Typography,
+  Alert,
 } from "antd";
 import {
   CalendarOutlined,
@@ -22,6 +27,8 @@ import {
   ClockCircleOutlined,
   BarChartOutlined,
   BookOutlined,
+  TrophyOutlined,
+  AlertOutlined,
 } from "@ant-design/icons";
 import { PageHeader } from "../../../components/UI";
 import {
@@ -35,6 +42,7 @@ import {
 import dayjs from "dayjs";
 
 const { RangePicker } = DatePicker;
+const { Title, Text } = Typography;
 
 const StudentAttendancePage = () => {
   const [loading, setLoading] = useState(true);
@@ -107,37 +115,57 @@ const StudentAttendancePage = () => {
   const attendanceRate =
     stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
 
-  // Table columns
+  // Table columns with modern design
   const columns = [
     {
-      title: "Date",
+      title: (
+        <Space>
+          <CalendarOutlined />
+          <span>Date</span>
+        </Space>
+      ),
       dataIndex: "date",
       key: "date",
-      width: 130,
+      width: 140,
+      sorter: (a, b) => new Date(a.date) - new Date(b.date),
       render: (date) => (
         <div className="flex items-center gap-2">
-          <CalendarOutlined className="text-slate-400" />
-          <span>{dayjs(date).format("MMM DD, YYYY")}</span>
+          <div className="w-10 h-10 bg-blue-50 rounded-lg flex flex-col items-center justify-center">
+            <div className="text-xs text-blue-600 font-semibold">
+              {dayjs(date).format("MMM")}
+            </div>
+            <div className="text-sm font-bold text-blue-900">
+              {dayjs(date).format("DD")}
+            </div>
+          </div>
+          <div>
+            <div className="font-medium text-slate-700">
+              {dayjs(date).format("ddd")}
+            </div>
+            <div className="text-xs text-slate-500">
+              {dayjs(date).format("YYYY")}
+            </div>
+          </div>
         </div>
       ),
     },
     {
-      title: "Day",
-      dataIndex: "date",
-      key: "day",
-      width: 100,
-      render: (date) => (
-        <span className="text-slate-500">{dayjs(date).format("dddd")}</span>
+      title: (
+        <Space>
+          <BookOutlined />
+          <span>Subject</span>
+        </Space>
       ),
-    },
-    {
-      title: "Subject",
       dataIndex: "subjectId",
       key: "subject",
       render: (subject) => (
         <div className="flex items-center gap-2">
-          <BookOutlined className="text-emerald-500" />
-          <span className="font-medium">{subject?.name || "N/A"}</span>
+          <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+            <BookOutlined className="text-purple-600" />
+          </div>
+          <span className="font-medium text-slate-700">
+            {subject?.name || "N/A"}
+          </span>
         </div>
       ),
     },
@@ -145,29 +173,31 @@ const StudentAttendancePage = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 120,
+      width: 130,
       render: (status) => {
         const config = {
           present: {
-            color: "success",
             icon: <CheckCircleOutlined />,
             label: "Present",
+            className: "border-emerald-200 bg-emerald-50 text-emerald-700",
           },
           absent: {
-            color: "error",
             icon: <CloseCircleOutlined />,
             label: "Absent",
+            className: "border-red-200 bg-red-50 text-red-700",
           },
           late: {
-            color: "warning",
             icon: <ClockCircleOutlined />,
             label: "Late",
+            className: "border-amber-200 bg-amber-50 text-amber-700",
           },
         };
-        const { color, icon, label } = config[status] || config.present;
+        const statusConfig = config[status] || config.present;
         return (
-          <Tag color={color} icon={icon} className="px-3 py-1">
-            {label}
+          <Tag
+            icon={statusConfig.icon}
+            className={`px-3 py-1 font-medium border ${statusConfig.className}`}>
+            {statusConfig.label}
           </Tag>
         );
       },
@@ -177,123 +207,181 @@ const StudentAttendancePage = () => {
   if (loading && attendance.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-100">
-        <Spin size="large" />
+        <Spin size="large" tip="Loading..." />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-slate-50 min-h-screen">
       {/* Header */}
       <PageHeader
         title="My Attendance"
-        subtitle="View your attendance records and statistics"
+        subtitle="Track your attendance records and maintain excellent performance"
       />
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        <Card className="border border-slate-200 shadow-sm">
-          <div className="text-center">
-            <CalendarOutlined className="text-2xl text-slate-500 mb-2" />
-            <div className="text-3xl font-bold text-slate-900">
-              {stats.total}
-            </div>
-            <div className="text-sm text-slate-500 mt-1">Total Days</div>
-          </div>
-        </Card>
-
-        <Card className="border border-emerald-200 bg-emerald-50 shadow-sm">
-          <div className="text-center">
-            <CheckCircleOutlined className="text-2xl text-emerald-600 mb-2" />
-            <div className="text-3xl font-bold text-emerald-700">
-              {stats.present}
-            </div>
-            <div className="text-sm text-emerald-600 mt-1">Present</div>
-          </div>
-        </Card>
-
-        <Card className="border border-red-200 bg-red-50 shadow-sm">
-          <div className="text-center">
-            <CloseCircleOutlined className="text-2xl text-red-600 mb-2" />
-            <div className="text-3xl font-bold text-red-700">
-              {stats.absent}
-            </div>
-            <div className="text-sm text-red-600 mt-1">Absent</div>
-          </div>
-        </Card>
-
-        <Card className="border border-amber-200 bg-amber-50 shadow-sm">
-          <div className="text-center">
-            <ClockCircleOutlined className="text-2xl text-amber-600 mb-2" />
-            <div className="text-3xl font-bold text-amber-700">
-              {stats.late}
-            </div>
-            <div className="text-sm text-amber-600 mt-1">Late</div>
-          </div>
-        </Card>
-
-        <Card className="border border-emerald-200 bg-emerald-50 shadow-sm">
-          <div className="text-center">
-            <BarChartOutlined className="text-2xl text-emerald-600 mb-2" />
-            <Progress
-              type="circle"
-              percent={attendanceRate}
-              width={50}
-              strokeColor={
-                attendanceRate >= 75
-                  ? "#10b981"
-                  : attendanceRate >= 50
-                    ? "#f59e0b"
-                    : "#ef4444"
+      <Row gutter={[16, 16]}>
+        <Col xs={12} sm={12} md={6} lg={6}>
+          <Card className="border-0 shadow-md rounded-xl hover:shadow-lg transition-shadow">
+            <Statistic
+              title={
+                <Text className="text-slate-600 flex items-center gap-2">
+                  <CalendarOutlined />
+                  Total Days
+                </Text>
               }
-              className="mb-1"
+              value={stats.total}
+              valueStyle={{ color: "#475569", fontWeight: "bold" }}
             />
-            <div className="text-sm text-emerald-600 mt-1">Attendance %</div>
-          </div>
-        </Card>
-      </div>
+          </Card>
+        </Col>
 
-      {/* Attendance Warning */}
-      {attendanceRate < 75 && stats.total > 0 && (
-        <Card className="border border-amber-300 bg-amber-50 shadow-sm">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-              <ClockCircleOutlined className="text-amber-600 text-xl" />
-            </div>
-            <div>
-              <div className="font-semibold text-amber-800">
-                Low Attendance Warning
+        <Col xs={12} sm={12} md={6} lg={6}>
+          <Card className="border-0 shadow-md rounded-xl bg-emerald-50 hover:shadow-lg transition-shadow">
+            <Statistic
+              title={
+                <Text className="text-emerald-700 flex items-center gap-2 font-semibold">
+                  <CheckCircleOutlined />
+                  Present
+                </Text>
+              }
+              value={stats.present}
+              valueStyle={{ color: "#059669", fontWeight: "bold" }}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={12} sm={12} md={6} lg={6}>
+          <Card className="border-0 shadow-md rounded-xl bg-red-50 hover:shadow-lg transition-shadow">
+            <Statistic
+              title={
+                <Text className="text-red-700 flex items-center gap-2 font-semibold">
+                  <CloseCircleOutlined />
+                  Absent
+                </Text>
+              }
+              value={stats.absent}
+              valueStyle={{ color: "#dc2626", fontWeight: "bold" }}
+            />
+          </Card>
+        </Col>
+
+        <Col xs={12} sm={12} md={6} lg={6}>
+          <Card className="border-0 shadow-md rounded-xl bg-amber-50 hover:shadow-lg transition-shadow">
+            <Statistic
+              title={
+                <Text className="text-amber-700 flex items-center gap-2 font-semibold">
+                  <ClockCircleOutlined />
+                  Late
+                </Text>
+              }
+              value={stats.late}
+              valueStyle={{ color: "#d97706", fontWeight: "bold" }}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Attendance Rate Card */}
+      {stats.total > 0 && (
+        <Card className="border-0 shadow-md rounded-xl">
+          <Row align="middle" gutter={24}>
+            <Col xs={24} md={4}>
+              <div className="text-center">
+                <div className="relative inline-block">
+                  <svg className="w-28 h-28">
+                    <circle
+                      cx="56"
+                      cy="56"
+                      r="52"
+                      stroke="#e5e7eb"
+                      strokeWidth="8"
+                      fill="none"
+                    />
+                    <circle
+                      cx="56"
+                      cy="56"
+                      r="52"
+                      stroke={
+                        attendanceRate >= 75
+                          ? "#10b981"
+                          : attendanceRate >= 50
+                            ? "#f59e0b"
+                            : "#ef4444"
+                      }
+                      strokeWidth="8"
+                      fill="none"
+                      strokeDasharray={`${attendanceRate * 3.27} 327`}
+                      strokeLinecap="round"
+                      transform="rotate(-90 56 56)"
+                    />
+                  </svg>
+                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                    <Text className="text-2xl font-bold text-slate-900">
+                      {attendanceRate}%
+                    </Text>
+                  </div>
+                </div>
               </div>
-              <div className="text-sm text-amber-700">
-                Your attendance is below 75%. Please ensure regular attendance
-                to avoid academic issues.
-              </div>
-            </div>
-          </div>
+            </Col>
+            <Col xs={24} md={20}>
+              <Title level={4} className="mb-2 flex items-center gap-2">
+                <TrophyOutlined className="text-blue-600" />
+                Your Attendance Rate
+              </Title>
+              <Text className="text-slate-600 block mb-3">
+                {attendanceRate >= 75
+                  ? "Excellent! Keep up the great work. You're maintaining excellent attendance."
+                  : attendanceRate >= 50
+                    ? "Good effort, but try to improve your attendance to stay on track."
+                    : "Your attendance needs improvement. Please prioritize regular attendance."}
+              </Text>
+              {attendanceRate < 75 && (
+                <Alert
+                  message="Attendance Target: 75%"
+                  description={`You need ${Math.max(0, Math.ceil((75 * stats.total - stats.present * 100) / 25))} more present days to reach 75% attendance.`}
+                  type="warning"
+                  icon={<AlertOutlined />}
+                  showIcon
+                  className="mt-2"
+                />
+              )}
+            </Col>
+          </Row>
         </Card>
       )}
 
       {/* Filters */}
-      <Card className="border border-slate-200 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              <CalendarOutlined className="mr-1" /> Date Range
+      <Card className="border-0 shadow-lg rounded-2xl">
+        <div className="mb-4">
+          <Title level={5} className="mb-0 flex items-center gap-2">
+            <CalendarOutlined className="text-blue-600" />
+            Filter Attendance Records
+          </Title>
+        </div>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} lg={12}>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <CalendarOutlined className="mr-2" />
+              Date Range
             </label>
             <RangePicker
               value={dateRange}
               onChange={setDateRange}
               format="MMM DD, YYYY"
               className="w-full"
+              size="large"
               disabledDate={(current) =>
                 current && current > dayjs().endOf("day")
               }
             />
-          </div>
+          </Col>
 
-          <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              <BookOutlined className="mr-1" /> Subject
+          <Col xs={24} sm={12} lg={12}>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <BookOutlined className="mr-2" />
+              Subject
             </label>
             <Select
               placeholder="All Subjects"
@@ -301,6 +389,7 @@ const StudentAttendancePage = () => {
               onChange={setSelectedSubject}
               allowClear
               className="w-full"
+              size="large"
               showSearch
               filterOption={(input, option) =>
                 option?.children?.toLowerCase().includes(input.toLowerCase())
@@ -311,17 +400,26 @@ const StudentAttendancePage = () => {
                 </Select.Option>
               ))}
             </Select>
-          </div>
-        </div>
+          </Col>
+        </Row>
       </Card>
 
       {/* Attendance Table */}
       <Card
-        className="border border-slate-200 shadow-sm"
+        className="border-0 shadow-lg rounded-2xl"
         title={
-          <div className="flex items-center gap-2">
-            <CalendarOutlined className="text-emerald-600" />
-            <span>Attendance Records</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <CalendarOutlined className="text-blue-600 text-lg" />
+            </div>
+            <div>
+              <Title level={4} className="mb-0">
+                Attendance Records
+              </Title>
+              <Text className="text-slate-500 text-sm">
+                Your daily attendance history
+              </Text>
+            </div>
           </div>
         }>
         <Table
@@ -329,11 +427,19 @@ const StudentAttendancePage = () => {
           dataSource={attendance}
           rowKey="_id"
           loading={loading}
+          rowClassName={(record) => {
+            const status = record?.status;
+            if (status === "present") return "bg-emerald-50";
+            if (status === "absent") return "bg-red-50";
+            if (status === "late") return "bg-amber-50";
+            return "";
+          }}
           pagination={{
             pageSize: 10,
             showSizeChanger: true,
             showTotal: (total, range) =>
               `${range[0]}-${range[1]} of ${total} records`,
+            className: "px-4",
           }}
           locale={{
             emptyText: (
@@ -343,6 +449,7 @@ const StudentAttendancePage = () => {
               />
             ),
           }}
+          className="modern-table"
         />
       </Card>
     </div>

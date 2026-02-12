@@ -82,10 +82,17 @@ const SubjectsPage = () => {
   const handleOpenModal = (subject = null) => {
     if (subject) {
       setEditingSubject(subject);
+
+      const resolvedClassIds = Array.isArray(subject.classIds)
+        ? subject.classIds.map((c) => c?._id || c).filter(Boolean)
+        : subject.classId
+          ? [subject.classId?._id || subject.classId]
+          : [];
+
       form.setFieldsValue({
         name: subject.name,
         code: subject.code,
-        classId: subject.classId?._id || "",
+        classIds: resolvedClassIds,
         assignedTeacher: subject.assignedTeacher?._id || "",
         academicYear: subject.academicYear,
         description: subject.description || "",
@@ -105,8 +112,12 @@ const SubjectsPage = () => {
 
   const handleSubmit = async (values) => {
     const payload = { ...values };
-    if (!payload.classId) delete payload.classId;
+    if (!Array.isArray(payload.classIds) || payload.classIds.length === 0)
+      delete payload.classIds;
     if (!payload.assignedTeacher) delete payload.assignedTeacher;
+
+    // Backward compatibility: if older parts still send classId, strip it here
+    if (payload.classId) delete payload.classId;
 
     try {
       if (editingSubject) {
@@ -251,7 +262,16 @@ const SubjectsPage = () => {
             <div>
               <p className="text-slate-500 text-sm">Assigned to Class</p>
               <p className="text-2xl font-bold text-orange-600">
-                {subjects.filter((s) => s.classId).length}
+                {
+                  subjects.filter((s) => {
+                    const ids = Array.isArray(s.classIds)
+                      ? s.classIds
+                      : s.classId
+                        ? [s.classId]
+                        : [];
+                    return ids.length > 0;
+                  }).length
+                }
               </p>
             </div>
           </div>
@@ -328,16 +348,40 @@ const SubjectsPage = () => {
 
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 flex-wrap">
-                    {subject.classId ? (
-                      <Tag
-                        icon={<BookOutlined />}
-                        color="purple"
-                        style={{ fontWeight: 500 }}>
-                        {subject.classId.name} - {subject.classId.section}
-                      </Tag>
-                    ) : (
-                      <Tag color="default">No Class</Tag>
-                    )}
+                    {(() => {
+                      const linkedClasses = Array.isArray(subject.classIds)
+                        ? subject.classIds
+                        : subject.classId
+                          ? [subject.classId]
+                          : [];
+
+                      if (!linkedClasses.length) {
+                        return <Tag color="default">No Class</Tag>;
+                      }
+
+                      const visible = linkedClasses.slice(0, 2);
+                      const remaining = linkedClasses.length - visible.length;
+
+                      return (
+                        <>
+                          {visible.map((cls) => (
+                            <Tag
+                              key={cls?._id || cls}
+                              icon={<BookOutlined />}
+                              color="purple"
+                              style={{ fontWeight: 500 }}>
+                              {cls?.name || "Class"}{" "}
+                              {cls?.section ? `- ${cls.section}` : ""}
+                            </Tag>
+                          ))}
+                          {remaining > 0 ? (
+                            <Tag color="purple" style={{ fontWeight: 500 }}>
+                              +{remaining} more
+                            </Tag>
+                          ) : null}
+                        </>
+                      );
+                    })()}
                     <Tag color="cyan" style={{ fontWeight: 500 }}>
                       {subject.academicYear}
                     </Tag>
@@ -407,11 +451,12 @@ const SubjectsPage = () => {
           </Form.Item>
 
           <Form.Item
-            name="classId"
-            label={<span className="font-medium">Class (Optional)</span>}>
+            name="classIds"
+            label={<span className="font-medium">Classes (Optional)</span>}>
             <Select
               size="large"
-              placeholder="Select a class"
+              mode="multiple"
+              placeholder="Select one or more classes"
               allowClear
               showSearch
               optionFilterProp="children">

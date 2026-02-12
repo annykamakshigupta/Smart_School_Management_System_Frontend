@@ -3,6 +3,14 @@ import BASE_URL from "../config/baseUrl";
 
 const API_URL = `${BASE_URL}`;
 
+const isDebugEnabled = () => {
+  try {
+    return localStorage.getItem("ssms_debug") === "1";
+  } catch {
+    return false;
+  }
+};
+
 // Helper to get auth headers
 const getAuthHeaders = () => {
   const token = localStorage.getItem("ssms_token");
@@ -116,14 +124,54 @@ export const getMyAssignments = async () => {
  */
 export const getStudentsByClass = async (classId) => {
   try {
-    // Teacher-safe endpoint (admin-only route would 403 for teachers)
-    const response = await axios.get(
-      `${API_URL}/attendance/students?classId=${classId}`,
-      getAuthHeaders(),
-    );
+    const subjectId = arguments.length > 1 ? arguments[1] : undefined;
+    const params = new URLSearchParams();
+    if (subjectId) params.append("subjectId", subjectId);
+
+    // Dedicated teacher endpoint (clear auth + better errors)
+    const url = params.toString()
+      ? `${API_URL}/teachers/class/${classId}/students?${params.toString()}`
+      : `${API_URL}/teachers/class/${classId}/students`;
+
+    if (isDebugEnabled()) {
+      console.log("[teacher.service] getStudentsByClass request", {
+        classId,
+        subjectId,
+        url,
+        hasToken: !!localStorage.getItem("ssms_token"),
+      });
+    }
+
+    const response = await axios.get(url, getAuthHeaders());
+
+    if (isDebugEnabled()) {
+      console.log("[teacher.service] getStudentsByClass response", {
+        url,
+        success: response?.data?.success,
+        count: response?.data?.count,
+      });
+    }
+
     return response.data;
   } catch (error) {
-    throw new Error(error.response?.data?.message || "Error fetching students");
+    if (isDebugEnabled()) {
+      console.log("[teacher.service] getStudentsByClass error", {
+        classId,
+        status: error?.response?.status,
+        data: error?.response?.data,
+        message: error?.message,
+      });
+    }
+
+    const status = error.response?.status;
+    const backendMessage = error.response?.data?.message;
+    const backendError = error.response?.data?.error;
+    const details = backendError ? `: ${backendError}` : "";
+    const statusText = status ? ` (HTTP ${status})` : "";
+
+    throw new Error(
+      `${backendMessage || "Error fetching students"}${statusText}${details}`,
+    );
   }
 };
 

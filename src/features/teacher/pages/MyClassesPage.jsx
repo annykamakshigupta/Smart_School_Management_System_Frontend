@@ -43,6 +43,14 @@ import {
 } from "../../../services/teacher.service";
 import { message } from "antd";
 
+const isDebugEnabled = () => {
+  try {
+    return localStorage.getItem("ssms_debug") === "1";
+  } catch {
+    return false;
+  }
+};
+
 const MyClassesPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -61,8 +69,13 @@ const MyClassesPage = () => {
       setLoading(true);
       const response = await getMyAssignments();
 
+      if (isDebugEnabled()) {
+        console.log("[MyClassesPage] getMyAssignments raw", response);
+      }
+
       const assignedClasses = response?.data?.assignedClasses || [];
       const assignedSubjects = response?.data?.assignedSubjects || [];
+      const assignedSubjectPairs = response?.data?.assignedSubjectPairs || [];
       const classTeacherOf = response?.data?.classTeacherOf || [];
 
       // Build enhanced class data
@@ -89,17 +102,52 @@ const MyClassesPage = () => {
         }
       });
 
-      // Add subjects to classes
-      assignedSubjects.forEach((subject) => {
-        const classId = subject.classId?._id || subject.classId;
-        if (classId && classesMap.has(classId)) {
+      // Add subjects to classes (prefer schedule-derived class+subject pairs)
+      if (Array.isArray(assignedSubjectPairs) && assignedSubjectPairs.length) {
+        assignedSubjectPairs.forEach((pair) => {
+          const classValue = pair.classId;
+          const subjectValue = pair.subjectId;
+
+          const classId = classValue?._id || classValue;
+          const subjectId = subjectValue?._id || subjectValue;
+          const subjectName = subjectValue?.name || "Unknown Subject";
+
+          if (!classId) return;
+
+          if (!classesMap.has(classId)) {
+            classesMap.set(classId, {
+              id: classId,
+              name: classValue?.name || "Unknown",
+              section: classValue?.section || "",
+              academicYear: classValue?.academicYear || "",
+              displayName: classValue?.section
+                ? `${classValue?.name} - ${classValue?.section}`
+                : classValue?.name || "Unknown",
+              subjects: [],
+              isClassTeacher: false,
+              totalStudents: 0,
+            });
+          }
+
           const classData = classesMap.get(classId);
           classData.subjects.push({
-            id: subject._id || subject,
-            name: subject.name || "Unknown Subject",
+            id: subjectId,
+            name: subjectName,
           });
-        }
-      });
+        });
+      } else {
+        // Legacy fallback
+        assignedSubjects.forEach((subject) => {
+          const classId = subject.classId?._id || subject.classId;
+          if (classId && classesMap.has(classId)) {
+            const classData = classesMap.get(classId);
+            classData.subjects.push({
+              id: subject._id || subject,
+              name: subject.name || "Unknown Subject",
+            });
+          }
+        });
+      }
 
       // Mark class teacher status
       classTeacherOf.forEach((cls) => {
@@ -125,16 +173,44 @@ const MyClassesPage = () => {
 
       const classesArray = Array.from(classesMap.values());
 
+      if (isDebugEnabled()) {
+        console.log("[MyClassesPage] classesArray", {
+          count: classesArray.length,
+          ids: classesArray.map((c) => c.id),
+        });
+      }
+
       // Fetch student counts for each class
       for (const classData of classesArray) {
         try {
+          if (isDebugEnabled()) {
+            console.log("[MyClassesPage] fetching students", {
+              classId: classData.id,
+              displayName: classData.displayName,
+            });
+          }
           const studentsRes = await getStudentsByClass(classData.id);
           classData.totalStudents = studentsRes?.data?.length || 0;
+
+          if (isDebugEnabled()) {
+            console.log("[MyClassesPage] students fetched", {
+              classId: classData.id,
+              totalStudents: classData.totalStudents,
+            });
+          }
         } catch (error) {
           console.error(
             `Error fetching students for class ${classData.id}:`,
             error,
           );
+
+          if (isDebugEnabled()) {
+            console.log("[MyClassesPage] fetch students failed", {
+              classId: classData.id,
+              errorMessage: error?.message,
+            });
+          }
+
           classData.totalStudents = 0;
         }
       }
@@ -154,11 +230,25 @@ const MyClassesPage = () => {
     setLoadingStudents(true);
 
     try {
+      if (isDebugEnabled()) {
+        console.log("[MyClassesPage] handleViewDetails", {
+          classId: classData?.id,
+          classData,
+        });
+      }
       const response = await getStudentsByClass(classData.id);
       setClassStudents(response?.data || []);
     } catch (error) {
       console.error("Error fetching students:", error);
       message.error("Failed to load students");
+
+      if (isDebugEnabled()) {
+        console.log("[MyClassesPage] handleViewDetails failed", {
+          classId: classData?.id,
+          errorMessage: error?.message,
+        });
+      }
+
       setClassStudents([]);
     } finally {
       setLoadingStudents(false);
@@ -458,7 +548,9 @@ const MyClassesPage = () => {
 
               {loadingStudents ? (
                 <div className="text-center py-8">
-                  <Spin size="large" tip="Loading students..." />
+                  <Spin spinning size="large" tip="Loading students...">
+                    <div className="h-16" />
+                  </Spin>
                 </div>
               ) : classStudents.length > 0 ? (
                 <List

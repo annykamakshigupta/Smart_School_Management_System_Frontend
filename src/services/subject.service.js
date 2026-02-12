@@ -20,6 +20,8 @@ export const createSubject = async (subjectData) => {
     const payload = { ...subjectData };
     if (payload.assignedTeacher === "") delete payload.assignedTeacher;
     if (payload.classId === "") delete payload.classId;
+    if (Array.isArray(payload.classIds) && payload.classIds.length === 0)
+      delete payload.classIds;
 
     const response = await axios.post(API_URL, payload, getAuthHeaders());
     return response.data;
@@ -72,6 +74,8 @@ export const updateSubject = async (subjectId, updateData) => {
     const payload = { ...updateData };
     if (payload.assignedTeacher === "") delete payload.assignedTeacher;
     if (payload.classId === "") delete payload.classId;
+    if (Array.isArray(payload.classIds) && payload.classIds.length === 0)
+      delete payload.classIds;
 
     const response = await axios.put(
       `${API_URL}/${subjectId}`,

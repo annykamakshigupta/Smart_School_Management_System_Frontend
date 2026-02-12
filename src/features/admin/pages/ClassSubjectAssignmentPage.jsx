@@ -639,8 +639,24 @@ const ClassSubjectAssignmentPage = () => {
               <div>
                 <div className="font-medium">{selectedSubject?.name}</div>
                 <div className="text-xs text-gray-500">
-                  Code: {selectedSubject?.code} | Class:{" "}
-                  {selectedSubject?.classId?.name || "N/A"}
+                  {(() => {
+                    const linked = Array.isArray(selectedSubject?.classIds)
+                      ? selectedSubject.classIds
+                      : selectedSubject?.classId
+                        ? [selectedSubject.classId]
+                        : [];
+                    const label = linked.length
+                      ? linked.length === 1
+                        ? `${linked[0]?.name || "N/A"}${linked[0]?.section ? `-${linked[0].section}` : ""}`
+                        : `${linked.length} classes`
+                      : "N/A";
+
+                    return (
+                      <>
+                        Code: {selectedSubject?.code} | Classes: {label}
+                      </>
+                    );
+                  })()}
                 </div>
               </div>
             </div>
@@ -726,7 +742,17 @@ const ClassSubjectAssignmentPage = () => {
                     <div className="flex items-center gap-2">
                       <Tag color="green">{subject.name}</Tag>
                       <span className="text-gray-500 text-xs">
-                        Class: {subject.classId?.name || "N/A"}
+                        {(() => {
+                          const linked = Array.isArray(subject?.classIds)
+                            ? subject.classIds
+                            : subject?.classId
+                              ? [subject.classId]
+                              : [];
+                          if (!linked.length) return <>Classes: N/A</>;
+                          if (linked.length === 1)
+                            return <>Classes: {linked[0]?.name || "N/A"}</>;
+                          return <>Classes: {linked.length}</>;
+                        })()}
                       </span>
                     </div>
                   </List.Item>

@@ -52,29 +52,47 @@ const AttendanceTable = ({
     },
     showStudent && {
       title: "Student",
-      dataIndex: ["student", "name"],
+      dataIndex: "studentId",
       key: "studentName",
-      render: (text, record) => (
-        <div>
-          <div className="font-medium">{text}</div>
-          <div className="text-xs text-gray-500">{record.student?.email}</div>
-        </div>
-      ),
-      sorter: (a, b) => a.student?.name.localeCompare(b.student?.name),
+      render: (studentId, record) => {
+        const student = studentId;
+        const userName =
+          student?.userId?.name || student?.user?.name || "Unknown";
+        const userEmail = student?.userId?.email || student?.user?.email || "";
+
+        return (
+          <div>
+            <div className="font-medium">{userName}</div>
+            <div className="text-xs text-gray-500">{userEmail}</div>
+          </div>
+        );
+      },
+      sorter: (a, b) => {
+        const nameA =
+          a.studentId?.userId?.name || a.studentId?.user?.name || "";
+        const nameB =
+          b.studentId?.userId?.name || b.studentId?.user?.name || "";
+        return nameA.localeCompare(nameB);
+      },
     },
     showClass && {
       title: "Class",
       key: "class",
       render: (_, record) => (
         <span>
-          {record.class?.name} - {record.class?.section}
+          {record.classId?.name || record.class?.name || "N/A"}{" "}
+          {record.classId?.section || record.class?.section
+            ? `- ${record.classId?.section || record.class?.section}`
+            : ""}
         </span>
       ),
     },
     showSubject && {
       title: "Subject",
-      dataIndex: ["subject", "name"],
+      dataIndex: ["subjectId", "name"],
       key: "subjectName",
+      render: (text, record) =>
+        text || record.subject?.name || record.subjectId?.name || "N/A",
     },
     {
       title: "Status",
@@ -148,6 +166,13 @@ const AttendanceTable = ({
       dataSource={data}
       loading={loading}
       rowKey="_id"
+      rowClassName={(record) => {
+        const status = record?.status;
+        if (status === "present") return "bg-emerald-50";
+        if (status === "absent") return "bg-red-50";
+        if (status === "late") return "bg-amber-50";
+        return "";
+      }}
       pagination={{
         pageSize: 10,
         showSizeChanger: true,

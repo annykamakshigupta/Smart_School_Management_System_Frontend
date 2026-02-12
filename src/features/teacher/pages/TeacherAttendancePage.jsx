@@ -1,6 +1,6 @@
 /**
- * Teacher Attendance Page
- * Overview page for teachers to view attendance records and navigate to mark attendance
+ * Teacher Attendance Page - Modern & Classy Design
+ * View attendance records with beautiful, clean interface
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -15,6 +15,12 @@ import {
   Spin,
   message,
   Progress,
+  Statistic,
+  Row,
+  Col,
+  Space,
+  Avatar,
+  Typography,
 } from "antd";
 import {
   PlusOutlined,
@@ -25,6 +31,10 @@ import {
   CalendarOutlined,
   FilterOutlined,
   BarChartOutlined,
+  UserOutlined,
+  BookOutlined,
+  TeamOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "../../../components/UI";
@@ -34,6 +44,8 @@ import {
   getAttendanceSummary,
 } from "../../../services/attendance.service";
 import dayjs from "dayjs";
+
+const { Title, Text } = Typography;
 
 const TeacherAttendancePage = () => {
   const navigate = useNavigate();
@@ -148,70 +160,132 @@ const TeacherAttendancePage = () => {
       ? Math.round((localSummary.present / localSummary.total) * 100)
       : 0;
 
-  // Table columns
+  // Table columns with modern design
   const columns = [
     {
-      title: "Date",
+      title: (
+        <Space>
+          <CalendarOutlined />
+          <span>Date</span>
+        </Space>
+      ),
       dataIndex: "date",
       key: "date",
-      width: 120,
-      render: (date) => dayjs(date).format("MMM DD, YYYY"),
-    },
-    {
-      title: "Student",
-      dataIndex: "student",
-      key: "student",
-      render: (student) => (
+      width: 140,
+      sorter: (a, b) => new Date(a.date) - new Date(b.date),
+      render: (date) => (
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-medium text-sm">
-            {student?.user?.name?.[0]?.toUpperCase() || "S"}
+          <div className="w-10 h-10 bg-blue-50 rounded-lg flex flex-col items-center justify-center">
+            <div className="text-xs text-blue-600 font-semibold">
+              {dayjs(date).format("MMM")}
+            </div>
+            <div className="text-sm font-bold text-blue-900">
+              {dayjs(date).format("DD")}
+            </div>
           </div>
           <div>
-            <div className="font-medium text-slate-900">
-              {student?.user?.name || "Unknown"}
+            <div className="font-medium text-slate-700">
+              {dayjs(date).format("ddd")}
             </div>
             <div className="text-xs text-slate-500">
-              Roll: {student?.rollNumber || "N/A"}
+              {dayjs(date).format("YYYY")}
             </div>
           </div>
         </div>
       ),
     },
     {
-      title: "Subject",
-      dataIndex: "subject",
+      title: (
+        <Space>
+          <UserOutlined />
+          <span>Student</span>
+        </Space>
+      ),
+      dataIndex: "studentId",
+      key: "student",
+      render: (studentId) => {
+        const student = studentId;
+        const userName =
+          student?.userId?.name || student?.user?.name || "Unknown Student";
+        const rollNumber = student?.rollNumber || "N/A";
+
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar
+              size={40}
+              className="bg-blue-500 shrink-0"
+              icon={<UserOutlined />}>
+              {userName?.[0]?.toUpperCase()}
+            </Avatar>
+            <div>
+              <div className="font-semibold text-slate-900">{userName}</div>
+              <div className="text-xs text-slate-500 flex items-center gap-1">
+                <TeamOutlined className="text-[10px]" />
+                Roll: {rollNumber}
+              </div>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      title: (
+        <Space>
+          <BookOutlined />
+          <span>Subject</span>
+        </Space>
+      ),
+      dataIndex: "subjectId",
       key: "subject",
-      render: (subject) => (
-        <span className="text-slate-600">{subject?.name || "N/A"}</span>
+      render: (subject, record) => (
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+            <BookOutlined className="text-purple-600" />
+          </div>
+          <span className="font-medium text-slate-700">
+            {(subject?.name || record?.subject?.name) ?? "N/A"}
+          </span>
+        </div>
       ),
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
-      width: 120,
+      width: 130,
+      filters: [
+        { text: "Present", value: "present" },
+        { text: "Absent", value: "absent" },
+        { text: "Late", value: "late" },
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status) => {
         const config = {
           present: {
             color: "success",
             icon: <CheckCircleOutlined />,
             label: "Present",
+            className: "border-emerald-200 bg-emerald-50 text-emerald-700",
           },
           absent: {
             color: "error",
             icon: <CloseCircleOutlined />,
             label: "Absent",
+            className: "border-red-200 bg-red-50 text-red-700",
           },
           late: {
             color: "warning",
             icon: <ClockCircleOutlined />,
             label: "Late",
+            className: "border-amber-200 bg-amber-50 text-amber-700",
           },
         };
-        const { color, icon, label } = config[status] || config.present;
+        const statusConfig = config[status] || config.present;
         return (
-          <Tag color={color} icon={icon}>
-            {label}
+          <Tag
+            icon={statusConfig.icon}
+            className={`px-3 py-1 font-medium border ${statusConfig.className}`}>
+            {statusConfig.label}
           </Tag>
         );
       },
@@ -220,8 +294,9 @@ const TeacherAttendancePage = () => {
       title: "Remarks",
       dataIndex: "remarks",
       key: "remarks",
+      ellipsis: true,
       render: (remarks) => (
-        <span className="text-slate-500 text-sm">{remarks || "-"}</span>
+        <span className="text-slate-600 italic">{remarks || "—"}</span>
       ),
     },
   ];
@@ -229,13 +304,13 @@ const TeacherAttendancePage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-100">
-        <Spin size="large" />
+        <Spin size="large" tip="Loading..." />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-slate-50 min-h-screen">
       {/* Header */}
       <PageHeader
         title="Attendance Management"
@@ -246,18 +321,25 @@ const TeacherAttendancePage = () => {
             icon={<PlusOutlined />}
             onClick={() => navigate("/teacher/attendance/mark")}
             size="large"
-            className="bg-blue-600 hover:bg-blue-700">
+            className="bg-blue-600 hover:bg-blue-700 shadow-md h-12 px-6 font-semibold">
             Mark Attendance
           </Button>
         }
       />
 
       {/* Filter Card */}
-      <Card className="border border-slate-200 shadow-sm">
-        <div className="flex flex-wrap gap-4 items-end">
-          <div className="flex-1 min-w-37.5">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              <FilterOutlined className="mr-1" /> Class
+      <Card className="border-0 shadow-lg rounded-2xl">
+        <div className="mb-4">
+          <Title level={5} className="mb-0 flex items-center gap-2">
+            <FilterOutlined className="text-blue-600" />
+            Filter Attendance Records
+          </Title>
+        </div>
+        <Row gutter={[16, 16]}>
+          <Col xs={24} sm={12} lg={8}>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <TeamOutlined className="mr-2" />
+              Class
             </label>
             <Select
               placeholder="Select Class"
@@ -267,13 +349,15 @@ const TeacherAttendancePage = () => {
                 setSelectedSubject(null);
               }}
               className="w-full"
+              size="large"
               options={classOptions}
               allowClear
             />
-          </div>
+          </Col>
 
-          <div className="flex-1 min-w-37.5">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+          <Col xs={24} sm={12} lg={8}>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <BookOutlined className="mr-2" />
               Subject
             </label>
             <Select
@@ -281,104 +365,181 @@ const TeacherAttendancePage = () => {
               value={selectedSubject}
               onChange={setSelectedSubject}
               className="w-full"
+              size="large"
               options={subjectOptions}
               disabled={!selectedClass}
               allowClear
             />
-          </div>
+          </Col>
 
-          <div className="flex-1 min-w-50">
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              <CalendarOutlined className="mr-1" /> Date Range
+          <Col xs={24} sm={12} lg={6}>
+            <label className="block text-sm font-semibold text-slate-700 mb-2">
+              <CalendarOutlined className="mr-2" />
+              Date Range
             </label>
             <DatePicker.RangePicker
               value={dateRange}
               onChange={setDateRange}
               className="w-full"
+              size="large"
               format="MMM DD, YYYY"
             />
-          </div>
+          </Col>
 
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={fetchAttendance}
-            loading={attendanceLoading}
-            disabled={!selectedClass}>
-            Refresh
-          </Button>
-        </div>
+          <Col xs={24} sm={12} lg={2}>
+            <label className="block text-sm font-semibold text-slate-700 mb-2 opacity-0">
+              Action
+            </label>
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={fetchAttendance}
+              loading={attendanceLoading}
+              disabled={!selectedClass}
+              size="large"
+              className="w-full">
+              Refresh
+            </Button>
+          </Col>
+        </Row>
       </Card>
 
       {/* Summary Cards */}
       {selectedClass && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <Card className="border border-slate-200 shadow-sm">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-slate-900">
-                {localSummary.total}
-              </div>
-              <div className="text-sm text-slate-500 mt-1">Total Records</div>
-            </div>
-          </Card>
-
-          <Card className="border border-emerald-200 bg-emerald-50 shadow-sm">
-            <div className="text-center">
-              <CheckCircleOutlined className="text-2xl text-emerald-600 mb-1" />
-              <div className="text-3xl font-bold text-emerald-700">
-                {localSummary.present}
-              </div>
-              <div className="text-sm text-emerald-600 mt-1">Present</div>
-            </div>
-          </Card>
-
-          <Card className="border border-red-200 bg-red-50 shadow-sm">
-            <div className="text-center">
-              <CloseCircleOutlined className="text-2xl text-red-600 mb-1" />
-              <div className="text-3xl font-bold text-red-700">
-                {localSummary.absent}
-              </div>
-              <div className="text-sm text-red-600 mt-1">Absent</div>
-            </div>
-          </Card>
-
-          <Card className="border border-amber-200 bg-amber-50 shadow-sm">
-            <div className="text-center">
-              <ClockCircleOutlined className="text-2xl text-amber-600 mb-1" />
-              <div className="text-3xl font-bold text-amber-700">
-                {localSummary.late}
-              </div>
-              <div className="text-sm text-amber-600 mt-1">Late</div>
-            </div>
-          </Card>
-
-          <Card className="border border-blue-200 bg-blue-50 shadow-sm">
-            <div className="text-center">
-              <BarChartOutlined className="text-2xl text-blue-600 mb-1" />
-              <Progress
-                type="circle"
-                percent={attendanceRate}
-                width={50}
-                strokeColor="#3b82f6"
-                className="mb-1"
+        <Row gutter={[16, 16]}>
+          <Col xs={12} sm={12} md={6} lg={6}>
+            <Card className="border-0 shadow-md rounded-xl hover:shadow-lg transition-shadow">
+              <Statistic
+                title={
+                  <Text className="text-slate-600 flex items-center gap-2">
+                    <TeamOutlined />
+                    Total Records
+                  </Text>
+                }
+                value={localSummary.total}
+                valueStyle={{ color: "#475569", fontWeight: "bold" }}
               />
-              <div className="text-sm text-blue-600 mt-1">Attendance Rate</div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </Col>
+
+          <Col xs={12} sm={12} md={6} lg={6}>
+            <Card className="border-0 shadow-md rounded-xl bg-emerald-50 hover:shadow-lg transition-shadow">
+              <Statistic
+                title={
+                  <Text className="text-emerald-700 flex items-center gap-2 font-semibold">
+                    <CheckCircleOutlined />
+                    Present
+                  </Text>
+                }
+                value={localSummary.present}
+                valueStyle={{ color: "#059669", fontWeight: "bold" }}
+              />
+            </Card>
+          </Col>
+
+          <Col xs={12} sm={12} md={6} lg={6}>
+            <Card className="border-0 shadow-md rounded-xl bg-red-50 hover:shadow-lg transition-shadow">
+              <Statistic
+                title={
+                  <Text className="text-red-700 flex items-center gap-2 font-semibold">
+                    <CloseCircleOutlined />
+                    Absent
+                  </Text>
+                }
+                value={localSummary.absent}
+                valueStyle={{ color: "#dc2626", fontWeight: "bold" }}
+              />
+            </Card>
+          </Col>
+
+          <Col xs={12} sm={12} md={6} lg={6}>
+            <Card className="border-0 shadow-md rounded-xl bg-amber-50 hover:shadow-lg transition-shadow">
+              <Statistic
+                title={
+                  <Text className="text-amber-700 flex items-center gap-2 font-semibold">
+                    <ClockCircleOutlined />
+                    Late
+                  </Text>
+                }
+                value={localSummary.late}
+                valueStyle={{ color: "#d97706", fontWeight: "bold" }}
+              />
+            </Card>
+          </Col>
+        </Row>
+      )}
+
+      {/* Attendance Rate Progress */}
+      {selectedClass && localSummary.total > 0 && (
+        <Card className="border-0 shadow-md rounded-xl">
+          <Row align="middle" gutter={24}>
+            <Col xs={24} md={4}>
+              <div className="text-center">
+                <Progress
+                  type="circle"
+                  percent={attendanceRate}
+                  strokeColor={{
+                    "0%":
+                      attendanceRate >= 75
+                        ? "#10b981"
+                        : attendanceRate >= 50
+                          ? "#f59e0b"
+                          : "#ef4444",
+                    "100%":
+                      attendanceRate >= 75
+                        ? "#059669"
+                        : attendanceRate >= 50
+                          ? "#d97706"
+                          : "#dc2626",
+                  }}
+                  strokeWidth={8}
+                  width={100}
+                />
+              </div>
+            </Col>
+            <Col xs={24} md={20}>
+              <Title level={4} className="mb-2 flex items-center gap-2">
+                <TrophyOutlined className="text-blue-600" />
+                Overall Attendance Rate
+              </Title>
+              <Text className="text-slate-600">
+                {attendanceRate >= 75
+                  ? "Excellent attendance! Students are performing well."
+                  : attendanceRate >= 50
+                    ? "Good attendance. Some improvements needed."
+                    : "Low attendance. Immediate attention required."}
+              </Text>
+            </Col>
+          </Row>
+        </Card>
       )}
 
       {/* Attendance Table */}
       <Card
-        className="border border-slate-200 shadow-sm"
+        className="border-0 shadow-lg rounded-2xl"
         title={
-          <div className="flex items-center gap-2">
-            <CalendarOutlined className="text-blue-600" />
-            <span>Attendance Records</span>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+              <CalendarOutlined className="text-blue-600 text-lg" />
+            </div>
+            <div>
+              <Title level={4} className="mb-0">
+                Attendance Records
+              </Title>
+              <Text className="text-slate-500 text-sm">
+                View and track student attendance
+              </Text>
+            </div>
           </div>
         }>
         {!selectedClass ? (
           <Empty
-            description="Please select a class to view attendance records"
+            description={
+              <div>
+                <Text className="text-slate-600">
+                  Please select a class to view attendance records
+                </Text>
+              </div>
+            }
             image={Empty.PRESENTED_IMAGE_SIMPLE}
           />
         ) : (
@@ -387,11 +548,19 @@ const TeacherAttendancePage = () => {
             dataSource={attendance}
             rowKey="_id"
             loading={attendanceLoading}
+            rowClassName={(record) => {
+              const status = record?.status;
+              if (status === "present") return "bg-emerald-50";
+              if (status === "absent") return "bg-red-50";
+              if (status === "late") return "bg-amber-50";
+              return "";
+            }}
             pagination={{
               pageSize: 10,
               showSizeChanger: true,
               showTotal: (total, range) =>
                 `${range[0]}-${range[1]} of ${total} records`,
+              className: "px-4",
             }}
             locale={{
               emptyText: (
@@ -401,6 +570,7 @@ const TeacherAttendancePage = () => {
                 />
               ),
             }}
+            className="modern-table"
           />
         )}
       </Card>

@@ -126,6 +126,8 @@ const StudentClassesPage = () => {
   }
 
   const classInfo = studentProfile.class || studentProfile.classId;
+  const classTeacher = classInfo?.classTeacher || null;
+  const classTeacherUser = classTeacher?.userId || classTeacher?.user || null;
 
   return (
     <div className="min-h-screen bg-slate-50 -m-6 p-6">
@@ -236,7 +238,7 @@ const StudentClassesPage = () => {
       </Card>
 
       {/* Class Teacher Card */}
-      {classInfo?.classTeacher && (
+      {classTeacher && (
         <Card
           title={
             <div className="flex items-center gap-2">
@@ -250,19 +252,19 @@ const StudentClassesPage = () => {
               size={64}
               className="bg-emerald-600"
               icon={<UserOutlined />}>
-              {classInfo.classTeacher.user?.name?.[0]?.toUpperCase()}
+              {classTeacherUser?.name?.[0]?.toUpperCase()}
             </Avatar>
             <div>
               <h3 className="text-lg font-semibold text-slate-900">
-                {classInfo.classTeacher.user?.name || "Class Teacher"}
+                {classTeacherUser?.name || "Class Teacher"}
               </h3>
               <p className="text-slate-500">
-                {classInfo.classTeacher.qualification || "Teacher"}
+                {classTeacher.qualification || "Teacher"}
               </p>
-              {classInfo.classTeacher.user?.email && (
+              {classTeacherUser?.email && (
                 <div className="flex items-center gap-2 mt-2 text-sm text-slate-600">
                   <MailOutlined />
-                  <span>{classInfo.classTeacher.user.email}</span>
+                  <span>{classTeacherUser.email}</span>
                 </div>
               )}
             </div>
@@ -353,6 +355,9 @@ const SubjectCard = ({ subject }) => {
   };
 
   const colorScheme = subjectColors[subject.name] || subjectColors.default;
+  const assignedTeacher = subject?.assignedTeacher || null;
+  const assignedTeacherUser =
+    assignedTeacher?.userId || assignedTeacher?.user || null;
 
   return (
     <div
@@ -383,18 +388,18 @@ const SubjectCard = ({ subject }) => {
       </div>
 
       {/* Teacher Info */}
-      {subject.assignedTeacher && (
+      {assignedTeacher && (
         <div className="mt-3 pt-3 border-t border-slate-200">
           <div className="flex items-center gap-2">
             <Avatar
               size="small"
               className="bg-slate-600"
               icon={<UserOutlined />}>
-              {subject.assignedTeacher.user?.name?.[0]?.toUpperCase()}
+              {assignedTeacherUser?.name?.[0]?.toUpperCase()}
             </Avatar>
             <div>
               <div className="text-sm font-medium text-slate-900">
-                {subject.assignedTeacher.user?.name || "Teacher"}
+                {assignedTeacherUser?.name || "Teacher"}
               </div>
               <div className="text-xs text-slate-500">Subject Teacher</div>
             </div>

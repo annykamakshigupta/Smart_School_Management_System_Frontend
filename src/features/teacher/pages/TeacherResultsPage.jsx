@@ -31,7 +31,7 @@ import {
   getExamResults,
   getClassAnalytics,
 } from "../../../services/exam.service";
-import { getStudentsByClass } from "../../../services/admin.service";
+import { getStudentsByClass } from "../../../services/teacher.service";
 import { GradeBadge } from "../../../components/Results";
 
 const examTypeLabels = {
@@ -79,6 +79,8 @@ const TeacherResultsPage = () => {
     const exam = exams.find((e) => e._id === examId);
     setSelectedExam(exam);
     setSelectedExamSubject(null);
+    setSelectedClassId(null);
+    setStudents([]);
     setMarksData([]);
     try {
       const res = await getExamSubjects(examId);
@@ -92,16 +94,24 @@ const TeacherResultsPage = () => {
     const es = examSubjects.find((s) => s._id === esId);
     setSelectedExamSubject(es);
     setSelectedClassId(es?.classId?._id);
+    setStudents([]);
+    setMarksData([]);
     setLoading(true);
     try {
-      const studentRes = await getStudentsByClass(es.classId._id);
+      const classId = es?.classId?._id;
+      const subjectId = es?.subjectId?._id;
+      if (!classId || !subjectId || !selectedExam?._id) {
+        throw new Error("Please select a valid exam, class, and subject");
+      }
+
+      const studentRes = await getStudentsByClass(classId, subjectId);
       const studentList = studentRes.data || [];
 
       // Load existing marks
       const resultsRes = await getExamResults(
         selectedExam._id,
-        es.classId._id,
-        es.subjectId._id,
+        classId,
+        subjectId,
       );
       const existingResults = resultsRes.data || [];
 
@@ -121,7 +131,9 @@ const TeacherResultsPage = () => {
       setMarksData(mergedMarks);
       setStudents(studentList);
     } catch (e) {
-      message.error("Error loading students");
+      setStudents([]);
+      setMarksData([]);
+      message.error(e.message || "Error loading students");
     } finally {
       setLoading(false);
     }

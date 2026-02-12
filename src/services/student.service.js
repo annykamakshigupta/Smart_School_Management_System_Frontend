@@ -39,9 +39,23 @@ export const getMyStudentProfile = async () => {
     }
     const user = JSON.parse(userData);
 
-    // If roleProfile exists, return it directly
+    // If roleProfile exists and looks populated, return it directly.
+    // Otherwise fall back to /users/me to avoid stale/incomplete localStorage payloads.
     if (user.roleProfile) {
-      return { data: normalizeStudentProfile(user.roleProfile), success: true };
+      const rp = user.roleProfile;
+      const hasPopulatedUser =
+        rp.userId &&
+        typeof rp.userId === "object" &&
+        (rp.userId.email || rp.userId.name);
+      const hasClass =
+        (rp.classId &&
+          typeof rp.classId === "object" &&
+          (rp.classId._id || rp.classId.name)) ||
+        typeof rp.classId === "string";
+
+      if (hasPopulatedUser && hasClass) {
+        return { data: normalizeStudentProfile(rp), success: true };
+      }
     }
 
     // Otherwise fetch from API (student-accessible)
