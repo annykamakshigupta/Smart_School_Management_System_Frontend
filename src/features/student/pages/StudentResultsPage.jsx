@@ -181,7 +181,7 @@ const StudentResultsPage = () => {
                   title="Percentage"
                   value={summary.percentage}
                   suffix="%"
-                  valueStyle={{ color: "#2563eb" }}
+                  styles={{ color: "#2563eb" }}
                 />
               </Card>
               <Card className="text-center">
@@ -191,7 +191,7 @@ const StudentResultsPage = () => {
                 <Statistic
                   title="Result"
                   value={summary.allPassed ? "PASS" : "FAIL"}
-                  valueStyle={{
+                  styles={{
                     color: summary.allPassed ? "#16a34a" : "#dc2626",
                     fontWeight: 700,
                   }}

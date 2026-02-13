@@ -174,22 +174,14 @@ const MyClassesPage = () => {
       const classesArray = Array.from(classesMap.values());
 
       if (isDebugEnabled()) {
-        console.log("[MyClassesPage] classesArray", {
-          count: classesArray.length,
-          ids: classesArray.map((c) => c.id),
-        });
+        console.log("[MyClassesPage] Processed classes data", classesArray);
       }
-
       // Fetch student counts for each class
       for (const classData of classesArray) {
         try {
-          if (isDebugEnabled()) {
-            console.log("[MyClassesPage] fetching students", {
-              classId: classData.id,
-              displayName: classData.displayName,
-            });
-          }
+        
           const studentsRes = await getStudentsByClass(classData.id);
+        
           classData.totalStudents = studentsRes?.data?.length || 0;
 
           if (isDebugEnabled()) {
@@ -311,7 +303,7 @@ const MyClassesPage = () => {
             }
             value={classesData.length}
             prefix={<BookOutlined className="text-indigo-500" />}
-            valueStyle={{ color: "#6366f1", fontWeight: "bold" }}
+            styles={{ color: "#6366f1", fontWeight: "bold" }}
           />
         </Card>
 
@@ -322,7 +314,7 @@ const MyClassesPage = () => {
             }
             value={getTotalStudents()}
             prefix={<TeamOutlined className="text-emerald-500" />}
-            valueStyle={{ color: "#10b981", fontWeight: "bold" }}
+            styles={{ color: "#10b981", fontWeight: "bold" }}
           />
         </Card>
 
@@ -335,7 +327,7 @@ const MyClassesPage = () => {
             }
             value={getTotalSubjects()}
             prefix={<FileTextOutlined className="text-amber-500" />}
-            valueStyle={{ color: "#f59e0b", fontWeight: "bold" }}
+            styles={{ color: "#f59e0b", fontWeight: "bold" }}
           />
         </Card>
 
@@ -348,7 +340,7 @@ const MyClassesPage = () => {
             }
             value={getClassTeacherCount()}
             prefix={<StarOutlined className="text-rose-500" />}
-            valueStyle={{ color: "#f43f5e", fontWeight: "bold" }}
+            styles={{ color: "#f43f5e", fontWeight: "bold" }}
           />
         </Card>
       </div>

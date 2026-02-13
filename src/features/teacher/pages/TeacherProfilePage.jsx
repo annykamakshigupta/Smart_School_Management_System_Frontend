@@ -180,7 +180,7 @@ const TeacherProfilePage = () => {
                   </span>
                 }
                 value={uniqueClasses.length}
-                valueStyle={{ color: "#2563eb" }}
+                styles={{ color: "#2563eb" }}
                 prefix={<TeamOutlined />}
               />
             </Card>
@@ -194,7 +194,7 @@ const TeacherProfilePage = () => {
                   </span>
                 }
                 value={uniqueSubjects.length}
-                valueStyle={{ color: "#059669" }}
+                styles={{ color: "#059669" }}
                 prefix={<BookOutlined />}
               />
             </Card>
@@ -208,7 +208,7 @@ const TeacherProfilePage = () => {
                   </span>
                 }
                 value={assignments.length}
-                valueStyle={{ color: "#7c3aed" }}
+                styles={{ color: "#7c3aed" }}
                 prefix={<FileTextOutlined />}
               />
             </Card>

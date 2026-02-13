@@ -180,7 +180,7 @@ const StudentProfilePage = () => {
                 }
                 value={calculateAttendanceRate()}
                 suffix="%"
-                valueStyle={{ color: "#059669" }}
+                styles={{ color: "#059669" }}
                 prefix={<CheckCircleOutlined />}
               />
               <Progress
@@ -200,7 +200,7 @@ const StudentProfilePage = () => {
                   </span>
                 }
                 value={subjects.length}
-                valueStyle={{ color: "#2563eb" }}
+                styles={{ color: "#2563eb" }}
                 prefix={<BookOutlined />}
               />
             </Card>
@@ -215,7 +215,7 @@ const StudentProfilePage = () => {
                 }
                 value={calculateAverageGrade()}
                 suffix="%"
-                valueStyle={{ color: "#d97706" }}
+                styles={{ color: "#d97706" }}
                 prefix={<TrophyOutlined />}
               />
               <Progress

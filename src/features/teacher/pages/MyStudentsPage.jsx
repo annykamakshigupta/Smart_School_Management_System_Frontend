@@ -202,7 +202,6 @@ const MyStudentsPage = () => {
         <PageHeader
           title="My Students"
           subtitle="View and manage all students in your assigned classes"
-         
         />
         <EmptyState
           title="No Students Found"
@@ -234,7 +233,7 @@ const MyStudentsPage = () => {
               }
               value={allStudents.length}
               prefix={<TeamOutlined className="text-indigo-500" />}
-              valueStyle={{ color: "#6366f1", fontWeight: "bold" }}
+              styles={{ color: "#6366f1", fontWeight: "bold" }}
             />
           </Card>
         </Col>
@@ -251,7 +250,7 @@ const MyStudentsPage = () => {
                   .length
               }
               prefix={<CheckCircleOutlined className="text-emerald-500" />}
-              valueStyle={{ color: "#10b981", fontWeight: "bold" }}
+              styles={{ color: "#10b981", fontWeight: "bold" }}
             />
           </Card>
         </Col>
@@ -263,7 +262,7 @@ const MyStudentsPage = () => {
               }
               value={classesData.length}
               prefix={<BookOutlined className="text-amber-500" />}
-              valueStyle={{ color: "#f59e0b", fontWeight: "bold" }}
+              styles={{ color: "#f59e0b", fontWeight: "bold" }}
             />
           </Card>
         </Col>
@@ -277,7 +276,7 @@ const MyStudentsPage = () => {
               }
               value={filteredStudents.length}
               prefix={<FilterOutlined className="text-rose-500" />}
-              valueStyle={{ color: "#f43f5e", fontWeight: "bold" }}
+              styles={{ color: "#f43f5e", fontWeight: "bold" }}
             />
           </Card>
         </Col>

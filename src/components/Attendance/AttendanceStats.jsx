@@ -56,7 +56,7 @@ const AttendanceStats = ({ statistics, loading = false }) => {
               title="Total Classes"
               value={totalClasses}
               prefix={<CalendarOutlined className="text-blue-500" />}
-              valueStyle={{ color: "#1890ff" }}
+              styles={{ color: "#1890ff" }}
             />
           </Card>
         </Col>
@@ -67,7 +67,7 @@ const AttendanceStats = ({ statistics, loading = false }) => {
               title="Present"
               value={present}
               prefix={<CheckCircleOutlined className="text-green-500" />}
-              valueStyle={{ color: "#52c41a" }}
+              styles={{ color: "#52c41a" }}
             />
           </Card>
         </Col>
@@ -78,7 +78,7 @@ const AttendanceStats = ({ statistics, loading = false }) => {
               title="Absent"
               value={absent}
               prefix={<CloseCircleOutlined className="text-red-500" />}
-              valueStyle={{ color: "#ff4d4f" }}
+              styles={{ color: "#ff4d4f" }}
             />
           </Card>
         </Col>
@@ -89,7 +89,7 @@ const AttendanceStats = ({ statistics, loading = false }) => {
               title="Late"
               value={late}
               prefix={<ClockCircleOutlined className="text-yellow-500" />}
-              valueStyle={{ color: "#faad14" }}
+              styles={{ color: "#faad14" }}
             />
           </Card>
         </Col>

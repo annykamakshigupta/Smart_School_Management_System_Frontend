@@ -806,21 +806,21 @@ const AdminResultsPage = () => {
                   title="Class Average"
                   value={analyticsData.overview.overallAverage}
                   suffix="%"
-                  valueStyle={{ color: "#2563eb" }}
+                  styles={{ color: "#2563eb" }}
                 />
               </Card>
               <Card className="text-center">
                 <Statistic
                   title="Passed"
                   value={analyticsData.overview.passCount}
-                  valueStyle={{ color: "#16a34a" }}
+                  styles={{ color: "#16a34a" }}
                 />
               </Card>
               <Card className="text-center">
                 <Statistic
                   title="Failed"
                   value={analyticsData.overview.failCount}
-                  valueStyle={{ color: "#dc2626" }}
+                  styles={{ color: "#dc2626" }}
                 />
               </Card>
             </div>

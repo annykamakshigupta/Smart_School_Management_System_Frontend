@@ -134,7 +134,7 @@ const AdminProfilePage = () => {
                     </span>
                   }
                   value={stats.totalStudents || 0}
-                  valueStyle={{ color: "#2563eb" }}
+                  styles={{ color: "#2563eb" }}
                   prefix={<UserOutlined />}
                 />
               </Card>
@@ -148,7 +148,7 @@ const AdminProfilePage = () => {
                     </span>
                   }
                   value={stats.totalTeachers || 0}
-                  valueStyle={{ color: "#059669" }}
+                  styles={{ color: "#059669" }}
                   prefix={<TeamOutlined />}
                 />
               </Card>
@@ -162,7 +162,7 @@ const AdminProfilePage = () => {
                     </span>
                   }
                   value={stats.totalClasses || 0}
-                  valueStyle={{ color: "#7c3aed" }}
+                  styles={{ color: "#7c3aed" }}
                   prefix={<BookOutlined />}
                 />
               </Card>
@@ -176,7 +176,7 @@ const AdminProfilePage = () => {
                     </span>
                   }
                   value={stats.totalParents || 0}
-                  valueStyle={{ color: "#d97706" }}
+                  styles={{ color: "#d97706" }}
                   prefix={<UserOutlined />}
                 />
               </Card>

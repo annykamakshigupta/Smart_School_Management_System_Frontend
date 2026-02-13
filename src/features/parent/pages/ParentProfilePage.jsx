@@ -134,7 +134,7 @@ const ParentProfilePage = () => {
                   </span>
                 }
                 value={children.length}
-                valueStyle={{ color: "#7c3aed" }}
+                styles={{ color: "#7c3aed" }}
                 prefix={<TeamOutlined />}
               />
             </Card>
@@ -150,7 +150,7 @@ const ParentProfilePage = () => {
                 value={
                   children.filter((c) => c.userId?.status === "active").length
                 }
-                valueStyle={{ color: "#2563eb" }}
+                styles={{ color: "#2563eb" }}
                 prefix={<UserOutlined />}
               />
             </Card>

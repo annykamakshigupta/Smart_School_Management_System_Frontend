@@ -416,7 +416,7 @@ const TeacherAttendancePage = () => {
                   </Text>
                 }
                 value={localSummary.total}
-                valueStyle={{ color: "#475569", fontWeight: "bold" }}
+                styles={{ color: "#475569", fontWeight: "bold" }}
               />
             </Card>
           </Col>
@@ -431,7 +431,7 @@ const TeacherAttendancePage = () => {
                   </Text>
                 }
                 value={localSummary.present}
-                valueStyle={{ color: "#059669", fontWeight: "bold" }}
+                styles={{ color: "#059669", fontWeight: "bold" }}
               />
             </Card>
           </Col>
@@ -446,7 +446,7 @@ const TeacherAttendancePage = () => {
                   </Text>
                 }
                 value={localSummary.absent}
-                valueStyle={{ color: "#dc2626", fontWeight: "bold" }}
+                styles={{ color: "#dc2626", fontWeight: "bold" }}
               />
             </Card>
           </Col>
@@ -461,7 +461,7 @@ const TeacherAttendancePage = () => {
                   </Text>
                 }
                 value={localSummary.late}
-                valueStyle={{ color: "#d97706", fontWeight: "bold" }}
+                styles={{ color: "#d97706", fontWeight: "bold" }}
               />
             </Card>
           </Col>

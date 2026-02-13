@@ -181,7 +181,7 @@ const DashboardHeader = ({
             menu={{ items: userMenuItems }}
             trigger={["click"]}
             placement="bottomRight"
-            overlayClassName="w-56">
+            classNames="w-56">
             <button
               className="
                 flex items-center gap-3 p-1.5 pr-3

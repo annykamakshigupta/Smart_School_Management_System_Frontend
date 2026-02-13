@@ -124,11 +124,9 @@ export const getMyAssignments = async () => {
  */
 export const getStudentsByClass = async (classId) => {
   try {
-    const subjectId = arguments.length > 1 ? arguments[1] : undefined;
-    const params = new URLSearchParams();
-    if (subjectId) params.append("subjectId", subjectId);
 
-    // Dedicated teacher endpoint (clear auth + better errors)
+    const params = new URLSearchParams();
+
     const url = params.toString()
       ? `${API_URL}/teachers/class/${classId}/students?${params.toString()}`
       : `${API_URL}/teachers/class/${classId}/students`;
@@ -163,6 +161,7 @@ export const getStudentsByClass = async (classId) => {
       });
     }
 
+    console.error(error);
     const status = error.response?.status;
     const backendMessage = error.response?.data?.message;
     const backendError = error.response?.data?.error;

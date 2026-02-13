@@ -413,21 +413,21 @@ const TeacherResultsPage = () => {
                     title="Average"
                     value={analyticsData.overview?.overallAverage || 0}
                     suffix="%"
-                    valueStyle={{ color: "#2563eb" }}
+                    styles={{ color: "#2563eb" }}
                   />
                 </Card>
                 <Card className="text-center">
                   <Statistic
                     title="Pass"
                     value={analyticsData.overview?.passCount || 0}
-                    valueStyle={{ color: "#16a34a" }}
+                    styles={{ color: "#16a34a" }}
                   />
                 </Card>
                 <Card className="text-center">
                   <Statistic
                     title="Fail"
                     value={analyticsData.overview?.failCount || 0}
-                    valueStyle={{ color: "#dc2626" }}
+                    styles={{ color: "#dc2626" }}
                   />
                 </Card>
               </div>
