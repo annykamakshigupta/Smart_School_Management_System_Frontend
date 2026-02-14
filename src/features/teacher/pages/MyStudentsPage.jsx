@@ -63,18 +63,43 @@ const MyStudentsPage = () => {
     try {
       setLoading(true);
 
-      // Get teacher's assigned classes
+      // Get teacher's assignments (classes can come from multiple sources)
       const response = await getMyAssignments();
-      const assignedClasses = response?.data?.assignedClasses || [];
+      const assignments = response?.data || {};
+
+      const assignedClasses = Array.isArray(assignments.assignedClasses)
+        ? assignments.assignedClasses
+        : [];
+      const classTeacherOf = Array.isArray(assignments.classTeacherOf)
+        ? assignments.classTeacherOf
+        : [];
+      const assignedSubjectPairs = Array.isArray(
+        assignments.assignedSubjectPairs,
+      )
+        ? assignments.assignedSubjectPairs
+        : [];
+
+      const scheduleClasses = assignedSubjectPairs
+        .map((pair) => pair?.classId)
+        .filter(Boolean);
+
+      const allClassSources = [
+        ...assignedClasses,
+        ...classTeacherOf,
+        ...scheduleClasses,
+      ];
 
       // Build unique classes list
       const uniqueClasses = [];
       const classMap = new Map();
 
-      assignedClasses.forEach((cls) => {
-        const classId = cls._id || cls;
-        const className = cls.name || "Unknown";
-        const section = cls.section || "";
+      allClassSources.forEach((cls) => {
+        const rawId = cls?._id || cls?.id || cls;
+        if (!rawId) return;
+
+        const classId = String(rawId);
+        const className = cls?.name || "Unknown";
+        const section = cls?.section || "";
 
         if (!classMap.has(classId)) {
           const displayName = section ? `${className} - ${section}` : className;
@@ -133,12 +158,17 @@ const MyStudentsPage = () => {
   const filteredStudents = allStudents.filter((student) => {
     const matchesClass =
       selectedClass === "all" || student.classId === selectedClass;
+
+    const q = (searchQuery || "").trim().toLowerCase();
+    if (!q) return matchesClass;
+
+    const name = String(student?.userId?.name || "").toLowerCase();
+    const admission = String(student?.admissionNumber || "").toLowerCase();
+    const roll = String(student?.rollNumber || "").toLowerCase();
+
     const matchesSearch =
-      student.userId?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.admissionNumber
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase()) ||
-      student.rollNumber?.toLowerCase().includes(searchQuery.toLowerCase());
+      name.includes(q) || admission.includes(q) || roll.includes(q);
+
     return matchesClass && matchesSearch;
   });
 
@@ -312,55 +342,10 @@ const MyStudentsPage = () => {
         </div>
       </Card>
 
-      {/* Class Overview Cards */}
-      {Object.keys(classStats).length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-          <Card
-            className={`cursor-pointer transition-all duration-300 hover:shadow-lg border-2 ${
-              selectedClass === "all"
-                ? "border-indigo-500 bg-indigo-50"
-                : "border-transparent hover:border-indigo-200"
-            }`}
-            onClick={() => setSelectedClass("all")}>
-            <div className="text-center">
-              <div className="text-sm font-medium text-gray-600 mb-1">
-                All Classes
-              </div>
-              <div className="text-3xl font-bold text-indigo-600">
-                {allStudents.length}
-              </div>
-              <div className="text-xs text-gray-500 mt-1">total students</div>
-            </div>
-          </Card>
-
-          {Object.entries(classStats).map(([classId, stats]) => (
-            <Card
-              key={classId}
-              className={`cursor-pointer transition-all duration-300 hover:shadow-lg border-2 ${
-                selectedClass === classId
-                  ? "border-indigo-500 bg-indigo-50"
-                  : "border-transparent hover:border-indigo-200"
-              }`}
-              onClick={() => setSelectedClass(classId)}>
-              <div className="text-center">
-                <div className="text-sm font-medium text-gray-900 mb-1 truncate">
-                  {stats.displayName}
-                </div>
-                <div className="text-3xl font-bold text-indigo-600">
-                  {stats.total}
-                </div>
-                <div className="text-xs text-gray-500 mt-1">
-                  {stats.active} active
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-      )}
 
       {/* Students Grid */}
       {filteredStudents.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-4 gap-6">
           {filteredStudents.map((student, index) => (
             <Card
               key={student._id || student.id}

@@ -194,12 +194,17 @@ const AdminAttendancePage = () => {
       : 0;
 
   // Filter subjects by selected class
-  const filteredSubjects = subjects.filter(
-    (s) =>
-      !selectedClass ||
-      s.classId === selectedClass ||
-      s.classId?._id === selectedClass,
-  );
+  const filteredSubjects = subjects.filter((subject) => {
+    if (!selectedClass) return true;
+
+    const selected = String(selectedClass);
+
+    const singleClassId = subject?.classId?._id || subject?.classId;
+    if (singleClassId && String(singleClassId) === selected) return true;
+
+    const multi = Array.isArray(subject?.classIds) ? subject.classIds : [];
+    return multi.some((c) => String(c?._id || c) === selected);
+  });
 
   // Table columns with modern design
   const columns = [

@@ -53,7 +53,17 @@ export const getMyStudentProfile = async () => {
           (rp.classId._id || rp.classId.name)) ||
         typeof rp.classId === "string";
 
-      if (hasPopulatedUser && hasClass) {
+      const classObj =
+        rp.class && typeof rp.class === "object" ? rp.class : rp.classId;
+      const classTeacher = classObj?.classTeacher;
+      const classTeacherOk =
+        // no class teacher assigned is valid
+        classTeacher == null ||
+        // populated teacher profile with populated user
+        (typeof classTeacher === "object" &&
+          (classTeacher.userId?.name || classTeacher.userId?.email));
+
+      if (hasPopulatedUser && hasClass && classTeacherOk) {
         return { data: normalizeStudentProfile(rp), success: true };
       }
     }

@@ -311,8 +311,12 @@ const AdminResultsPage = () => {
     try {
       const res = await getClassAnalytics(exam._id, classId);
       setAnalyticsData(res.data || null);
+      if (res.message) {
+        message.info(res.message);
+      }
     } catch (e) {
       message.error("Error loading analytics");
+      setAnalyticsData(null);
     } finally {
       setAnalyticsLoading(false);
     }

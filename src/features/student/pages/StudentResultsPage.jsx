@@ -20,6 +20,7 @@ import {
   getMyExamResults,
   getReportCard,
 } from "../../../services/exam.service";
+import { getMyStudentProfile } from "../../../services/student.service";
 import { GradeBadge, ReportCardView } from "../../../components/Results";
 
 const StudentResultsPage = () => {
@@ -27,6 +28,7 @@ const StudentResultsPage = () => {
   const [selectedExam, setSelectedExam] = useState(null);
   const [results, setResults] = useState([]);
   const [reportCard, setReportCard] = useState(null);
+  const [studentId, setStudentId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [loadingReport, setLoadingReport] = useState(false);
 
@@ -37,7 +39,12 @@ const StudentResultsPage = () => {
   const fetchResults = async () => {
     setLoading(true);
     try {
-      const res = await getMyExamResults();
+      const [res, profileRes] = await Promise.all([
+        getMyExamResults(),
+        getMyStudentProfile().catch(() => ({ data: null })),
+      ]);
+      setStudentId(profileRes.data?._id || null);
+
       const data = res.data || [];
       // Group results by exam
       const examMap = {};
@@ -66,9 +73,11 @@ const StudentResultsPage = () => {
     setSelectedExam(exam);
     setResults(exam?.results || []);
     setReportCard(null);
+
+    if (!studentId) return;
     setLoadingReport(true);
     try {
-      const res = await getReportCard(examId);
+      const res = await getReportCard(studentId, examId);
       setReportCard(res.data || null);
     } catch {
       // report card may not be available
@@ -83,7 +92,10 @@ const StudentResultsPage = () => {
       (s, r) => s + (r.marksObtained || 0),
       0,
     );
-    const totalMax = results.reduce((s, r) => s + (r.totalMarks || 0), 0);
+    const totalMax = results.reduce(
+      (s, r) => s + (r.maxMarks ?? r.totalMarks ?? 0),
+      0,
+    );
     const pct =
       totalMax > 0 ? ((totalObtained / totalMax) * 100).toFixed(1) : 0;
     const allPassed = results.every((r) => r.isPassed);
@@ -107,7 +119,8 @@ const StudentResultsPage = () => {
     },
     {
       title: "Marks",
-      render: (_, r) => `${r.marksObtained} / ${r.totalMarks}`,
+      render: (_, r) =>
+        `${r.marksObtained} / ${r.maxMarks ?? r.totalMarks ?? 0}`,
       width: 100,
     },
     {

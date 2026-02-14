@@ -70,12 +70,23 @@ export const getMyAssignments = async () => {
 
       // Fallback: subjects may include classId
       if (Array.isArray(raw?.assignedSubjects)) {
-        items.push(
-          ...raw.assignedSubjects.map((subject) => ({
-            classId: subject?.classId || null,
-            subjectId: subject,
-          })),
-        );
+        raw.assignedSubjects.forEach((subject) => {
+          const linked = [];
+          if (subject?.classId) linked.push(subject.classId);
+          if (Array.isArray(subject?.classIds) && subject.classIds.length) {
+            linked.push(...subject.classIds);
+          }
+
+          // If subject isn't linked to a class, keep it but it won't be class-filterable.
+          if (linked.length === 0) {
+            items.push({ classId: null, subjectId: subject });
+            return;
+          }
+
+          linked.forEach((classRef) => {
+            items.push({ classId: classRef || null, subjectId: subject });
+          });
+        });
       }
 
       // Include pure class assignments (no subject) so class teachers can at least select the class
@@ -122,18 +133,27 @@ export const getMyAssignments = async () => {
 /**
  * Get students in a specific class
  */
-export const getStudentsByClass = async (classId) => {
+export const getStudentsByClass = async (classId, subjectId) => {
   try {
+    const resolvedClassId =
+      typeof classId === "object" && classId !== null
+        ? classId?._id || classId?.id
+        : classId;
+
+    if (!resolvedClassId) {
+      throw new Error("classId is required");
+    }
 
     const params = new URLSearchParams();
+    if (subjectId) params.set("subjectId", subjectId);
 
     const url = params.toString()
-      ? `${API_URL}/teachers/class/${classId}/students?${params.toString()}`
-      : `${API_URL}/teachers/class/${classId}/students`;
+      ? `${API_URL}/teachers/class/${resolvedClassId}/students?${params.toString()}`
+      : `${API_URL}/teachers/class/${resolvedClassId}/students`;
 
     if (isDebugEnabled()) {
       console.log("[teacher.service] getStudentsByClass request", {
-        classId,
+        classId: resolvedClassId,
         subjectId,
         url,
         hasToken: !!localStorage.getItem("ssms_token"),
@@ -141,6 +161,14 @@ export const getStudentsByClass = async (classId) => {
     }
 
     const response = await axios.get(url, getAuthHeaders());
+    if (isDebugEnabled()) {
+      console.log("[teacher.service] getStudentsByClass response", {
+        url,
+        status: response?.status,
+        success: response?.data?.success,
+        count: response?.data?.count,
+      });
+    }
 
     if (isDebugEnabled()) {
       console.log("[teacher.service] getStudentsByClass response", {

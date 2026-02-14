@@ -140,7 +140,11 @@ const TeacherAttendancePage = () => {
   const subjectOptions = assignments
     .filter((a) => {
       const classId = a.classId?._id || a.classId;
-      return classId === selectedClass && a.subjectId;
+      return (
+        selectedClass &&
+        String(classId) === String(selectedClass) &&
+        a.subjectId
+      );
     })
     .map((a) => ({
       value: a.subjectId._id || a.subjectId,

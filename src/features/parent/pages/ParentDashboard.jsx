@@ -559,12 +559,39 @@ const ParentDashboard = () => {
                         </span>
                       }>
                       {child.classId?.subjects?.length > 0 ? (
-                        <div className="flex flex-wrap gap-2">
-                          {child.classId.subjects.map((subject, index) => (
-                            <Tag key={index} color="blue" className="py-1 px-3">
-                              {subject.name || subject}
-                            </Tag>
-                          ))}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {child.classId.subjects.map((subject, index) => {
+                            const name = subject?.name || String(subject);
+                            const code = subject?.code || null;
+
+                            return (
+                              <div
+                                key={subject?._id || index}
+                                className="flex items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 hover:shadow-sm transition-all">
+                                <div className="flex items-center gap-3 min-w-0">
+                                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                                    <BookOutlined className="text-blue-500" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <div className="font-semibold text-slate-900 truncate">
+                                      {name}
+                                    </div>
+                                    <div className="text-xs text-slate-500 truncate">
+                                      {code ? `Code: ${code}` : ""}
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {code ? (
+                                  <Tag
+                                    color="blue"
+                                    className="m-0 font-semibold">
+                                    {code}
+                                  </Tag>
+                                ) : null}
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <Empty

@@ -34,6 +34,8 @@ import {
   UserSwitchOutlined,
   CheckCircleOutlined,
   MoreOutlined,
+  PhoneOutlined,
+  MailOutlined,
 } from "@ant-design/icons";
 import {
   getAllTeachers,
@@ -134,6 +136,15 @@ const ClassSubjectAssignmentPage = () => {
     } catch (error) {
       message.error(error.message || "Error fetching teacher assignments");
     }
+  };
+
+  const getSubjectLinkedClasses = (subject) => {
+    if (!subject || typeof subject !== "object") return [];
+    if (Array.isArray(subject.classIds) && subject.classIds.length > 0) {
+      return subject.classIds;
+    }
+    if (subject.classId) return [subject.classId];
+    return [];
   };
 
   // Stats
@@ -353,13 +364,45 @@ const ClassSubjectAssignmentPage = () => {
 
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 flex-wrap">
-                      {subject.classId ? (
-                        <Tag color="purple" style={{ fontWeight: 500 }}>
-                          {subject.classId.name} - {subject.classId.section}
-                        </Tag>
-                      ) : (
-                        <Tag color="default">No Class</Tag>
-                      )}
+                      {(() => {
+                        const linked = getSubjectLinkedClasses(subject);
+                        if (!linked.length) {
+                          return <Tag color="default">No Class</Tag>;
+                        }
+
+                        const shown = linked.slice(0, 3);
+                        const remaining = linked.length - shown.length;
+
+                        return (
+                          <>
+                            {shown.map((cls) => (
+                              <Tag
+                                key={cls?._id || `${cls?.name}-${cls?.section}`}
+                                color="purple"
+                                style={{ fontWeight: 500 }}>
+                                {cls?.name || "N/A"}
+                                {cls?.section ? ` - ${cls.section}` : ""}
+                                {cls?.academicYear
+                                  ? ` (${cls.academicYear})`
+                                  : ""}
+                              </Tag>
+                            ))}
+                            {remaining > 0 ? (
+                              <Tooltip
+                                title={linked
+                                  .map((c) => {
+                                    const label = `${c?.name || "N/A"}${c?.section ? ` - ${c.section}` : ""}`;
+                                    return c?.academicYear
+                                      ? `${label} (${c.academicYear})`
+                                      : label;
+                                  })
+                                  .join(", ")}>
+                                <Tag color="default">+{remaining} more</Tag>
+                              </Tooltip>
+                            ) : null}
+                          </>
+                        );
+                      })()}
                     </div>
 
                     <div className="mt-3 pt-3 border-t border-slate-100">
@@ -709,61 +752,245 @@ const ClassSubjectAssignmentPage = () => {
           setSelectedTeacher(null);
         }}
         footer={null}
-        width={600}>
+        width={900}>
         {teacherAssignments && (
-          <div className="mt-4">
-            <Divider orientation="left">Assigned Classes</Divider>
-            {teacherAssignments.assignedClasses?.length > 0 ? (
-              <List
-                size="small"
-                dataSource={teacherAssignments.assignedClasses}
-                renderItem={(cls) => (
-                  <List.Item>
-                    <Tag color="purple">
-                      {cls.name} - {cls.section} ({cls.academicYear})
-                    </Tag>
-                  </List.Item>
-                )}
-              />
-            ) : (
-              <Empty
-                description="No classes assigned"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            )}
+          <div className="mt-4 space-y-4">
+            {(() => {
+              const teacher = teacherAssignments?.teacher;
+              const teacherUser = teacher?.userId;
+              const classTeacherOfIds = new Set(
+                (teacherAssignments?.classTeacherOf || [])
+                  .map((c) => c?._id)
+                  .filter(Boolean)
+                  .map((id) => String(id)),
+              );
 
-            <Divider orientation="left">Assigned Subjects</Divider>
-            {teacherAssignments.assignedSubjects?.length > 0 ? (
-              <List
-                size="small"
-                dataSource={teacherAssignments.assignedSubjects}
-                renderItem={(subject) => (
-                  <List.Item>
-                    <div className="flex items-center gap-2">
-                      <Tag color="green">{subject.name}</Tag>
-                      <span className="text-gray-500 text-xs">
-                        {(() => {
-                          const linked = Array.isArray(subject?.classIds)
-                            ? subject.classIds
-                            : subject?.classId
-                              ? [subject.classId]
-                              : [];
-                          if (!linked.length) return <>Classes: N/A</>;
-                          if (linked.length === 1)
-                            return <>Classes: {linked[0]?.name || "N/A"}</>;
-                          return <>Classes: {linked.length}</>;
-                        })()}
-                      </span>
+              const assignedClasses = teacherAssignments?.assignedClasses || [];
+              const assignedSubjects =
+                teacherAssignments?.assignedSubjects || [];
+
+              return (
+                <>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex items-center gap-4 min-w-0">
+                        <Avatar
+                          size={56}
+                          icon={<UserOutlined />}
+                          style={{
+                            backgroundColor: "#dbeafe",
+                            color: "#2563eb",
+                          }}
+                        />
+                        <div className="min-w-0">
+                          <div className="text-lg font-semibold text-slate-900 truncate">
+                            {teacherUser?.name || "N/A"}
+                          </div>
+                          <div className="text-sm text-slate-600 truncate">
+                            {teacherUser?.email || ""}
+                          </div>
+                          <div className="text-xs text-slate-500 truncate">
+                            {teacher?.employeeCode
+                              ? `Employee Code: ${teacher.employeeCode}`
+                              : ""}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        <Tag color="blue" className="m-0 font-semibold">
+                          {assignedClasses.length} classes
+                        </Tag>
+                        <Tag color="green" className="m-0 font-semibold">
+                          {assignedSubjects.length} subjects
+                        </Tag>
+                        <Tag color="purple" className="m-0 font-semibold">
+                          {(teacherAssignments?.classTeacherOf || []).length}{" "}
+                          class teacher
+                        </Tag>
+                        <Tag color="default" className="m-0 font-semibold">
+                          {teacherAssignments?.totalStudents || 0} students
+                        </Tag>
+                      </div>
                     </div>
-                  </List.Item>
-                )}
-              />
-            ) : (
-              <Empty
-                description="No subjects assigned"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            )}
+
+                    {(teacherUser?.phone || teacherUser?.email) && (
+                      <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-slate-600">
+                        {teacherUser?.phone ? (
+                          <span className="inline-flex items-center gap-2">
+                            <PhoneOutlined /> {teacherUser.phone}
+                          </span>
+                        ) : null}
+                        {teacherUser?.email ? (
+                          <span className="inline-flex items-center gap-2">
+                            <MailOutlined /> {teacherUser.email}
+                          </span>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+
+                  <Row gutter={[16, 16]}>
+                    <Col xs={24} md={12}>
+                      <Card
+                        className="h-full shadow-sm"
+                        title={
+                          <span className="flex items-center gap-2">
+                            <BookOutlined className="text-purple-600" />{" "}
+                            Assigned Classes
+                          </span>
+                        }>
+                        {assignedClasses.length > 0 ? (
+                          <div className="grid grid-cols-1 gap-3">
+                            {assignedClasses.map((cls) => {
+                              const id = String(cls?._id || cls);
+                              const isClassTeacher = classTeacherOfIds.has(id);
+
+                              return (
+                                <div
+                                  key={id}
+                                  className="flex items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 hover:shadow-sm transition-all">
+                                  <div className="flex items-center gap-3 min-w-0">
+                                    <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+                                      <BookOutlined className="text-purple-600" />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <div className="font-semibold text-slate-900 truncate">
+                                        {cls?.name || "N/A"}
+                                        {cls?.section
+                                          ? ` - ${cls.section}`
+                                          : ""}
+                                      </div>
+                                      <div className="text-xs text-slate-500 truncate">
+                                        {cls?.academicYear || ""}
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {isClassTeacher ? (
+                                    <Tag
+                                      color="purple"
+                                      className="m-0 font-semibold">
+                                      Class Teacher
+                                    </Tag>
+                                  ) : (
+                                    <Tag color="default" className="m-0">
+                                      Assigned
+                                    </Tag>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <Empty
+                            description="No classes assigned"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          />
+                        )}
+                      </Card>
+                    </Col>
+
+                    <Col xs={24} md={12}>
+                      <Card
+                        className="h-full shadow-sm"
+                        title={
+                          <span className="flex items-center gap-2">
+                            <BookOutlined className="text-green-600" /> Assigned
+                            Subjects
+                          </span>
+                        }>
+                        {assignedSubjects.length > 0 ? (
+                          <div className="grid grid-cols-1 gap-3">
+                            {assignedSubjects.map((subject, index) => {
+                              const linked = getSubjectLinkedClasses(subject);
+                              const shown = linked.slice(0, 3);
+                              const remaining = linked.length - shown.length;
+
+                              return (
+                                <div
+                                  key={subject?._id || index}
+                                  className="p-4 rounded-xl border border-slate-200 bg-white hover:border-green-200 hover:shadow-sm transition-all">
+                                  <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0">
+                                      <div className="font-semibold text-slate-900 truncate">
+                                        {subject?.name || "Untitled"}
+                                      </div>
+                                      <div className="text-xs text-slate-500 truncate">
+                                        {subject?.code
+                                          ? `Code: ${subject.code}`
+                                          : ""}
+                                      </div>
+                                    </div>
+                                    {subject?.code ? (
+                                      <Tag
+                                        color="green"
+                                        className="m-0 font-semibold">
+                                        {subject.code}
+                                      </Tag>
+                                    ) : null}
+                                  </div>
+
+                                  <div className="mt-3 flex flex-wrap gap-2">
+                                    {linked.length ? (
+                                      <>
+                                        {shown.map((cls) => (
+                                          <Tag
+                                            key={
+                                              cls?._id ||
+                                              `${cls?.name}-${cls?.section}`
+                                            }
+                                            color="blue"
+                                            className="m-0">
+                                            {cls?.name || "N/A"}
+                                            {cls?.section
+                                              ? ` - ${cls.section}`
+                                              : ""}
+                                            {cls?.academicYear
+                                              ? ` (${cls.academicYear})`
+                                              : ""}
+                                          </Tag>
+                                        ))}
+                                        {remaining > 0 ? (
+                                          <Tooltip
+                                            title={linked
+                                              .map((c) => {
+                                                const label = `${c?.name || "N/A"}${c?.section ? ` - ${c.section}` : ""}`;
+                                                return c?.academicYear
+                                                  ? `${label} (${c.academicYear})`
+                                                  : label;
+                                              })
+                                              .join(", ")}>
+                                            <Tag
+                                              color="default"
+                                              className="m-0">
+                                              +{remaining} more
+                                            </Tag>
+                                          </Tooltip>
+                                        ) : null}
+                                      </>
+                                    ) : (
+                                      <Tag color="default" className="m-0">
+                                        No class linked
+                                      </Tag>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <Empty
+                            description="No subjects assigned"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          />
+                        )}
+                      </Card>
+                    </Col>
+                  </Row>
+                </>
+              );
+            })()}
           </div>
         )}
       </Modal>

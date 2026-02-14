@@ -102,25 +102,43 @@ const TeacherDashboard = () => {
         ).values(),
       ];
 
-      // Calculate total students from assigned classes (unique)
+      // Fetch per-class student counts (assignedClasses doesn't include a students array)
       const classIds = uniqueAssignedClasses
         .map((cls) => cls?._id || cls)
-        .filter(Boolean);
+        .filter(Boolean)
+        .map((id) => String(id));
 
-      const studentCounts = await Promise.all(
+      const countsEntries = await Promise.all(
         classIds.map(async (id) => {
           try {
             const studentsRes = await getStudentsByClass(id);
-            return studentsRes.data?.length || 0;
+            return [id, studentsRes?.data?.length || 0];
           } catch {
-            return 0;
+            return [id, 0];
           }
         }),
       );
-      const totalStudents = studentCounts.reduce((sum, n) => sum + n, 0);
+
+      const classStudentCounts = Object.fromEntries(countsEntries);
+
+      const enhancedAssignedClasses = uniqueAssignedClasses.map((cls) => {
+        const id = String(cls?._id || cls);
+        const totalStudents = classStudentCounts[id] || 0;
+
+        if (typeof cls === "object" && cls !== null) {
+          return { ...cls, totalStudents };
+        }
+
+        return { _id: id, name: String(cls), totalStudents };
+      });
+
+      const totalStudents = enhancedAssignedClasses.reduce(
+        (sum, cls) => sum + (cls?.totalStudents || 0),
+        0,
+      );
 
       setTeacherData({
-        assignedClasses: uniqueAssignedClasses,
+        assignedClasses: enhancedAssignedClasses,
         assignedSubjects: uniqueAssignedSubjects,
         classTeacherOf: classTeacherRes.data || [],
         schedule: scheduleRes.data || [],
@@ -257,7 +275,6 @@ const TeacherDashboard = () => {
       </Row>
 
       <Row gutter={[16, 16]}>
-
         {/* Today's Schedule */}
         <Col xs={24} lg={12}>
           <Card
@@ -331,25 +348,38 @@ const TeacherDashboard = () => {
             }
             className="shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0">
             {teacherData.assignedClasses.length > 0 ? (
-              <List
-                dataSource={teacherData.assignedClasses}
-                renderItem={(cls) => (
-                  <List.Item>
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        icon={<TeamOutlined />}
-                        className="bg-blue-100 text-blue-400"
-                      />
-                      <div>
-                        <div className="font-medium">{cls.name || cls}</div>
-                        <div className="text-gray-500 text-sm">
-                          {cls.students?.length || 0} students
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {teacherData.assignedClasses.slice(0, 6).map((cls) => {
+                  const name = cls?.name || "Class";
+                  const section = cls?.section ? ` - ${cls.section}` : "";
+                  const count = cls?.totalStudents ?? 0;
+
+                  return (
+                    <div
+                      key={cls?._id || `${name}${section}`}
+                      className="flex items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-white hover:border-indigo-200 hover:shadow-sm transition-all">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+                          <TeamOutlined className="text-blue-500" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-slate-900 truncate">
+                            {name}
+                            {section}
+                          </div>
+                          <div className="text-xs text-slate-500 truncate">
+                            {cls?.academicYear || ""}
+                          </div>
                         </div>
                       </div>
+
+                      <Tag color="blue" className="m-0 font-semibold">
+                        {count} students
+                      </Tag>
                     </div>
-                  </List.Item>
-                )}
-              />
+                  );
+                })}
+              </div>
             ) : (
               <Empty
                 description="No classes assigned yet"
@@ -372,13 +402,37 @@ const TeacherDashboard = () => {
             }
             className="shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0">
             {teacherData.assignedSubjects.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {teacherData.assignedSubjects.map((subject, index) => (
-                  <Tag key={index} color="purple" className="py-2 px-4 text-sm">
-                    <BookOutlined className="mr-1" />
-                    {subject.name || subject}
-                  </Tag>
-                ))}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {teacherData.assignedSubjects.map((subject, index) => {
+                  const name = subject?.name || String(subject);
+                  const code = subject?.code || null;
+
+                  return (
+                    <div
+                      key={subject?._id || index}
+                      className="flex items-center justify-between gap-3 p-4 rounded-xl border border-slate-200 bg-white hover:border-purple-200 hover:shadow-sm transition-all">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+                          <BookOutlined className="text-purple-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-semibold text-slate-900 truncate">
+                            {name}
+                          </div>
+                          <div className="text-xs text-slate-500 truncate">
+                            {code ? `Code: ${code}` : ""}
+                          </div>
+                        </div>
+                      </div>
+
+                      {code ? (
+                        <Tag color="purple" className="m-0 font-semibold">
+                          {code}
+                        </Tag>
+                      ) : null}
+                    </div>
+                  );
+                })}
               </div>
             ) : (
               <Empty

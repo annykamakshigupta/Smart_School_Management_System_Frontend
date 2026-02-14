@@ -63,7 +63,10 @@ const MarkAttendancePage = () => {
 
       // Auto-select first class if available and not already selected
       if (response.items?.length > 0 && !selectedClass) {
-        const firstAssignment = response.items[0];
+        const firstAssignment =
+          response.items.find((x) => x?.classId && x?.subjectId) ||
+          response.items.find((x) => x?.classId) ||
+          response.items[0];
         setSelectedClass(
           firstAssignment.classId?._id || firstAssignment.classId,
         );
@@ -161,7 +164,11 @@ const MarkAttendancePage = () => {
   const subjectOptions = assignments
     .filter((a) => {
       const classId = a.classId?._id || a.classId;
-      return classId === selectedClass && a.subjectId;
+      return (
+        selectedClass &&
+        String(classId) === String(selectedClass) &&
+        a.subjectId
+      );
     })
     .map((a) => ({
       value: a.subjectId._id || a.subjectId,

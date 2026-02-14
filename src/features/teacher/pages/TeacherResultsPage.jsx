@@ -178,7 +178,9 @@ const TeacherResultsPage = () => {
       );
       message.success("Marks saved as draft");
     } catch (e) {
-      message.error(e.message || "Error saving marks");
+      message.error(
+        e?.response?.data?.message || e?.message || "Error saving marks",
+      );
     } finally {
       setSaving(false);
     }
@@ -192,7 +194,9 @@ const TeacherResultsPage = () => {
       const res = await getExamSubjects(selectedExam._id);
       setExamSubjects(res.data || []);
     } catch (e) {
-      message.error(e.message || "Error submitting");
+      message.error(
+        e?.response?.data?.message || e?.message || "Error submitting",
+      );
     }
   };
 

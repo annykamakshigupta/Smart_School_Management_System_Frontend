@@ -38,7 +38,7 @@ import {
   getMyAttendance,
   getMySubjects,
 } from "../../../services/student.service";
-import { getMyResults } from "../../../services/result.service";
+import { getMyExamResults } from "../../../services/exam.service";
 
 const StudentProfilePage = () => {
   const [loading, setLoading] = useState(true);
@@ -68,7 +68,7 @@ const StudentProfilePage = () => {
           classId
             ? getMySubjects(classId).catch(() => ({ data: [] }))
             : Promise.resolve({ data: [] }),
-          getMyResults().catch(() => ({ data: [] })),
+          getMyExamResults().catch(() => ({ data: [] })),
         ]);
 
         setAttendance(attendanceRes.data || []);
@@ -97,7 +97,10 @@ const StudentProfilePage = () => {
   const calculateAverageGrade = () => {
     if (!results || results.length === 0) return 0;
     const total = results.reduce((acc, r) => acc + (r.marksObtained || 0), 0);
-    const maxTotal = results.reduce((acc, r) => acc + (r.totalMarks || 0), 0);
+    const maxTotal = results.reduce(
+      (acc, r) => acc + (r.maxMarks ?? r.totalMarks ?? 0),
+      0,
+    );
     return maxTotal > 0 ? Math.round((total / maxTotal) * 100) : 0;
   };
 

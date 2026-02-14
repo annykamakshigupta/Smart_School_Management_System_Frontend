@@ -88,7 +88,7 @@ const ParentResultsPage = () => {
     setReportCard(null);
     setLoadingReport(true);
     try {
-      const res = await getReportCard(examId, selectedChild);
+      const res = await getReportCard(selectedChild, examId);
       setReportCard(res.data || null);
     } catch {
       // May not be available
@@ -103,7 +103,10 @@ const ParentResultsPage = () => {
       (s, r) => s + (r.marksObtained || 0),
       0,
     );
-    const totalMax = results.reduce((s, r) => s + (r.totalMarks || 0), 0);
+    const totalMax = results.reduce(
+      (s, r) => s + (r.maxMarks ?? r.totalMarks ?? 0),
+      0,
+    );
     const pct =
       totalMax > 0 ? ((totalObtained / totalMax) * 100).toFixed(1) : 0;
     const allPassed = results.every((r) => r.isPassed);
@@ -121,7 +124,8 @@ const ParentResultsPage = () => {
     },
     {
       title: "Marks",
-      render: (_, r) => `${r.marksObtained} / ${r.totalMarks}`,
+      render: (_, r) =>
+        `${r.marksObtained} / ${r.maxMarks ?? r.totalMarks ?? 0}`,
       width: 100,
     },
     {
