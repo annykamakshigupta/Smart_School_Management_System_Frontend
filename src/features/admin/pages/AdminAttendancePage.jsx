@@ -5,7 +5,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  Card,
   Button,
   message,
   Modal,
@@ -17,13 +16,7 @@ import {
   Tag,
   DatePicker,
   Spin,
-  Statistic,
   Tooltip,
-  Row,
-  Col,
-  Space,
-  Avatar,
-  Typography,
 } from "antd";
 import {
   PlusOutlined,
@@ -42,7 +35,6 @@ import {
   UserOutlined,
   TrophyOutlined,
 } from "@ant-design/icons";
-import { PageHeader } from "../../../components/UI";
 import {
   getAttendanceByClass,
   updateAttendance,
@@ -55,7 +47,6 @@ import dayjs from "dayjs";
 
 const { confirm } = Modal;
 const { RangePicker } = DatePicker;
-const { Title, Text } = Typography;
 
 const AdminAttendancePage = () => {
   const [loading, setLoading] = useState(true);
@@ -210,10 +201,10 @@ const AdminAttendancePage = () => {
   const columns = [
     {
       title: (
-        <Space>
+        <div className="flex items-center gap-1">
           <CalendarOutlined />
           <span>Date</span>
-        </Space>
+        </div>
       ),
       dataIndex: "date",
       key: "date",
@@ -242,10 +233,10 @@ const AdminAttendancePage = () => {
     },
     {
       title: (
-        <Space>
+        <div className="flex items-center gap-1">
           <UserOutlined />
           <span>Student</span>
-        </Space>
+        </div>
       ),
       dataIndex: "studentId",
       key: "student",
@@ -257,12 +248,9 @@ const AdminAttendancePage = () => {
 
         return (
           <div className="flex items-center gap-3">
-            <Avatar
-              size={40}
-              className="bg-blue-500 shrink-0"
-              icon={<UserOutlined />}>
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-black text-sm text-white shrink-0">
               {userName?.[0]?.toUpperCase()}
-            </Avatar>
+            </div>
             <div>
               <div className="font-semibold text-slate-900">{userName}</div>
               <div className="text-xs text-slate-500 flex items-center gap-1">
@@ -276,10 +264,10 @@ const AdminAttendancePage = () => {
     },
     {
       title: (
-        <Space>
+        <div className="flex items-center gap-1">
           <TeamOutlined />
           <span>Class</span>
-        </Space>
+        </div>
       ),
       dataIndex: "classId",
       key: "class",
@@ -296,10 +284,10 @@ const AdminAttendancePage = () => {
     },
     {
       title: (
-        <Space>
+        <div className="flex items-center gap-1">
           <BookOutlined />
           <span>Subject</span>
-        </Space>
+        </div>
       ),
       dataIndex: "subjectId",
       key: "subject",
@@ -359,26 +347,22 @@ const AdminAttendancePage = () => {
       width: 100,
       fixed: "right",
       render: (_, record) => (
-        <Space>
+        <div className="flex items-center gap-1">
           <Tooltip title="Edit">
-            <Button
-              type="text"
-              size="small"
-              icon={<EditOutlined className="text-blue-600" />}
+            <button
               onClick={() => handleEdit(record)}
-              className="hover:bg-blue-50"
-            />
+              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-blue-50 transition-colors">
+              <EditOutlined className="text-blue-600" />
+            </button>
           </Tooltip>
           <Tooltip title="Delete">
-            <Button
-              type="text"
-              size="small"
-              icon={<DeleteOutlined className="text-red-600" />}
+            <button
               onClick={() => handleDelete(record)}
-              className="hover:bg-red-50"
-            />
+              className="w-8 h-8 rounded-xl flex items-center justify-center hover:bg-red-50 transition-colors">
+              <DeleteOutlined className="text-red-600" />
+            </button>
           </Tooltip>
-        </Space>
+        </div>
       ),
     },
   ];
@@ -392,25 +376,81 @@ const AdminAttendancePage = () => {
   }
 
   return (
-    <div className="space-y-6 p-6 bg-slate-50 min-h-screen">
-      {/* Header */}
-      <PageHeader
-        title="Attendance Management"
-        subtitle="Manage all attendance records across the institution"
-      />
-
-      {/* Filter Card */}
-      <Card className="border-0 shadow-lg rounded-2xl">
-        <div className="mb-4">
-          <Title level={5} className="mb-0 flex items-center gap-2">
-            <FilterOutlined className="text-blue-600" />
-            Filter Attendance Records
-          </Title>
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-blue-50 via-white to-cyan-50 min-h-screen">
+      {/* Gradient Header */}
+      <div className="bg-linear-to-r from-blue-600 to-cyan-700 rounded-3xl p-8 text-white shadow-2xl border border-blue-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <CalendarOutlined className="text-2xl text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white">
+                Attendance Management
+              </h1>
+              <p className="text-blue-100 text-sm mt-0.5">
+                Manage all attendance records across the institution
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={fetchAttendance}
+            disabled={loading || !selectedClass}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-sm font-medium transition-all border border-white/20 backdrop-blur-sm disabled:opacity-50">
+            <ReloadOutlined className={loading ? "animate-spin" : ""} />
+            Refresh
+          </button>
         </div>
-        <Row gutter={[16, 16]}>
-          <Col xs={24} sm={12} lg={8}>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              <TeamOutlined className="mr-2" />
+
+        {/* Stats strip — visible when a class is selected */}
+        {selectedClass && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+            {[
+              {
+                label: "Total Records",
+                value: localSummary.total,
+                bg: "bg-white/15",
+              },
+              {
+                label: "Present",
+                value: localSummary.present,
+                bg: "bg-emerald-500/30",
+              },
+              {
+                label: "Absent",
+                value: localSummary.absent,
+                bg: "bg-red-500/30",
+              },
+              {
+                label: "Late",
+                value: localSummary.late,
+                bg: "bg-amber-500/30",
+              },
+            ].map((s) => (
+              <div
+                key={s.label}
+                className={`${s.bg} rounded-2xl p-3 text-center border border-white/10`}>
+                <div className="text-2xl font-black text-white">{s.value}</div>
+                <div className="text-xs text-blue-100 mt-0.5">{s.label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Filter Panel */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center">
+            <FilterOutlined className="text-blue-600" />
+          </div>
+          <h2 className="font-bold text-slate-800 text-sm">
+            Filter Attendance Records
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
               Class
             </label>
             <Select
@@ -433,11 +473,9 @@ const AdminAttendancePage = () => {
                 </Select.Option>
               ))}
             </Select>
-          </Col>
-
-          <Col xs={24} sm={12} lg={8}>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              <BookOutlined className="mr-2" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
               Subject
             </label>
             <Select
@@ -458,11 +496,9 @@ const AdminAttendancePage = () => {
                 </Select.Option>
               ))}
             </Select>
-          </Col>
-
-          <Col xs={24} sm={12} lg={6}>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              <CalendarOutlined className="mr-2" />
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2">
               Date Range
             </label>
             <RangePicker
@@ -472,12 +508,8 @@ const AdminAttendancePage = () => {
               size="large"
               format="MMM DD, YYYY"
             />
-          </Col>
-
-          <Col xs={24} sm={12} lg={2}>
-            <label className="block text-sm font-semibold text-slate-700 mb-2 opacity-0">
-              Action
-            </label>
+          </div>
+          <div className="flex items-end">
             <Button
               icon={<ReloadOutlined />}
               onClick={fetchAttendance}
@@ -487,205 +519,136 @@ const AdminAttendancePage = () => {
               className="w-full">
               Refresh
             </Button>
-          </Col>
-        </Row>
-      </Card>
+          </div>
+        </div>
+      </div>
 
-      {/* Summary Cards */}
-      {selectedClass && (
-        <Row gutter={[16, 16]}>
-          <Col xs={12} sm={12} md={6} lg={6}>
-            <Card className="border-0 shadow-md rounded-xl hover:shadow-lg transition-shadow">
-              <Statistic
-                title={
-                  <Text className="text-slate-600 flex items-center gap-2">
-                    <TeamOutlined />
-                    Total Records
-                  </Text>
-                }
-                value={localSummary.total}
-                styles={{ color: "#475569", fontWeight: "bold" }}
-              />
-            </Card>
-          </Col>
-
-          <Col xs={12} sm={12} md={6} lg={6}>
-            <Card className="border-0 shadow-md rounded-xl bg-emerald-50 hover:shadow-lg transition-shadow">
-              <Statistic
-                title={
-                  <Text className="text-emerald-700 flex items-center gap-2 font-semibold">
-                    <CheckCircleOutlined />
-                    Present
-                  </Text>
-                }
-                value={localSummary.present}
-                styles={{ color: "#059669", fontWeight: "bold" }}
-              />
-            </Card>
-          </Col>
-
-          <Col xs={12} sm={12} md={6} lg={6}>
-            <Card className="border-0 shadow-md rounded-xl bg-red-50 hover:shadow-lg transition-shadow">
-              <Statistic
-                title={
-                  <Text className="text-red-700 flex items-center gap-2 font-semibold">
-                    <CloseCircleOutlined />
-                    Absent
-                  </Text>
-                }
-                value={localSummary.absent}
-                styles={{ color: "#dc2626", fontWeight: "bold" }}
-              />
-            </Card>
-          </Col>
-
-          <Col xs={12} sm={12} md={6} lg={6}>
-            <Card className="border-0 shadow-md rounded-xl bg-amber-50 hover:shadow-lg transition-shadow">
-              <Statistic
-                title={
-                  <Text className="text-amber-700 flex items-center gap-2 font-semibold">
-                    <ClockCircleOutlined />
-                    Late
-                  </Text>
-                }
-                value={localSummary.late}
-                styles={{ color: "#d97706", fontWeight: "bold" }}
-              />
-            </Card>
-          </Col>
-        </Row>
-      )}
-
-      {/* Attendance Rate Progress */}
+      {/* Attendance Rate Gauge */}
       {selectedClass && localSummary.total > 0 && (
-        <Card className="border-0 shadow-md rounded-xl">
-          <Row align="middle" gutter={24}>
-            <Col xs={24} md={4}>
-              <div className="text-center">
-                <div className="relative inline-block">
-                  <svg className="w-28 h-28">
-                    <circle
-                      cx="56"
-                      cy="56"
-                      r="52"
-                      stroke="#e5e7eb"
-                      strokeWidth="8"
-                      fill="none"
-                    />
-                    <circle
-                      cx="56"
-                      cy="56"
-                      r="52"
-                      stroke={
-                        attendanceRate >= 75
-                          ? "#10b981"
-                          : attendanceRate >= 50
-                            ? "#f59e0b"
-                            : "#ef4444"
-                      }
-                      strokeWidth="8"
-                      fill="none"
-                      strokeDasharray={`${attendanceRate * 3.27} 327`}
-                      strokeLinecap="round"
-                      transform="rotate(-90 56 56)"
-                    />
-                  </svg>
-                  <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                    <Text className="text-2xl font-bold text-slate-900">
-                      {attendanceRate}%
-                    </Text>
-                  </div>
-                </div>
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
+          <div className="flex items-center gap-6">
+            <div className="relative shrink-0">
+              <svg className="w-28 h-28">
+                <circle
+                  cx="56"
+                  cy="56"
+                  r="52"
+                  stroke="#e5e7eb"
+                  strokeWidth="8"
+                  fill="none"
+                />
+                <circle
+                  cx="56"
+                  cy="56"
+                  r="52"
+                  stroke={
+                    attendanceRate >= 75
+                      ? "#10b981"
+                      : attendanceRate >= 50
+                        ? "#f59e0b"
+                        : "#ef4444"
+                  }
+                  strokeWidth="8"
+                  fill="none"
+                  strokeDasharray={`${attendanceRate * 3.27} 327`}
+                  strokeLinecap="round"
+                  transform="rotate(-90 56 56)"
+                />
+              </svg>
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
+                <span className="text-2xl font-black text-slate-900">
+                  {attendanceRate}%
+                </span>
               </div>
-            </Col>
-            <Col xs={24} md={20}>
-              <Title level={4} className="mb-2 flex items-center gap-2">
+            </div>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
                 <TrophyOutlined className="text-blue-600" />
-                Overall Attendance Rate
-              </Title>
-              <Text className="text-slate-600">
+                <h3 className="font-bold text-slate-900">
+                  Overall Attendance Rate
+                </h3>
+              </div>
+              <p className="text-slate-500 text-sm">
                 {attendanceRate >= 75
                   ? "Excellent attendance across the institution!"
                   : attendanceRate >= 50
                     ? "Good attendance. Some classes need improvement."
                     : "Low attendance. Immediate intervention required."}
-              </Text>
-            </Col>
-          </Row>
-        </Card>
+              </p>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Attendance Table */}
-      <Card
-        className="border-0 shadow-lg rounded-2xl"
-        title={
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <CalendarOutlined className="text-blue-600 text-lg" />
-            </div>
-            <div>
-              <Title level={4} className="mb-0">
-                Attendance Records
-              </Title>
-              <Text className="text-slate-500 text-sm">
-                Manage and monitor student attendance
-              </Text>
-            </div>
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
+            <CalendarOutlined className="text-blue-600" />
           </div>
-        }>
-        {!selectedClass ? (
-          <Empty
-            description={
-              <div>
-                <Text className="text-slate-600">
+          <div>
+            <h2 className="font-bold text-slate-900 text-sm">
+              Attendance Records
+            </h2>
+            <p className="text-xs text-slate-400">
+              Manage and monitor student attendance
+            </p>
+          </div>
+        </div>
+        <div className="p-4">
+          {!selectedClass ? (
+            <Empty
+              description={
+                <span className="text-slate-500">
                   Please select a class to view attendance records
-                </Text>
-              </div>
-            }
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          />
-        ) : (
-          <Table
-            columns={columns}
-            dataSource={attendance}
-            rowKey="_id"
-            loading={loading}
-            rowClassName={(record) => {
-              const status = record?.status;
-              if (status === "present") return "bg-emerald-50";
-              if (status === "absent") return "bg-red-50";
-              if (status === "late") return "bg-amber-50";
-              return "";
-            }}
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total, range) =>
-                `${range[0]}-${range[1]} of ${total} records`,
-              className: "px-4",
-            }}
-            locale={{
-              emptyText: (
-                <Empty
-                  description="No attendance records found"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
-              ),
-            }}
-            className="modern-table"
-            scroll={{ x: 1000 }}
-          />
-        )}
-      </Card>
+                </span>
+              }
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              className="my-8"
+            />
+          ) : (
+            <Table
+              columns={columns}
+              dataSource={attendance}
+              rowKey="_id"
+              loading={loading}
+              rowClassName={(record) => {
+                if (record?.status === "present") return "bg-emerald-50";
+                if (record?.status === "absent") return "bg-red-50";
+                if (record?.status === "late") return "bg-amber-50";
+                return "";
+              }}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} of ${total} records`,
+                className: "px-4",
+              }}
+              locale={{
+                emptyText: (
+                  <Empty
+                    description="No attendance records found"
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                  />
+                ),
+              }}
+              scroll={{ x: 1000 }}
+            />
+          )}
+        </div>
+      </div>
 
       {/* Edit Attendance Modal */}
       <Modal
         title={
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+          <div className="flex items-center gap-3 pb-1">
+            <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
               <EditOutlined className="text-blue-600" />
             </div>
-            <span className="text-lg font-semibold">Edit Attendance</span>
+            <span className="text-lg font-bold text-slate-900">
+              Edit Attendance
+            </span>
           </div>
         }
         open={editModal.visible}

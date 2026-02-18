@@ -9,25 +9,14 @@ import {
   Modal,
   Form,
   Select,
-  Tag,
-  Space,
   message,
-  Avatar,
-  Card,
-  Tooltip,
-  List,
-  Empty,
-  Row,
-  Col,
-  Divider,
-  Popconfirm,
   Dropdown,
-  Skeleton,
+  Empty,
   Input,
 } from "antd";
 import {
-  PlusOutlined,
   UserOutlined,
+  PlusOutlined,
   ReloadOutlined,
   TeamOutlined,
   LinkOutlined,
@@ -224,266 +213,264 @@ const ParentChildMappingPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 -m-6 p-6">
-      {/* Header Section - Sticky */}
-      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-purple-50 via-white to-indigo-50 min-h-screen">
+      {/* Gradient Header */}
+      <div className="bg-linear-to-r from-purple-600 to-indigo-700 rounded-3xl p-8 text-white shadow-2xl border border-purple-500/20">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <LinkOutlined className="text-2xl text-white" />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-black text-white">
                 Parent-Child Mapping
               </h1>
-              <p className="text-slate-500 mt-1">
+              <p className="text-purple-200 text-sm mt-0.5">
                 Link parents to their children for attendance and academic
                 tracking
               </p>
             </div>
-            <div className="flex gap-3">
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={fetchData}
-                className="hover:border-blue-500 hover:text-blue-500">
-                Refresh
-              </Button>
-            </div>
           </div>
+          <button
+            onClick={fetchData}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-sm font-medium transition-all border border-white/20 backdrop-blur-sm w-fit">
+            <ReloadOutlined /> Refresh
+          </button>
+        </div>
+        {/* Mini stats strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+          {[
+            {
+              label: "Total Parents",
+              value: parents.length,
+              color: "bg-white/15",
+            },
+            {
+              label: "With Children",
+              value: parentsWithChildren,
+              color: "bg-emerald-500/30",
+            },
+            {
+              label: "Without Children",
+              value: parentsWithoutChildren,
+              color: "bg-orange-500/30",
+            },
+            {
+              label: "Students No Parent",
+              value: studentsWithoutParent,
+              color: "bg-red-500/30",
+            },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className={`${s.color} rounded-2xl p-3 text-center border border-white/10`}>
+              <div className="text-2xl font-black text-white">{s.value}</div>
+              <div className="text-xs text-purple-100 mt-0.5">{s.label}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-              <TeamOutlined className="text-2xl text-purple-600" />
+      {/* Main Content Panel */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-purple-700" />
             </div>
-            <div>
-              <p className="text-slate-500 text-sm">Total Parents</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {parents.length}
-              </p>
-            </div>
+            <h2 className="font-bold text-slate-900 text-sm">All Parents</h2>
           </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-              <LinkOutlined className="text-2xl text-green-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">With Children</p>
-              <p className="text-2xl font-bold text-green-600">
-                {parentsWithChildren}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
-              <DisconnectOutlined className="text-2xl text-orange-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Without Children</p>
-              <p className="text-2xl font-bold text-orange-600">
-                {parentsWithoutChildren}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
-              <UserOutlined className="text-2xl text-red-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Students No Parent</p>
-              <p className="text-2xl font-bold text-red-600">
-                {studentsWithoutParent}
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Main Content Card */}
-      <Card className="border-0 shadow-sm mb-6">
-        {/* Search Bar */}
-        <div className="mb-6">
           <Input.Search
             placeholder="Search parents by name or email..."
             size="large"
             allowClear
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-md"
+            className="max-w-xs"
           />
         </div>
 
-        {/* Parent Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="border border-slate-200">
-                <Skeleton avatar active />
-              </Card>
-            ))}
-          </div>
-        ) : filteredParents.length === 0 ? (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={
-              <span className="text-slate-500">
-                {searchQuery
-                  ? "No parents found matching your search"
-                  : "No parents registered yet"}
-              </span>
-            }
-            className="my-12"
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredParents.map((parent) => (
-              <Card
-                key={parent._id}
-                className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
-                bodyStyle={{ padding: "20px" }}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar
-                      size={48}
-                      icon={<TeamOutlined />}
-                      style={{
-                        backgroundColor: "#f3e8ff",
-                        color: "#9333ea",
-                      }}
-                    />
-                    <div>
-                      <h3 className="font-semibold text-slate-900 text-base">
-                        {parent.userId?.name || "N/A"}
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        {parent.userId?.email || "N/A"}
-                      </p>
+        <div className="p-6">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="bg-slate-50 rounded-2xl p-5 animate-pulse">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="w-12 h-12 bg-slate-200 rounded-2xl" />
+                    <div className="flex-1">
+                      <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
+                      <div className="h-3 bg-slate-100 rounded w-1/2" />
                     </div>
                   </div>
-                  <Dropdown
-                    menu={{ items: getActionItems(parent) }}
-                    trigger={["click"]}
-                    placement="bottomRight">
-                    <Button
-                      type="text"
-                      icon={<MoreOutlined />}
-                      className="hover:bg-slate-100"
-                    />
-                  </Dropdown>
+                  <div className="h-3 bg-slate-100 rounded w-full mt-3" />
                 </div>
+              ))}
+            </div>
+          ) : filteredParents.length === 0 ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                <span className="text-slate-500">
+                  {searchQuery
+                    ? "No parents found matching your search"
+                    : "No parents registered yet"}
+                </span>
+              }
+              className="my-12"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredParents.map((parent) => {
+                const initial = parent.userId?.name?.[0]?.toUpperCase() || "P";
+                return (
+                  <div
+                    key={parent._id}
+                    className="bg-slate-50 rounded-2xl p-5 hover:bg-white hover:shadow-md transition-all border border-slate-100 hover:border-slate-200 group">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center font-black text-base text-white">
+                          {initial}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-sm leading-tight">
+                            {parent.userId?.name || "N/A"}
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {parent.userId?.email || "N/A"}
+                          </p>
+                        </div>
+                      </div>
+                      <Dropdown
+                        menu={{ items: getActionItems(parent) }}
+                        trigger={["click"]}
+                        placement="bottomRight">
+                        <Button
+                          type="text"
+                          icon={<MoreOutlined />}
+                          className="opacity-0 group-hover:opacity-100 hover:bg-slate-200 rounded-xl"
+                        />
+                      </Dropdown>
+                    </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-slate-600">
-                    <PhoneOutlined className="text-slate-400" />
-                    <span>{parent.userId?.phone || "N/A"}</span>
-                  </div>
-
-                  <div className="mt-3 pt-3 border-t border-slate-100">
-                    <p className="text-xs text-slate-500 mb-2">Children:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {parent.children && parent.children.length > 0 ? (
-                        parent.children.map((child, idx) => (
-                          <Tag
-                            key={idx}
-                            icon={<UserOutlined />}
-                            color="green"
-                            style={{ fontWeight: 500 }}>
-                            {child?.userId?.name || "Unknown"}
-                          </Tag>
-                        ))
-                      ) : (
-                        <Tag color="default">No children assigned</Tag>
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <PhoneOutlined />
+                        <span>{parent.userId?.phone || "N/A"}</span>
+                      </div>
+                      <div className="pt-2 border-t border-slate-100">
+                        <p className="text-xs text-slate-400 mb-1.5">
+                          Children:
+                        </p>
+                        <div className="flex flex-wrap gap-1">
+                          {parent.children && parent.children.length > 0 ? (
+                            parent.children.map((child, idx) => (
+                              <span
+                                key={idx}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">
+                                <UserOutlined className="text-[10px]" />{" "}
+                                {child?.userId?.name || "Unknown"}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-xs">
+                              No children assigned
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {parent.children && parent.children.length > 0 && (
+                        <div className="text-xs text-slate-400">
+                          <TeamOutlined className="mr-1" />
+                          {parent.children.length} child
+                          {parent.children.length !== 1 ? "ren" : ""}
+                        </div>
                       )}
                     </div>
                   </div>
-
-                  {parent.children && parent.children.length > 0 && (
-                    <div className="text-xs text-slate-400 mt-2">
-                      <TeamOutlined className="mr-1" />
-                      {parent.children.length} child
-                      {parent.children.length !== 1 ? "ren" : ""}
-                    </div>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Students Without Parent Section */}
       {studentsWithoutParent > 0 && (
-        <Card
-          className="border-0 shadow-sm"
-          title={
-            <div className="flex items-center gap-2">
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+          <div className="px-6 py-4 border-b border-orange-100 bg-orange-50 flex items-center gap-3">
+            <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
               <UserOutlined className="text-orange-600" />
-              <span>Students Without Parent ({studentsWithoutParent})</span>
             </div>
-          }>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div>
+              <h2 className="font-bold text-orange-900 text-sm">
+                Students Without Parent ({studentsWithoutParent})
+              </h2>
+              <p className="text-xs text-orange-500">
+                These students need a parent assigned
+              </p>
+            </div>
+          </div>
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {students
               .filter((s) => !s.parentId)
-              .map((student) => (
-                <Card
-                  key={student._id}
-                  size="small"
-                  className="border border-orange-200 hover:shadow-md transition-all hover:border-orange-400">
-                  <div className="flex items-center gap-3 mb-3">
-                    <Avatar
-                      icon={<UserOutlined />}
-                      style={{ backgroundColor: "#f97316", color: "white" }}
-                    />
-                    <div className="flex-1">
-                      <div className="font-medium text-sm">
-                        {student.userId?.name || "Unknown"}
+              .map((student) => {
+                const initial = student.userId?.name?.[0]?.toUpperCase() || "S";
+                return (
+                  <div
+                    key={student._id}
+                    className="bg-orange-50 rounded-2xl p-4 border border-orange-100 hover:border-orange-300 transition-all">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center font-black text-white text-sm">
+                        {initial}
                       </div>
-                      <div className="text-xs text-slate-500">
-                        {student.userId?.email || "N/A"}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold text-sm text-slate-900 truncate">
+                          {student.userId?.name || "Unknown"}
+                        </div>
+                        <div className="text-xs text-slate-500 truncate">
+                          {student.userId?.email || "N/A"}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                        <BookOutlined className="text-[10px]" />{" "}
+                        {student.classId?.name || "No Class"}
+                      </span>
+                      {student.section && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold">
+                          {student.section}
+                        </span>
+                      )}
+                    </div>
+                    <Button
+                      type="primary"
+                      size="small"
+                      block
+                      icon={<LinkOutlined />}
+                      onClick={() => handleQuickAssign(student)}
+                      className="bg-orange-600 hover:bg-orange-700 border-orange-600">
+                      Assign Parent
+                    </Button>
                   </div>
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    <Tag color="blue" className="text-xs">
-                      {student.classId?.name || "No Class"}
-                    </Tag>
-                    {student.section && (
-                      <Tag color="green" className="text-xs">
-                        {student.section}
-                      </Tag>
-                    )}
-                  </div>
-                  <Button
-                    type="primary"
-                    size="small"
-                    block
-                    icon={<LinkOutlined />}
-                    onClick={() => handleQuickAssign(student)}
-                    className="bg-orange-600 hover:bg-orange-700">
-                    Assign Parent
-                  </Button>
-                </Card>
-              ))}
+                );
+              })}
           </div>
-        </Card>
+        </div>
       )}
 
       {/* Assign Children Modal */}
       <Modal
         title={
-          <div className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-            <TeamOutlined className="text-purple-600" />
-            Assign Students to Parent
+          <div className="flex items-center gap-3 pb-1">
+            <div className="w-9 h-9 bg-purple-600 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-white" />
+            </div>
+            <span className="text-lg font-bold text-slate-900">
+              Assign Students to Parent
+            </span>
           </div>
         }
         open={isLinkModalOpen}
@@ -494,23 +481,20 @@ const ParentChildMappingPage = () => {
         }}
         footer={null}
         width={600}>
-        <div className="mb-4 p-4 bg-linear-to-r from-purple-50 to-indigo-50 rounded-xl border border-purple-100">
+        <div className="mb-4 p-4 bg-linear-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-100">
           <div className="flex items-center gap-3">
-            <Avatar
-              size={48}
-              icon={<TeamOutlined />}
-              className="bg-purple-500"
-              style={{ backgroundColor: "#9333ea" }}
-            />
+            <div className="w-12 h-12 rounded-2xl bg-purple-600 flex items-center justify-center font-black text-white text-base">
+              {selectedParent?.userId?.name?.[0]?.toUpperCase() || "P"}
+            </div>
             <div>
-              <div className="font-semibold text-lg">
+              <div className="font-bold text-base text-slate-900">
                 {selectedParent?.userId?.name}
               </div>
-              <div className="text-xs text-gray-600 flex items-center gap-1">
+              <div className="text-xs text-slate-500 flex items-center gap-1">
                 <MailOutlined />
                 {selectedParent?.userId?.email}
               </div>
-              <div className="text-xs text-gray-600 flex items-center gap-1">
+              <div className="text-xs text-slate-500 flex items-center gap-1">
                 <PhoneOutlined />
                 {selectedParent?.userId?.phone || "N/A"}
               </div>
@@ -523,16 +507,16 @@ const ParentChildMappingPage = () => {
               </div>
               <div className="flex flex-wrap gap-1">
                 {selectedParent.children.map((child, idx) => (
-                  <Tag key={idx} color="purple" className="text-xs">
+                  <span key={idx} className="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
                     {child?.userId?.name}
-                  </Tag>
+                  </span>
                 ))}
               </div>
             </div>
           )}
         </div>
 
-        <Divider className="my-4">Select Students to Assign</Divider>
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 mt-2">Select Students to Assign</p>
 
         <Form form={form} layout="vertical" onFinish={handleLinkChild}>
           <Form.Item
@@ -602,9 +586,11 @@ const ParentChildMappingPage = () => {
       {/* Quick Assign Modal (from student to parent) */}
       <Modal
         title={
-          <div className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-            <UserOutlined className="text-green-600" />
-            Assign Student to Parent
+          <div className="flex items-center gap-3 pb-1">
+            <div className="w-9 h-9 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <UserOutlined className="text-emerald-600" />
+            </div>
+            <span className="text-lg font-bold text-slate-900">Assign Student to Parent</span>
           </div>
         }
         open={isQuickAssignModalOpen}
@@ -617,16 +603,13 @@ const ParentChildMappingPage = () => {
         width={500}>
         {selectedStudent && (
           <>
-            <div className="mb-4 p-4 bg-linear-to-r from-green-50 to-blue-50 rounded-xl border border-green-100">
+            <div className="mb-4 p-4 bg-linear-to-r from-green-50 to-blue-50 rounded-2xl border border-green-100">
               <div className="flex items-center gap-3">
-                <Avatar
-                  size={48}
-                  icon={<UserOutlined />}
-                  className="bg-green-500"
-                  style={{ backgroundColor: "#16a34a" }}
-                />
+                <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center font-black text-white text-base">
+                  {selectedStudent.userId?.name?.[0]?.toUpperCase() || "S"}
+                </div>
                 <div>
-                  <div className="font-semibold text-lg">
+                  <div className="font-bold text-base text-slate-900">
                     {selectedStudent.userId?.name || "Unknown Student"}
                   </div>
                   <div className="text-xs text-gray-600">
@@ -642,7 +625,7 @@ const ParentChildMappingPage = () => {
               </div>
             </div>
 
-            <Divider className="my-4">Select Parent</Divider>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3 mt-2">Select Parent</p>
 
             <Form
               form={quickAssignForm}

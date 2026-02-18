@@ -13,12 +13,8 @@ import {
   Input,
   Select,
   message,
-  Card,
-  Avatar,
-  Tag,
   Dropdown,
   Empty,
-  Skeleton,
 } from "antd";
 import {
   PlusOutlined,
@@ -154,259 +150,177 @@ const ClassesPage = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 -m-6 p-6">
-      {/* Header Section - Sticky */}
-      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">
-                Class Management
-              </h1>
-              <p className="text-slate-500 mt-1">
-                Manage school classes, sections, and class teachers
-              </p>
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-violet-50 via-white to-purple-50 min-h-screen">
+      {/* Gradient Header */}
+      <div className="bg-linear-to-r from-violet-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl border border-violet-500/20">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <BookOutlined className="text-2xl text-white" />
             </div>
-            <div className="flex gap-3">
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={fetchClasses}
-                className="hover:border-blue-500 hover:text-blue-500">
-                Refresh
-              </Button>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => handleOpenModal()}
-                className="bg-blue-600 hover:bg-blue-700 shadow-sm">
-                Add Class
-              </Button>
+            <div>
+              <h1 className="text-2xl font-black text-white">Class Management</h1>
+              <p className="text-violet-200 text-sm mt-0.5">Manage school classes, sections, and class teachers</p>
             </div>
           </div>
+          <div className="flex gap-3">
+            <button
+              onClick={fetchClasses}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-sm font-medium transition-all border border-white/20 backdrop-blur-sm">
+              <ReloadOutlined /> Refresh
+            </button>
+            <button
+              onClick={() => handleOpenModal()}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white text-violet-800 rounded-2xl text-sm font-bold hover:bg-violet-50 transition-all shadow-lg">
+              <PlusOutlined /> Add Class
+            </button>
+          </div>
+        </div>
+        {/* Mini stats strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+          {[
+            { label: "Total Classes", value: classes.length, color: "bg-white/15" },
+            { label: "With Teachers", value: classes.filter((c) => c.classTeacher).length, color: "bg-blue-500/30" },
+            { label: "Total Teachers", value: teachers.length, color: "bg-emerald-500/30" },
+            { label: "Active Classes", value: classes.filter((c) => c.isActive).length, color: "bg-amber-500/30" },
+          ].map((s) => (
+            <div key={s.label} className={`${s.color} rounded-2xl p-3 text-center border border-white/10`}>
+              <div className="text-2xl font-black text-white">{s.value}</div>
+              <div className="text-xs text-violet-100 mt-0.5">{s.label}</div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-              <BookOutlined className="text-2xl text-purple-600" />
+      {/* Main Content Panel */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-violet-700" />
             </div>
-            <div>
-              <p className="text-slate-500 text-sm">Total Classes</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {classes.length}
-              </p>
-            </div>
+            <h2 className="font-bold text-slate-900 text-sm">All Classes</h2>
           </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-              <UserOutlined className="text-2xl text-blue-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">With Teachers</p>
-              <p className="text-2xl font-bold text-blue-600">
-                {classes.filter((c) => c.classTeacher).length}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center">
-              <TeamOutlined className="text-2xl text-green-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Total Teachers</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {teachers.length}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
-              <BookOutlined className="text-2xl text-orange-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Active Classes</p>
-              <p className="text-2xl font-bold text-orange-600">
-                {classes.filter((c) => c.isActive).length}
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Main Content Card */}
-      <Card className="border-0 shadow-sm">
-        {/* Search Bar */}
-        <div className="mb-6">
           <Input.Search
             placeholder="Search classes by name, section, or year..."
             size="large"
             allowClear
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-md"
+            className="max-w-xs"
           />
         </div>
 
-        {/* Class Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="border border-slate-200">
-                <Skeleton avatar active />
-              </Card>
-            ))}
-          </div>
-        ) : filteredClasses.length === 0 ? (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={
-              <span className="text-slate-500">
-                {searchQuery
-                  ? "No classes found matching your search"
-                  : "No classes found. Create your first class to get started."}
-              </span>
-            }
-            className="my-12"
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredClasses.map((classItem) => (
-              <Card
-                key={classItem._id}
-                className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
-                bodyStyle={{ padding: "20px" }}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-                      <BookOutlined className="text-2xl text-purple-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-slate-900 text-base">
-                        {classItem.name} - {classItem.section}
-                      </h3>
-                      <p className="text-xs text-slate-500">
-                        {classItem.academicYear}
-                      </p>
+        <div className="p-6">
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="bg-slate-50 rounded-2xl p-5 animate-pulse">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-slate-200 rounded-2xl" />
+                    <div className="flex-1">
+                      <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
+                      <div className="h-3 bg-slate-100 rounded w-1/2" />
                     </div>
                   </div>
-                  <Dropdown
-                    menu={{ items: getActionItems(classItem) }}
-                    trigger={["click"]}
-                    placement="bottomRight">
-                    <Button
-                      type="text"
-                      icon={<MoreOutlined />}
-                      className="hover:bg-slate-100"
-                    />
-                  </Dropdown>
                 </div>
-
-                <div className="space-y-2">
-                  {classItem.classTeacher ? (
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        size="small"
-                        icon={<UserOutlined />}
-                        style={{
-                          backgroundColor: "#dbeafe",
-                          color: "#2563eb",
-                        }}
-                      />
-                      <span className="text-sm text-slate-700">
-                        {classItem.classTeacher.userId?.name || "Not Assigned"}
+              ))}
+            </div>
+          ) : filteredClasses.length === 0 ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                <span className="text-slate-500">
+                  {searchQuery ? "No classes found matching your search" : "No classes found. Create your first class to get started."}
+                </span>
+              }
+              className="my-12"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredClasses.map((classItem) => (
+                <div
+                  key={classItem._id}
+                  className="bg-slate-50 rounded-2xl p-5 hover:bg-white hover:shadow-md transition-all border border-slate-100 hover:border-slate-200 group">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-violet-600 rounded-2xl flex items-center justify-center">
+                        <BookOutlined className="text-xl text-white" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-slate-900 text-sm leading-tight">{classItem.name} - {classItem.section}</h3>
+                        <p className="text-xs text-slate-500 mt-0.5">{classItem.academicYear}</p>
+                      </div>
+                    </div>
+                    <Dropdown
+                      menu={{ items: getActionItems(classItem) }}
+                      trigger={["click"]}
+                      placement="bottomRight">
+                      <Button type="text" icon={<MoreOutlined />} className="opacity-0 group-hover:opacity-100 hover:bg-slate-200 rounded-xl" />
+                    </Dropdown>
+                  </div>
+                  <div className="space-y-2.5">
+                    {classItem.classTeacher ? (
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        <div className="w-6 h-6 rounded-lg bg-blue-100 flex items-center justify-center">
+                          <UserOutlined className="text-blue-600 text-[10px]" />
+                        </div>
+                        <span className="font-medium">{classItem.classTeacher.userId?.name || "Not Assigned"}</span>
+                      </div>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full text-xs">
+                        No Class Teacher
+                      </span>
+                    )}
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                        {classItem.subjects?.length || 0} subjects
                       </span>
                     </div>
-                  ) : (
-                    <Tag color="default">No Class Teacher</Tag>
-                  )}
-
-                  <div className="flex items-center gap-2 mt-3 pt-3 border-t border-slate-100">
-                    <Tag color="blue" style={{ fontWeight: 500 }}>
-                      {classItem.subjects?.length || 0} subjects
-                    </Tag>
                   </div>
                 </div>
-              </Card>
-            ))}
-          </div>
-        )}
-      </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Create/Edit Class Modal */}
       <Modal
         title={
-          <div className="text-lg font-semibold text-slate-900">
-            {editingClass ? "Edit Class" : "Add New Class"}
+          <div className="flex items-center gap-3 pb-1">
+            <div className="w-9 h-9 bg-violet-100 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-violet-700" />
+            </div>
+            <span className="text-lg font-bold text-slate-900">{editingClass ? "Edit Class" : "Add New Class"}</span>
           </div>
         }
         open={isModalOpen}
         onCancel={handleCloseModal}
         footer={null}
         width={600}>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          className="mt-4">
-          <Form.Item
-            name="name"
-            label={<span className="font-medium">Class Name</span>}
-            rules={[{ required: true, message: "Class name is required" }]}>
+        <Form form={form} layout="vertical" onFinish={handleSubmit} className="mt-4">
+          <Form.Item name="name" label={<span className="font-medium">Class Name</span>} rules={[{ required: true, message: "Class name is required" }]}>
             <Input size="large" placeholder="e.g., Grade 10" />
           </Form.Item>
-
-          <Form.Item
-            name="section"
-            label={<span className="font-medium">Section</span>}
-            rules={[{ required: true, message: "Section is required" }]}>
+          <Form.Item name="section" label={<span className="font-medium">Section</span>} rules={[{ required: true, message: "Section is required" }]}>
             <Input size="large" placeholder="e.g., A, B, C" />
           </Form.Item>
-
-          <Form.Item
-            name="academicYear"
-            label={<span className="font-medium">Academic Year</span>}
-            rules={[{ required: true, message: "Academic year is required" }]}>
+          <Form.Item name="academicYear" label={<span className="font-medium">Academic Year</span>} rules={[{ required: true, message: "Academic year is required" }]}>
             <Input size="large" placeholder="e.g., 2024-2025" />
           </Form.Item>
-
-          <Form.Item
-            name="classTeacher"
-            label={
-              <span className="font-medium">Class Teacher (Optional)</span>
-            }>
-            <Select
-              size="large"
-              placeholder="Select a teacher"
-              allowClear
-              showSearch
-              optionFilterProp="children">
+          <Form.Item name="classTeacher" label={<span className="font-medium">Class Teacher (Optional)</span>}>
+            <Select size="large" placeholder="Select a teacher" allowClear showSearch optionFilterProp="children">
               {teachers.map((teacher) => (
                 <Select.Option key={teacher._id} value={teacher._id}>
-                  {teacher.userId?.name || "N/A"} ({teacher.userId?.email || ""}
-                  )
+                  {teacher.userId?.name || "N/A"} ({teacher.userId?.email || ""})
                 </Select.Option>
               ))}
             </Select>
           </Form.Item>
-
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
             <Button onClick={handleCloseModal}>Cancel</Button>
-            <Button
-              type="primary"
-              htmlType="submit"
-              className="bg-blue-600 hover:bg-blue-700">
+            <Button type="primary" htmlType="submit" className="bg-violet-600 hover:bg-violet-700">
               {editingClass ? "Update" : "Create"} Class
             </Button>
           </div>

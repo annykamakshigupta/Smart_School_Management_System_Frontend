@@ -1,40 +1,29 @@
 /**
- * Parent Child Attendance Page - Modern & Classy Design
- * Monitor child's attendance with beautiful interface
+ * Parent Child Attendance Page — Modern redesign
  */
 
 import { useState, useEffect, useCallback } from "react";
 import {
-  Card,
-  message,
   DatePicker,
   Select,
   Empty,
   Table,
-  Tag,
   Spin,
-  Statistic,
-  Avatar,
-  Row,
-  Col,
+  message,
+  Tag,
   Space,
-  Typography,
-  Alert,
 } from "antd";
 import {
-  UserOutlined,
   CalendarOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
   ClockCircleOutlined,
-  BarChartOutlined,
   BookOutlined,
   ExclamationCircleOutlined,
   StarOutlined,
   TrophyOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { PageHeader } from "../../../components/UI";
 import {
   getAttendanceForChild,
   getCurrentMonthRange,
@@ -45,7 +34,6 @@ import dayjs from "dayjs";
 import { useSearchParams } from "react-router-dom";
 
 const { RangePicker } = DatePicker;
-const { Title, Text } = Typography;
 
 const ParentChildAttendancePage = () => {
   const [searchParams] = useSearchParams();
@@ -236,240 +224,275 @@ const ParentChildAttendancePage = () => {
 
   if (loading && children.length === 0) {
     return (
-      <div className="flex items-center justify-center min-h-100">
-        <Spin size="large" tip="Loading..." />
+      <div className="flex items-center justify-center min-h-screen">
+        <Spin size="large" />
       </div>
     );
   }
 
-  return (
-    <div className="space-y-6 p-6 bg-slate-50 min-h-screen">
-      {/* Header */}
-      <PageHeader
-        title="Child's Attendance"
-        subtitle="Monitor your child's attendance records and academic performance"
-      />
+  const rateColor =
+    attendanceRate >= 90
+      ? "bg-emerald-500"
+      : attendanceRate >= 75
+        ? "bg-amber-500"
+        : "bg-red-500";
+  const rateText =
+    attendanceRate >= 90
+      ? "text-emerald-600"
+      : attendanceRate >= 75
+        ? "text-amber-600"
+        : "text-red-600";
+  const rateCircle =
+    attendanceRate >= 75
+      ? "#8b5cf6"
+      : attendanceRate >= 50
+        ? "#f59e0b"
+        : "#ef4444";
 
-      {/* Child Selector Card */}
-      <Card className="border-0 shadow-lg rounded-2xl">
-        <div className="mb-4">
-          <Title level={5} className="mb-0 flex items-center gap-2">
-            <UserOutlined className="text-blue-600" />
-            Select Your Child
-          </Title>
+  return (
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-slate-50 via-white to-blue-50 min-h-screen">
+      {/* Header */}
+      <div className="bg-linear-to-r from-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl border border-indigo-400/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                <CheckCircleOutlined className="text-xl" />
+              </div>
+              <h1 className="text-3xl font-black">Child&apos;s Attendance</h1>
+            </div>
+            <p className="text-indigo-200">
+              Monitor your child&apos;s attendance records and academic
+              performance
+            </p>
+          </div>
+          {stats.total > 0 && (
+            <div className="hidden md:flex items-center gap-4">
+              {[
+                { label: "Total", value: stats.total, bg: "bg-white/15" },
+                {
+                  label: "Present",
+                  value: stats.present,
+                  bg: "bg-emerald-500/30",
+                },
+                { label: "Absent", value: stats.absent, bg: "bg-red-500/30" },
+              ].map(({ label, value, bg }) => (
+                <div
+                  key={label}
+                  className={`${bg} backdrop-blur-sm rounded-2xl px-5 py-3 border border-white/20 text-center`}>
+                  <p className="text-xs text-indigo-200">{label}</p>
+                  <p className="text-3xl font-black">{value}</p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <Row gutter={[16, 16]} align="middle">
-          <Col xs={24} md={12}>
+      </div>
+
+      {/* Child Selector */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+          <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+            <TeamOutlined className="text-purple-600" />
+          </div>
+          <span className="font-bold text-slate-800">Select Your Child</span>
+        </div>
+        <div className="p-5">
+          <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
             <Select
               placeholder="Select a child"
               value={selectedChild}
               onChange={setSelectedChild}
-              className="w-full"
+              className="w-full sm:w-72"
               size="large">
               {children.map((child) => (
                 <Select.Option key={child._id} value={child._id}>
-                  <div className="flex items-center gap-2">
-                    <UserOutlined />
-                    {child.userId?.name ||
-                      child.user?.name ||
-                      child.name ||
-                      "Student"}
-                  </div>
+                  {child.userId?.name || "Student"}
                 </Select.Option>
               ))}
             </Select>
-          </Col>
-
-          {selectedChildInfo && (
-            <Col xs={24} md={12}>
-              <div className="flex items-center gap-4 p-4 bg-violet-50 rounded-xl">
-                <Avatar
-                  size={56}
-                  icon={<UserOutlined />}
-                  className="bg-violet-600 shrink-0">
-                  {(selectedChildInfo.userId?.name ||
-                    selectedChildInfo.user?.name)?.[0]?.toUpperCase()}
-                </Avatar>
+            {selectedChildInfo && (
+              <div className="flex items-center gap-3 px-4 py-3 bg-purple-50 rounded-2xl border border-purple-100">
+                <div className="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center shrink-0">
+                  <span className="text-white font-black text-sm">
+                    {(selectedChildInfo.userId?.name || "S")[0].toUpperCase()}
+                  </span>
+                </div>
                 <div>
-                  <div className="font-bold text-lg text-slate-900">
-                    {selectedChildInfo.userId?.name ||
-                      selectedChildInfo.user?.name ||
-                      "Student"}
-                  </div>
-                  <div className="text-sm text-slate-600 flex items-center gap-1">
-                    <TeamOutlined />
-                    Class:{" "}
-                    {selectedChildInfo.classId?.name ||
-                      selectedChildInfo.class?.name ||
-                      "N/A"}
-                  </div>
+                  <p className="font-bold text-slate-800 text-sm">
+                    {selectedChildInfo.userId?.name || "Student"}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    <TeamOutlined className="mr-1" />
+                    {selectedChildInfo.classId?.name || "N/A"}
+                  </p>
                 </div>
               </div>
-            </Col>
-          )}
-        </Row>
-      </Card>
+            )}
+          </div>
+        </div>
+      </div>
 
       {selectedChild ? (
         <>
-          {/* Statistics Cards */}
-          <Row gutter={[16, 16]}>
-            <Col xs={12} sm={12} md={6} lg={6}>
-              <Card className="border-0 shadow-md rounded-xl hover:shadow-lg transition-shadow">
-                <Statistic
-                  title={
-                    <Text className="text-slate-600 flex items-center gap-2">
-                      <CalendarOutlined />
-                      Total Days
-                    </Text>
-                  }
-                  value={stats.total}
-                  styles={{ color: "#475569", fontWeight: "bold" }}
-                />
-              </Card>
-            </Col>
+          {/* Stats Strip */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              {
+                icon: <CalendarOutlined className="text-xl" />,
+                label: "Total Days",
+                value: stats.total,
+                bg: "bg-slate-500",
+                light: "bg-slate-50",
+                text: "text-slate-700",
+              },
+              {
+                icon: <CheckCircleOutlined className="text-xl" />,
+                label: "Present",
+                value: stats.present,
+                bg: "bg-emerald-500",
+                light: "bg-emerald-50",
+                text: "text-emerald-700",
+              },
+              {
+                icon: <CloseCircleOutlined className="text-xl" />,
+                label: "Absent",
+                value: stats.absent,
+                bg: "bg-red-500",
+                light: "bg-red-50",
+                text: "text-red-700",
+              },
+              {
+                icon: <ClockCircleOutlined className="text-xl" />,
+                label: "Late",
+                value: stats.late,
+                bg: "bg-amber-500",
+                light: "bg-amber-50",
+                text: "text-amber-700",
+              },
+            ].map(({ icon, label, value, bg, light, text }) => (
+              <div
+                key={label}
+                className={`${light} rounded-2xl p-4 flex items-center gap-3 border border-white shadow-sm`}>
+                <div
+                  className={`w-11 h-11 ${bg} rounded-xl flex items-center justify-center text-white shrink-0`}>
+                  {icon}
+                </div>
+                <div>
+                  <div className={`text-2xl font-black ${text}`}>{value}</div>
+                  <div className="text-xs text-slate-500">{label}</div>
+                </div>
+              </div>
+            ))}
+          </div>
 
-            <Col xs={12} sm={12} md={6} lg={6}>
-              <Card className="border-0 shadow-md rounded-xl bg-emerald-50 hover:shadow-lg transition-shadow">
-                <Statistic
-                  title={
-                    <Text className="text-emerald-700 flex items-center gap-2 font-semibold">
-                      <CheckCircleOutlined />
-                      Present
-                    </Text>
-                  }
-                  value={stats.present}
-                  styles={{ color: "#059669", fontWeight: "bold" }}
-                />
-              </Card>
-            </Col>
-
-            <Col xs={12} sm={12} md={6} lg={6}>
-              <Card className="border-0 shadow-md rounded-xl bg-red-50 hover:shadow-lg transition-shadow">
-                <Statistic
-                  title={
-                    <Text className="text-red-700 flex items-center gap-2 font-semibold">
-                      <CloseCircleOutlined />
-                      Absent
-                    </Text>
-                  }
-                  value={stats.absent}
-                  styles={{ color: "#dc2626", fontWeight: "bold" }}
-                />
-              </Card>
-            </Col>
-
-            <Col xs={12} sm={12} md={6} lg={6}>
-              <Card className="border-0 shadow-md rounded-xl bg-amber-50 hover:shadow-lg transition-shadow">
-                <Statistic
-                  title={
-                    <Text className="text-amber-700 flex items-center gap-2 font-semibold">
-                      <ClockCircleOutlined />
-                      Late
-                    </Text>
-                  }
-                  value={stats.late}
-                  styles={{ color: "#d97706", fontWeight: "bold" }}
-                />
-              </Card>
-            </Col>
-          </Row>
-
-          {/* Attendance Rate Card */}
+          {/* Attendance Rate */}
           {stats.total > 0 && (
-            <Card className="border-0 shadow-md rounded-xl">
-              <Row align="middle" gutter={24}>
-                <Col xs={24} md={4}>
-                  <div className="text-center">
-                    <div className="relative inline-block">
-                      <svg className="w-28 h-28">
-                        <circle
-                          cx="56"
-                          cy="56"
-                          r="52"
-                          stroke="#e5e7eb"
-                          strokeWidth="8"
-                          fill="none"
-                        />
-                        <circle
-                          cx="56"
-                          cy="56"
-                          r="52"
-                          stroke={
-                            attendanceRate >= 75
-                              ? "#8b5cf6"
-                              : attendanceRate >= 50
-                                ? "#f59e0b"
-                                : "#ef4444"
-                          }
-                          strokeWidth="8"
-                          fill="none"
-                          strokeDasharray={`${attendanceRate * 3.27} 327`}
-                          strokeLinecap="round"
-                          transform="rotate(-90 56 56)"
-                        />
-                      </svg>
-                      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-                        <Text className="text-2xl font-bold text-slate-900">
-                          {attendanceRate}%
-                        </Text>
-                      </div>
+            <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                  <TrophyOutlined className="text-violet-600" />
+                </div>
+                <span className="font-bold text-slate-800">
+                  Attendance Rate
+                </span>
+              </div>
+              <div className="p-6">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                  {/* Circle */}
+                  <div className="relative shrink-0">
+                    <svg width="120" height="120" viewBox="0 0 120 120">
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="52"
+                        stroke="#e5e7eb"
+                        strokeWidth="10"
+                        fill="none"
+                      />
+                      <circle
+                        cx="60"
+                        cy="60"
+                        r="52"
+                        stroke={rateCircle}
+                        strokeWidth="10"
+                        fill="none"
+                        strokeDasharray={`${attendanceRate * 3.27} 327`}
+                        strokeLinecap="round"
+                        transform="rotate(-90 60 60)"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className={`text-2xl font-black ${rateText}`}>
+                        {attendanceRate}%
+                      </span>
                     </div>
                   </div>
-                </Col>
-                <Col xs={24} md={20}>
-                  <Title level={4} className="mb-2 flex items-center gap-2">
-                    <TrophyOutlined className="text-violet-600" />
-                    Child's Attendance Rate
-                  </Title>
-                  <Text className="text-slate-600 block mb-3">
-                    {attendanceRate >= 95
-                      ? "Outstanding! Your child maintains excellent attendance."
-                      : attendanceRate >= 75
-                        ? "Good attendance record. Keep encouraging regular attendance."
-                        : attendanceRate >= 50
-                          ? "Moderate attendance. Please ensure more regular school attendance."
-                          : "Low attendance detected. Please prioritize daily school attendance."}
-                  </Text>
-
-                  {attendanceRate >= 95 && (
-                    <Alert
-                      message="Excellent Performance!"
-                      description={`Your child has an outstanding attendance rate of ${attendanceRate}%. This dedication to regular attendance contributes significantly to academic success!`}
-                      type="success"
-                      icon={<StarOutlined />}
-                      showIcon
-                      className="mt-2"
-                    />
-                  )}
-
-                  {attendanceRate < 75 && (
-                    <Alert
-                      message="Attendance Below Target (75%)"
-                      description={`Your child needs ${Math.max(0, Math.ceil((75 * stats.total - stats.present * 100) / 25))} more present days to reach the recommended 75% attendance rate. Regular attendance is crucial for academic success.`}
-                      type="warning"
-                      icon={<ExclamationCircleOutlined />}
-                      showIcon
-                      className="mt-2"
-                    />
-                  )}
-                </Col>
-              </Row>
-            </Card>
+                  {/* Info */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-3 rounded-full ${rateColor} transition-all`}
+                          style={{ width: `${attendanceRate}%` }}
+                        />
+                      </div>
+                      <span
+                        className={`text-lg font-black min-w-12 text-right ${rateText}`}>
+                        {attendanceRate}%
+                      </span>
+                    </div>
+                    <p className="text-slate-600 mb-4">
+                      {attendanceRate >= 95
+                        ? "🏆 Outstanding! Your child maintains excellent attendance."
+                        : attendanceRate >= 75
+                          ? "👍 Good attendance. Keep encouraging regular attendance."
+                          : attendanceRate >= 50
+                            ? "⚠️ Moderate attendance. Please ensure more regular school attendance."
+                            : "🚨 Low attendance. Please prioritize daily school attendance."}
+                    </p>
+                    {attendanceRate >= 95 && (
+                      <div className="flex items-start gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+                        <StarOutlined className="text-emerald-600 mt-0.5" />
+                        <p className="text-sm text-emerald-700">
+                          Outstanding {attendanceRate}% rate — this dedication
+                          contributes significantly to academic success!
+                        </p>
+                      </div>
+                    )}
+                    {attendanceRate < 75 && (
+                      <div className="flex items-start gap-3 bg-amber-50 border border-amber-100 rounded-2xl p-4">
+                        <ExclamationCircleOutlined className="text-amber-600 mt-0.5" />
+                        <p className="text-sm text-amber-700">
+                          Attendance below 75% target.{" "}
+                          {Math.max(
+                            0,
+                            Math.ceil(
+                              (75 * stats.total - stats.present * 100) / 25,
+                            ),
+                          )}{" "}
+                          more present days needed to reach the recommended
+                          rate.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Filters */}
-          <Card className="border-0 shadow-lg rounded-2xl">
-            <div className="mb-4">
-              <Title level={5} className="mb-0 flex items-center gap-2">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
                 <CalendarOutlined className="text-blue-600" />
-                Filter Attendance Records
-              </Title>
+              </div>
+              <span className="font-bold text-slate-800">Filter Records</span>
             </div>
-            <Row gutter={[16, 16]}>
-              <Col xs={24} sm={12}>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  <CalendarOutlined className="mr-2" />
+            <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
                   Date Range
                 </label>
                 <RangePicker
@@ -482,11 +505,10 @@ const ParentChildAttendancePage = () => {
                     current && current > dayjs().endOf("day")
                   }
                 />
-              </Col>
-
-              <Col xs={24} sm={12}>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">
-                  <BookOutlined className="mr-2" />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  <BookOutlined className="mr-1" />
                   Subject
                 </label>
                 <Select
@@ -508,72 +530,67 @@ const ParentChildAttendancePage = () => {
                     </Select.Option>
                   ))}
                 </Select>
-              </Col>
-            </Row>
-          </Card>
+              </div>
+            </div>
+          </div>
 
-          {/* Attendance Table */}
-          <Card
-            className="border-0 shadow-lg rounded-2xl"
-            title={
+          {/* Records Table */}
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-violet-100 rounded-lg flex items-center justify-center">
-                  <CalendarOutlined className="text-violet-600 text-lg" />
+                <div className="w-8 h-8 bg-violet-100 rounded-lg flex items-center justify-center">
+                  <CalendarOutlined className="text-violet-600" />
                 </div>
                 <div>
-                  <Title level={4} className="mb-0">
+                  <span className="font-bold text-slate-800">
                     Attendance Records
-                  </Title>
-                  <Text className="text-slate-500 text-sm">
-                    Daily attendance history
-                  </Text>
+                  </span>
+                  <p className="text-xs text-slate-400">
+                    {attendance.length} records
+                  </p>
                 </div>
               </div>
-            }>
-            <Table
-              columns={columns}
-              dataSource={attendance}
-              rowKey="_id"
-              loading={loading}
-              rowClassName={(record) => {
-                const status = record?.status;
-                if (status === "present") return "bg-emerald-50";
-                if (status === "absent") return "bg-red-50";
-                if (status === "late") return "bg-amber-50";
-                return "";
-              }}
-              pagination={{
-                pageSize: 10,
-                showSizeChanger: true,
-                showTotal: (total, range) =>
-                  `${range[0]}-${range[1]} of ${total} records`,
-                className: "px-4",
-              }}
-              locale={{
-                emptyText: (
-                  <Empty
-                    description="No attendance records found"
-                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                  />
-                ),
-              }}
-              className="modern-table"
-            />
-          </Card>
+            </div>
+            <div className="p-4">
+              <Table
+                columns={columns}
+                dataSource={attendance}
+                rowKey="_id"
+                loading={loading}
+                rowClassName={(record) => {
+                  const s = record?.status;
+                  if (s === "present") return "bg-emerald-50/50";
+                  if (s === "absent") return "bg-red-50/50";
+                  if (s === "late") return "bg-amber-50/50";
+                  return "";
+                }}
+                pagination={{
+                  pageSize: 10,
+                  showSizeChanger: true,
+                  showTotal: (total, range) =>
+                    `${range[0]}-${range[1]} of ${total} records`,
+                }}
+                locale={{
+                  emptyText: (
+                    <Empty
+                      description="No attendance records found"
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    />
+                  ),
+                }}
+              />
+            </div>
+          </div>
         </>
       ) : (
-        <Card className="border-0 shadow-lg rounded-2xl">
-          <Empty
-            description={
-              <div>
-                <Text className="text-slate-600">
-                  Please select a child to view attendance records
-                </Text>
-              </div>
-            }
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-          />
-        </Card>
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-16 text-center">
+          <div className="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircleOutlined className="text-2xl text-purple-400" />
+          </div>
+          <p className="text-slate-500">
+            Please select a child to view attendance records
+          </p>
+        </div>
       )}
     </div>
   );

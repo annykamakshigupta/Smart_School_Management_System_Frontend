@@ -10,17 +10,9 @@ import {
   Form,
   Input,
   Select,
-  Tag,
-  Space,
   message,
-  Avatar,
-  Card,
-  Tooltip,
-  Popconfirm,
-  Badge,
   Dropdown,
   Empty,
-  Skeleton,
 } from "antd";
 import {
   PlusOutlined,
@@ -42,7 +34,6 @@ import {
   SafetyOutlined,
   IdcardOutlined,
 } from "@ant-design/icons";
-import { PageHeader, DataTable } from "../../../components/UI";
 import {
   getAllUsers,
   createUser,
@@ -291,259 +282,233 @@ const UserManagementPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 -m-6 p-6">
-      {/* Header Section - Sticky */}
-      <div className="sticky top-0 z-10 bg-slate-50 pb-4 mb-6">
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-slate-50 via-white to-blue-50 min-h-screen">
+      {/* Gradient Header */}
+      <div className="bg-linear-to-r from-slate-500 to-blue-900 rounded-3xl p-8 text-white shadow-2xl border border-slate-600/20">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
+              <TeamOutlined className="text-2xl text-white" />
+            </div>
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="text-2xl font-black text-white">
                 User Management
               </h1>
-              <p className="text-slate-500 mt-1">
+              <p className="text-slate-300 text-sm mt-0.5">
                 Manage all system users, roles, and permissions
               </p>
             </div>
-            <div className="flex gap-3">
-              <Button
-                icon={<ReloadOutlined />}
-                onClick={fetchUsers}
-                className="hover:border-blue-500 hover:text-blue-500">
-                Refresh
-              </Button>
-              <Button
-                type="primary"
-                icon={<PlusOutlined />}
-                onClick={() => {
-                  setEditingUser(null);
-                  form.resetFields();
-                  setGeneratedPassword("");
-                  handleGeneratePassword();
-                  setIsModalOpen(true);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 shadow-sm">
-                Add User
-              </Button>
-            </div>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={fetchUsers}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-2xl text-sm font-medium transition-all border border-white/20 backdrop-blur-sm">
+              <ReloadOutlined /> Refresh
+            </button>
+            <button
+              onClick={() => {
+                setEditingUser(null);
+                form.resetFields();
+                setGeneratedPassword("");
+                handleGeneratePassword();
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white text-slate-800 rounded-2xl text-sm font-bold hover:bg-slate-100 transition-all shadow-lg">
+              <PlusOutlined /> Add User
+            </button>
           </div>
         </div>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-              <TeamOutlined className="text-2xl text-blue-600" />
+        {/* Mini stats strip */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+          {[
+            {
+              label: "Total Users",
+              value: stats.totalUsers || 0,
+              color: "bg-white/15",
+            },
+            {
+              label: "Active",
+              value: stats.activeUsers || 0,
+              color: "bg-emerald-500/30",
+            },
+            {
+              label: "Suspended",
+              value: stats.suspendedUsers || 0,
+              color: "bg-orange-500/30",
+            },
+            {
+              label: "Classes",
+              value: stats.totalClasses || 0,
+              color: "bg-purple-500/30",
+            },
+          ].map((s) => (
+            <div
+              key={s.label}
+              className={`${s.color} rounded-2xl p-3 text-center border border-white/10`}>
+              <div className="text-2xl font-black text-white">{s.value}</div>
+              <div className="text-xs text-slate-300 mt-0.5">{s.label}</div>
             </div>
-            <div>
-              <p className="text-slate-500 text-sm">Total Users</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {stats.totalUsers || 0}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-              <CheckCircleOutlined className="text-2xl text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Active</p>
-              <p className="text-2xl font-bold text-emerald-600">
-                {stats.activeUsers || 0}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-orange-50 rounded-xl flex items-center justify-center">
-              <StopOutlined className="text-2xl text-orange-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Suspended</p>
-              <p className="text-2xl font-bold text-orange-600">
-                {stats.suspendedUsers || 0}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-              <BookOutlined className="text-2xl text-purple-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Classes</p>
-              <p className="text-2xl font-bold text-slate-900">
-                {stats.totalClasses || 0}
-              </p>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      {/* Main Content Card */}
-      <Card className="border-0 shadow-sm">
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-6 pb-4 border-b border-slate-200">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                activeTab === tab.key
-                  ? "bg-blue-600 text-white shadow-sm"
-                  : "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              }`}>
-              {tab.label}
-              {tab.count !== null && (
-                <span
-                  style={{
-                    marginLeft: 8,
-                    display: "inline-flex",
-                    alignItems: "center",
-                  }}>
-                  <Badge
-                    count={tab.count}
-                    style={{
-                      backgroundColor:
-                        activeTab === tab.key ? "white" : "#e2e8f0",
-                      color: activeTab === tab.key ? "#2563eb" : "#475569",
-                    }}
-                  />
-                </span>
-              )}
-            </button>
           ))}
         </div>
+      </div>
 
-        {/* Search Bar */}
-        <div className="mb-6">
-          <Input.Search
-            placeholder="Search by name or email..."
-            size="large"
-            allowClear
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="max-w-md"
-          />
+      {/* Main Content Panel */}
+      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        {/* Panel header with tabs + search */}
+        <div className="px-6 py-4 border-b border-slate-100">
+          <div className="flex flex-col md:flex-row md:items-center gap-4">
+            <div className="flex flex-wrap gap-2 flex-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                    activeTab === tab.key
+                      ? "bg-slate-800 text-white shadow-sm"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}>
+                  {tab.label}
+                  {tab.count !== null && (
+                    <span
+                      className={`ml-2 text-xs px-1.5 py-0.5 rounded-full ${activeTab === tab.key ? "bg-white/20 text-white" : "bg-slate-200 text-slate-500"}`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <Input.Search
+              placeholder="Search by name or email..."
+              size="large"
+              allowClear
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="max-w-xs"
+            />
+          </div>
         </div>
 
-        {/* User Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Card key={i} className="border border-slate-200">
-                <Skeleton avatar active />
-              </Card>
-            ))}
-          </div>
-        ) : filteredUsers.length === 0 ? (
-          <Empty
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={
-              <span className="text-slate-500">
-                {searchQuery
-                  ? "No users found matching your search"
-                  : "No users in this category"}
-              </span>
-            }
-            className="my-12"
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredUsers.map((user) => {
-              const roleConfig = getRoleConfig(user.role);
-              const statusConfig = getStatusConfig(user.status || "active");
+        <div className="p-6">
+          {/* User Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div
+                  key={i}
+                  className="bg-slate-50 rounded-2xl p-5 animate-pulse">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-12 h-12 bg-slate-200 rounded-2xl" />
+                    <div className="flex-1">
+                      <div className="h-4 bg-slate-200 rounded w-3/4 mb-2" />
+                      <div className="h-3 bg-slate-100 rounded w-1/2" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-3 bg-slate-100 rounded w-full" />
+                    <div className="h-3 bg-slate-100 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredUsers.length === 0 ? (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                <span className="text-slate-500">
+                  {searchQuery
+                    ? "No users found matching your search"
+                    : "No users in this category"}
+                </span>
+              }
+              className="my-12"
+            />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredUsers.map((user) => {
+                const roleConfig = getRoleConfig(user.role);
+                const statusConfig = getStatusConfig(user.status || "active");
+                const initial = user.name?.[0]?.toUpperCase() || "U";
 
-              return (
-                <Card
-                  key={user._id}
-                  className="border border-slate-200 hover:shadow-md transition-all hover:border-blue-300"
-                  bodyStyle={{ padding: "20px" }}>
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <Avatar
-                        size={48}
-                        icon={roleConfig.icon}
-                        style={{
-                          backgroundColor: roleConfig.bgColor,
-                          color: roleConfig.color,
-                        }}
-                      />
-                      <div>
-                        <h3 className="font-semibold text-slate-900 text-base">
-                          {user.name}
-                        </h3>
-                        <p className="text-xs text-slate-500">{user.email}</p>
+                return (
+                  <div
+                    key={user._id}
+                    className="bg-slate-50 rounded-2xl p-5 hover:bg-white hover:shadow-md transition-all border border-slate-100 hover:border-slate-200 group">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="w-12 h-12 rounded-2xl flex items-center justify-center font-black text-base text-white"
+                          style={{ backgroundColor: roleConfig.color }}>
+                          {initial}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-slate-900 text-sm leading-tight">
+                            {user.name}
+                          </h3>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <Dropdown
+                        menu={{ items: getActionItems(user) }}
+                        trigger={["click"]}
+                        placement="bottomRight">
+                        <Button
+                          type="text"
+                          icon={<MoreOutlined />}
+                          className="opacity-0 group-hover:opacity-100 hover:bg-slate-200 rounded-xl"
+                        />
+                      </Dropdown>
+                    </div>
+
+                    <div className="space-y-2.5">
+                      <div className="flex items-center gap-2 text-xs text-slate-500">
+                        <PhoneOutlined />
+                        <span>{user.phone || "N/A"}</span>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
+                          style={{
+                            backgroundColor: roleConfig.bgColor,
+                            color: roleConfig.color,
+                          }}>
+                          {roleConfig.label}
+                        </span>
+                        <span
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold"
+                          style={{
+                            backgroundColor: statusConfig.bgColor,
+                            color: statusConfig.color,
+                          }}>
+                          {statusConfig.label}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-400 pt-2 border-t border-slate-100">
+                        <IdcardOutlined />
+                        <span>
+                          Joined {new Date(user.createdAt).toLocaleDateString()}
+                        </span>
                       </div>
                     </div>
-                    <Dropdown
-                      menu={{ items: getActionItems(user) }}
-                      trigger={["click"]}
-                      placement="bottomRight">
-                      <Button
-                        type="text"
-                        icon={<MoreOutlined />}
-                        className="hover:bg-slate-100"
-                      />
-                    </Dropdown>
                   </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <PhoneOutlined className="text-slate-400" />
-                      <span>{user.phone || "N/A"}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <Tag
-                        icon={roleConfig.icon}
-                        style={{
-                          backgroundColor: roleConfig.bgColor,
-                          color: roleConfig.color,
-                          border: "none",
-                          fontWeight: 500,
-                        }}>
-                        {roleConfig.label}
-                      </Tag>
-                      <Tag
-                        icon={statusConfig.icon}
-                        style={{
-                          backgroundColor: statusConfig.bgColor,
-                          color: statusConfig.color,
-                          border: "none",
-                          fontWeight: 500,
-                        }}>
-                        {statusConfig.label}
-                      </Tag>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-xs text-slate-400 mt-3 pt-3 border-t border-slate-100">
-                      <IdcardOutlined />
-                      <span>
-                        Joined {new Date(user.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Create/Edit User Modal */}
       <Modal
         title={
-          <div className="text-lg font-semibold text-slate-900">
-            {editingUser ? "Edit User" : "Create New User"}
+          <div className="flex items-center gap-3 pb-1">
+            <div className="w-9 h-9 bg-slate-800 rounded-xl flex items-center justify-center">
+              <UserOutlined className="text-white" />
+            </div>
+            <span className="text-lg font-bold text-slate-900">
+              {editingUser ? "Edit User" : "Create New User"}
+            </span>
           </div>
         }
         open={isModalOpen}
@@ -681,9 +646,13 @@ const UserManagementPage = () => {
       {/* Reset Password Modal */}
       <Modal
         title={
-          <div className="text-lg font-semibold text-slate-900">
-            <LockOutlined className="mr-2" />
-            Set New Password
+          <div className="flex items-center gap-3 pb-1">
+            <div className="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
+              <LockOutlined className="text-orange-600" />
+            </div>
+            <span className="text-lg font-bold text-slate-900">
+              Set New Password
+            </span>
           </div>
         }
         open={isPasswordModalOpen}
