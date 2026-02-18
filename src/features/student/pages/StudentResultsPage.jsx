@@ -1,20 +1,13 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  Select,
-  Table,
-  Tag,
-  Empty,
-  Spin,
-  Statistic,
-  message,
-  Divider,
-  Button,
-} from "antd";
+import { Select, Table, Tag, Empty, Spin, message, Button } from "antd";
 import {
   TrophyOutlined,
   FileTextOutlined,
-  DownloadOutlined,
+  PrinterOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  BookOutlined,
+  PercentageOutlined,
 } from "@ant-design/icons";
 import {
   getMyExamResults,
@@ -149,6 +142,35 @@ const StudentResultsPage = () => {
     },
   ];
 
+  const getGradeColor = (pct) => {
+    const p = parseFloat(pct);
+    if (p >= 90)
+      return {
+        bg: "bg-emerald-500",
+        text: "text-emerald-600",
+        light: "bg-emerald-50",
+      };
+    if (p >= 75)
+      return { bg: "bg-blue-500", text: "text-blue-600", light: "bg-blue-50" };
+    if (p >= 60)
+      return {
+        bg: "bg-amber-500",
+        text: "text-amber-600",
+        light: "bg-amber-50",
+      };
+    if (p >= 40)
+      return {
+        bg: "bg-orange-500",
+        text: "text-orange-600",
+        light: "bg-orange-50",
+      };
+    return { bg: "bg-red-500", text: "text-red-600", light: "bg-red-50" };
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -158,98 +180,224 @@ const StudentResultsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 -m-6 p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">My Results</h1>
-        <p className="text-slate-500">View your exam results and report card</p>
-      </div>
+    <>
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #printable-report, #printable-report * { visibility: visible; }
+          #printable-report { position: fixed; top: 0; left: 0; width: 100%; }
+          .no-print { display: none !important; }
+        }
+      `}</style>
 
-      <div className="mb-6 max-w-md">
-        <label className="text-sm font-medium text-slate-700 mb-1 block">
-          Select Exam
-        </label>
-        <Select
-          className="w-full"
-          placeholder="Choose an exam"
-          onChange={handleExamSelect}
-          options={exams.map((e) => ({
-            value: e.examId,
-            label: `${e.examName} (${e.examType})`,
-          }))}
-        />
-      </div>
-
-      {selectedExam ? (
-        <>
-          {summary && (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <Card className="text-center">
-                <Statistic
-                  title="Total Marks"
-                  value={`${summary.totalObtained} / ${summary.totalMax}`}
-                />
-              </Card>
-              <Card className="text-center">
-                <Statistic
-                  title="Percentage"
-                  value={summary.percentage}
-                  suffix="%"
-                  styles={{ color: "#2563eb" }}
-                />
-              </Card>
-              <Card className="text-center">
-                <Statistic title="Subjects" value={results.length} />
-              </Card>
-              <Card className="text-center">
-                <Statistic
-                  title="Result"
-                  value={summary.allPassed ? "PASS" : "FAIL"}
-                  styles={{
-                    color: summary.allPassed ? "#16a34a" : "#dc2626",
-                    fontWeight: 700,
-                  }}
-                  prefix={summary.allPassed ? <TrophyOutlined /> : null}
-                />
-              </Card>
-            </div>
-          )}
-
-          <Card
-            title="Subject-wise Results"
-            className="mb-6 border-0 shadow-sm">
-            <Table
-              columns={columns}
-              dataSource={results}
-              rowKey="_id"
-              pagination={false}
-              size="middle"
-            />
-          </Card>
-
-          {loadingReport ? (
-            <div className="text-center py-8">
-              <Spin />
-              <p className="text-sm text-slate-500 mt-2">
-                Loading report card...
+      <div className="min-h-screen bg-linear-to-br from-indigo-50 via-white to-purple-50 -m-6 p-6">
+        {/* Header */}
+        <div className="bg-linear-to-r from-indigo-600 to-purple-600 rounded-3xl p-8 text-white shadow-2xl mb-8">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-1">My Exam Results</h1>
+              <p className="text-indigo-100">
+                Track your academic performance across all exams
               </p>
             </div>
-          ) : reportCard ? (
-            <Card
-              title={
-                <span>
-                  <FileTextOutlined className="mr-2" />
-                  Report Card
+            {selectedExam && summary && (
+              <div className="flex items-center gap-3">
+                <Button
+                  type="primary"
+                  icon={<PrinterOutlined />}
+                  onClick={handlePrint}
+                  className="no-print bg-white text-indigo-700 border-0 font-semibold hover:bg-indigo-50"
+                  size="large">
+                  Download / Print PDF
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Exam Selector */}
+        <div className="no-print mb-8 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+          <label className="text-sm font-semibold text-slate-700 mb-2 block">
+            Select Exam to View Results
+          </label>
+          <Select
+            className="w-full max-w-md"
+            placeholder="Choose an exam..."
+            size="large"
+            onChange={handleExamSelect}
+            options={exams.map((e) => ({
+              value: e.examId,
+              label: `${e.examName}${e.examType ? ` (${e.examType})` : ""}`,
+            }))}
+          />
+          {exams.length === 0 && (
+            <p className="text-sm text-slate-400 mt-2">
+              No published exam results yet.
+            </p>
+          )}
+        </div>
+
+        {selectedExam ? (
+          <div id="printable-report">
+            {/* Exam Title Banner */}
+            <div className="mb-6 text-center">
+              <h2 className="text-2xl font-bold text-slate-800">
+                {selectedExam.examName}
+              </h2>
+              {selectedExam.examType && (
+                <span className="inline-block mt-1 px-3 py-1 rounded-full bg-indigo-100 text-indigo-700 text-sm font-medium">
+                  {selectedExam.examType}
                 </span>
-              }
-              className="border-0 shadow-sm">
-              <ReportCardView data={reportCard} />
-            </Card>
-          ) : null}
-        </>
-      ) : (
-        <Empty description="Select an exam to view your results" />
-      )}
-    </div>
+              )}
+            </div>
+
+            {/* Summary Cards */}
+            {summary &&
+              (() => {
+                const colors = getGradeColor(summary.percentage);
+                return (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center hover:shadow-md transition-shadow">
+                      <div className="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <BookOutlined className="text-xl text-indigo-600" />
+                      </div>
+                      <div className="text-2xl font-bold text-slate-900">
+                        {summary.totalObtained}
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        of {summary.totalMax} marks
+                      </div>
+                      <div className="text-sm font-medium text-slate-600 mt-1">
+                        Total Marks
+                      </div>
+                    </div>
+
+                    <div
+                      className={`${colors.light} rounded-2xl border border-slate-100 shadow-sm p-5 text-center hover:shadow-md transition-shadow`}>
+                      <div
+                        className={`w-12 h-12 ${colors.bg} rounded-xl flex items-center justify-center mx-auto mb-3`}>
+                        <PercentageOutlined className="text-xl text-white" />
+                      </div>
+                      <div className={`text-2xl font-bold ${colors.text}`}>
+                        {summary.percentage}%
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        Overall Score
+                      </div>
+                      <div className="text-sm font-medium text-slate-600 mt-1">
+                        Percentage
+                      </div>
+                    </div>
+
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 text-center hover:shadow-md transition-shadow">
+                      <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3">
+                        <FileTextOutlined className="text-xl text-purple-600" />
+                      </div>
+                      <div className="text-2xl font-bold text-slate-900">
+                        {results.length}
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        Subjects taken
+                      </div>
+                      <div className="text-sm font-medium text-slate-600 mt-1">
+                        Subjects
+                      </div>
+                    </div>
+
+                    <div
+                      className={`${summary.allPassed ? "bg-emerald-50" : "bg-red-50"} rounded-2xl border border-slate-100 shadow-sm p-5 text-center hover:shadow-md transition-shadow`}>
+                      <div
+                        className={`w-12 h-12 ${summary.allPassed ? "bg-emerald-500" : "bg-red-500"} rounded-xl flex items-center justify-center mx-auto mb-3`}>
+                        {summary.allPassed ? (
+                          <CheckCircleOutlined className="text-xl text-white" />
+                        ) : (
+                          <CloseCircleOutlined className="text-xl text-white" />
+                        )}
+                      </div>
+                      <div
+                        className={`text-2xl font-bold ${summary.allPassed ? "text-emerald-600" : "text-red-600"}`}>
+                        {summary.allPassed ? "PASS" : "FAIL"}
+                      </div>
+                      <div className="text-xs text-slate-400 mt-1">
+                        {summary.allPassed
+                          ? "All subjects cleared"
+                          : "Some subjects failed"}
+                      </div>
+                      <div className="text-sm font-medium text-slate-600 mt-1">
+                        Overall Result
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
+            {/* Subject Results Table */}
+            <div className="bg-white rounded-2xl border border-slate-100 shadow-sm mb-8 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                <div className="w-8 h-8 bg-indigo-100 rounded-lg flex items-center justify-center">
+                  <TrophyOutlined className="text-indigo-600" />
+                </div>
+                <span className="font-bold text-slate-800 text-lg">
+                  Subject-wise Results
+                </span>
+              </div>
+              <Table
+                columns={columns}
+                dataSource={results}
+                rowKey="_id"
+                pagination={false}
+                size="middle"
+                rowClassName={(r) => (r.isPassed ? "" : "bg-red-50")}
+              />
+            </div>
+
+            {/* Report Card */}
+            {loadingReport ? (
+              <div className="text-center py-12">
+                <Spin size="large" />
+                <p className="text-sm text-slate-500 mt-3">
+                  Loading report card...
+                </p>
+              </div>
+            ) : reportCard ? (
+              <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                      <FileTextOutlined className="text-purple-600" />
+                    </div>
+                    <span className="font-bold text-slate-800 text-lg">
+                      Official Report Card
+                    </span>
+                  </div>
+                  <Button
+                    icon={<PrinterOutlined />}
+                    onClick={handlePrint}
+                    className="no-print">
+                    Print / Save PDF
+                  </Button>
+                </div>
+                <div className="p-6">
+                  <ReportCardView data={reportCard} />
+                </div>
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-16 text-center">
+            <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+              <TrophyOutlined className="text-4xl text-indigo-300" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-600 mb-2">
+              Select an exam above
+            </h3>
+            <p className="text-slate-400">
+              Your results and report card will appear here
+            </p>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

@@ -53,6 +53,7 @@ const TeacherResultsPage = () => {
   const [marksData, setMarksData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   // Performance view
   const [resultsData, setResultsData] = useState([]);
@@ -87,6 +88,20 @@ const TeacherResultsPage = () => {
       setExamSubjects(res.data || []);
     } catch (e) {
       message.error("Error loading subjects");
+    }
+  };
+
+  const refreshExamSubjects = async (examId, keepSelectedId = null) => {
+    try {
+      const res = await getExamSubjects(examId);
+      const list = res.data || [];
+      setExamSubjects(list);
+      if (keepSelectedId) {
+        const updated = list.find((x) => x._id === keepSelectedId);
+        if (updated) setSelectedExamSubject(updated);
+      }
+    } catch {
+      // no-op: caller already shows error where relevant
     }
   };
 
@@ -177,10 +192,13 @@ const TeacherResultsPage = () => {
         })),
       );
       message.success("Marks saved as draft");
+
+      await refreshExamSubjects(selectedExam._id, selectedExamSubject._id);
     } catch (e) {
       message.error(
         e?.response?.data?.message || e?.message || "Error saving marks",
       );
+      throw e;
     } finally {
       setSaving(false);
     }
@@ -188,15 +206,53 @@ const TeacherResultsPage = () => {
 
   const handleSubmitForApproval = async () => {
     if (!selectedExamSubject) return;
+    if (saving || submitting) return;
+    if (!selectedExam?._id) {
+      message.warning("Select an exam first");
+      return;
+    }
+
+    // Ensure marks are persisted before submitting.
+    const valid = marksData.filter(
+      (m) => m.marksObtained !== "" && m.marksObtained !== null,
+    );
+    if (!valid.length) {
+      message.warning("Enter at least one student's marks");
+      return;
+    }
+
+    // Validate max marks before submitting.
+    const max = selectedExamSubject.maxMarks;
+    const invalid = valid.filter(
+      (m) => m.marksObtained > max || m.marksObtained < 0,
+    );
+    if (invalid.length) {
+      message.error(`Marks must be between 0 and ${max}`);
+      return;
+    }
+
+    setSubmitting(true);
     try {
+      await enterMarks(
+        selectedExam._id,
+        selectedExamSubject._id,
+        valid.map((m) => ({
+          studentId: m.studentId,
+          marksObtained: Number(m.marksObtained),
+          remarks: m.remarks,
+        })),
+      );
+
       await submitMarksForApproval(selectedExamSubject._id);
       message.success("Marks submitted for approval");
-      const res = await getExamSubjects(selectedExam._id);
-      setExamSubjects(res.data || []);
+
+      await refreshExamSubjects(selectedExam._id, selectedExamSubject._id);
     } catch (e) {
       message.error(
         e?.response?.data?.message || e?.message || "Error submitting",
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -343,9 +399,11 @@ const TeacherResultsPage = () => {
                     icon={<SendOutlined />}
                     className="bg-blue-600"
                     onClick={handleSubmitForApproval}
+                    loading={submitting}
                     disabled={
                       selectedExamSubject.marksEntryStatus === "approved" ||
-                      selectedExamSubject.marksEntryStatus === "submitted"
+                      selectedExamSubject.marksEntryStatus === "submitted" ||
+                      saving
                     }>
                     Submit for Approval
                   </Button>

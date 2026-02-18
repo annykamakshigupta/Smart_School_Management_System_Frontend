@@ -1,6 +1,7 @@
 /**
  * Teacher Dashboard
  * Main dashboard view for teachers - Shows real data from API
+ * Enhanced with modern analytics and visualizations
  */
 
 import { useState, useEffect } from "react";
@@ -28,6 +29,7 @@ import {
   PhoneOutlined,
   IdcardOutlined,
   HomeOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
 import { Link, useNavigate } from "react-router-dom";
 import { StatCard, PageHeader } from "../../../components/UI";
@@ -181,98 +183,124 @@ const TeacherDashboard = () => {
   const todaySchedule = getTodaySchedule();
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-indigo-600 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-center justify-between">
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-slate-50 via-white to-slate-50 min-h-screen">
+      {/* Welcome Header - Enhanced */}
+      <div className="bg-linear-to-r from-blue-600 to-blue-700 rounded-3xl p-8 text-white shadow-2xl border border-blue-400/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
               Welcome Back, Teacher! 🎓
             </h1>
-            <p className="text-indigo-100 text-lg">
+            <p className="text-blue-100 text-lg">
               Here's your overview for today
             </p>
           </div>
-          <div className="hidden md:flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Button
               type="primary"
               size="large"
               icon={<CheckCircleOutlined />}
               onClick={() => navigate("/teacher/attendance?mark=1")}
-              className="bg-white/20 hover:bg-white/30 border-white/30 backdrop-blur-sm">
+              className="bg-white/20 hover:bg-white/30 border-white/20 backdrop-blur-sm shadow-lg">
               Mark Attendance
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Stats */}
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-blue-500 to-blue-400 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <TeamOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Total
-              </div>
+      {/* Stats - Clean solid cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-2xl" />
             </div>
-            <h3 className="text-4xl font-bold mb-1">
-              {teacherData.totalStudents}
-            </h3>
-            <p className="text-blue-100 text-sm font-medium">My Students</p>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Total
+            </span>
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <CalendarOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Today
-              </div>
+          <h3 className="text-4xl font-bold mb-1">
+            {teacherData.totalStudents}
+          </h3>
+          <p className="text-blue-100 text-sm font-medium">My Students</p>
+        </div>
+
+        <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <CalendarOutlined className="text-2xl" />
             </div>
-            <h3 className="text-4xl font-bold mb-1">{todaySchedule.length}</h3>
-            <p className="text-green-100 text-sm font-medium">Classes Today</p>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Today
+            </span>
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <HomeOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Active
-              </div>
+          <h3 className="text-4xl font-bold mb-1">{todaySchedule.length}</h3>
+          <p className="text-emerald-100 text-sm font-medium">Classes Today</p>
+        </div>
+
+        <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <HomeOutlined className="text-2xl" />
             </div>
-            <h3 className="text-4xl font-bold mb-1">
-              {teacherData.assignedClasses.length}
-            </h3>
-            <p className="text-amber-100 text-sm font-medium">
-              Assigned Classes
-            </p>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Active
+            </span>
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <BookOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Teaching
-              </div>
+          <h3 className="text-4xl font-bold mb-1">
+            {teacherData.assignedClasses.length}
+          </h3>
+          <p className="text-amber-100 text-sm font-medium">Assigned Classes</p>
+        </div>
+
+        <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-2xl" />
             </div>
-            <h3 className="text-4xl font-bold mb-1">
-              {teacherData.assignedSubjects.length}
-            </h3>
-            <p className="text-purple-100 text-sm font-medium">My Subjects</p>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Teaching
+            </span>
           </div>
-        </Col>
-      </Row>
+          <h3 className="text-4xl font-bold mb-1">
+            {teacherData.assignedSubjects.length}
+          </h3>
+          <p className="text-purple-100 text-sm font-medium">Subjects</p>
+        </div>
+      </div>
+
+      {/* Quick Overview */}
+      {teacherData.assignedClasses.length > 0 && (
+        <Row gutter={[16, 16]}>
+          <Col xs={24}>
+            <Card
+              className="border-0 shadow-md rounded-2xl"
+              title={
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <HomeOutlined className="text-xl text-blue-600" />
+                  </div>
+                  <span className="font-bold text-lg">My Classes Overview</span>
+                </div>
+              }>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                {teacherData.assignedClasses.slice(0, 8).map((cls, idx) => (
+                  <div
+                    key={cls._id || idx}
+                    className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:border-blue-200 hover:bg-blue-50 transition-all">
+                    <p className="font-semibold text-slate-800 truncate">
+                      {cls.name || cls.className || `Class ${idx + 1}`}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {cls.students?.length ?? 0} students
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </Col>
+        </Row>
+      )}
 
       <Row gutter={[16, 16]}>
         {/* Today's Schedule */}

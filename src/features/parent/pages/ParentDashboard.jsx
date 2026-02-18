@@ -1,6 +1,7 @@
 /**
  * Parent Dashboard
  * Main dashboard view for parents - Shows real data from API
+ * Enhanced with alerts and comparison visualizations
  */
 
 import { useState, useEffect } from "react";
@@ -171,20 +172,22 @@ const ParentDashboard = () => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-indigo-600 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-center justify-between">
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-purple-50 via-white to-purple-50 min-h-screen">
+      {/* Welcome Header - Enhanced */}
+      <div className="bg-linear-to-r from-purple-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl border border-purple-400/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Parent Dashboard 👨‍👩‍👧‍👦</h1>
-            <p className="text-indigo-100 text-lg">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              Parent Dashboard 👨‍👩‍👧‍👦
+            </h1>
+            <p className="text-purple-100 text-lg">
               Monitor and support your children's academic journey
             </p>
           </div>
           <div className="hidden md:block">
-            <div className="text-right">
-              <p className="text-sm text-indigo-100">Total Children</p>
-              <p className="text-3xl font-bold">{children.length}</p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-8 py-4 border border-white/20 text-center">
+              <p className="text-sm text-purple-100">Total Children</p>
+              <p className="text-4xl font-bold">{children.length}</p>
             </div>
           </div>
         </div>
@@ -361,6 +364,51 @@ const ParentDashboard = () => {
                     </div>
                   </Col>
                 </Row>
+
+                {/* Attendance Summary */}
+                {childAttendance.length > 0 && (
+                  <div className="mb-6 bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">
+                        <CheckCircleOutlined className="text-purple-600" />
+                      </div>
+                      <span className="font-bold text-slate-800">
+                        This Month's Attendance
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="bg-green-50 rounded-xl p-3">
+                        <div className="text-2xl font-bold text-green-600">
+                          {
+                            childAttendance.filter(
+                              (a) => a.status === "present",
+                            ).length
+                          }
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          Present
+                        </div>
+                      </div>
+                      <div className="bg-red-50 rounded-xl p-3">
+                        <div className="text-2xl font-bold text-red-500">
+                          {
+                            childAttendance.filter((a) => a.status === "absent")
+                              .length
+                          }
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          Absent
+                        </div>
+                      </div>
+                      <div className="bg-blue-50 rounded-xl p-3">
+                        <div className="text-2xl font-bold text-blue-600">
+                          {calculateAttendanceRate()}%
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">Rate</div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Timetable */}
                 <Card

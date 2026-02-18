@@ -16,6 +16,8 @@ import {
   Empty,
   message,
   Statistic,
+  Progress,
+  Badge,
 } from "antd";
 import {
   TeamOutlined,
@@ -117,94 +119,138 @@ const AdminDashboard = () => {
     );
   }
 
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div className="bg-indigo-600 rounded-2xl p-8 text-white shadow-xl">
-        <div className="flex items-center justify-between">
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-slate-50 via-white to-slate-50 min-h-screen">
+      {/* Welcome Header - Enhanced */}
+      <div className="bg-linear-to-r from-indigo-600 to-indigo-700 rounded-3xl p-8 text-white shadow-2xl border border-indigo-400/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome Back, Admin! 👋</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              Welcome Back, Admin! 👋
+            </h1>
             <p className="text-indigo-100 text-lg">
               Here's what's happening in your school today
             </p>
           </div>
           <div className="hidden md:block">
-            <div className="text-right">
-              <p className="text-sm text-indigo-100">Current Date</p>
-              <p className="text-xl font-semibold">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </p>
+            <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+              <p className="text-sm text-indigo-100">Today</p>
+              <p className="text-lg font-semibold">{currentDate}</p>
             </div>
           </div>
         </div>
       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <TeamOutlined className="text-2xl" />
+            </div>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Students
+            </span>
+          </div>
+          <h3 className="text-4xl font-bold mb-1">
+            {stats.totalStudents.toLocaleString()}
+          </h3>
+          <p className="text-blue-100 text-sm font-medium">Total Students</p>
+        </div>
 
-      {/* Stats Cards */}
-      <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-blue-500 to-blue-400 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <TeamOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Active
-              </div>
+        <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <UserOutlined className="text-2xl" />
             </div>
-            <h3 className="text-4xl font-bold mb-1">
-              {stats.totalStudents.toLocaleString()}
-            </h3>
-            <p className="text-blue-100 text-sm font-medium">Total Students</p>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Faculty
+            </span>
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-green-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <UserOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Faculty
-              </div>
+          <h3 className="text-4xl font-bold mb-1">{stats.totalTeachers}</h3>
+          <p className="text-emerald-100 text-sm font-medium">Total Teachers</p>
+        </div>
+
+        <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <BookOutlined className="text-2xl" />
             </div>
-            <h3 className="text-4xl font-bold mb-1">{stats.totalTeachers}</h3>
-            <p className="text-green-100 text-sm font-medium">Total Teachers</p>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Active
+            </span>
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <BookOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Active
-              </div>
+          <h3 className="text-4xl font-bold mb-1">{stats.totalClasses}</h3>
+          <p className="text-purple-100 text-sm font-medium">Total Classes</p>
+        </div>
+
+        <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+          <div className="flex items-start justify-between mb-5">
+            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+              <UsergroupAddOutlined className="text-2xl" />
             </div>
-            <h3 className="text-4xl font-bold mb-1">{stats.totalClasses}</h3>
-            <p className="text-purple-100 text-sm font-medium">Total Classes</p>
+            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+              Linked
+            </span>
           </div>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <div className="bg-linear-to-br from-amber-500 to-orange-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1">
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                <UsergroupAddOutlined className="text-3xl" />
-              </div>
-              <div className="bg-white/20 rounded-lg px-3 py-1 text-xs font-semibold">
-                Linked
-              </div>
-            </div>
-            <h3 className="text-4xl font-bold mb-1">{stats.totalParents}</h3>
-            <p className="text-amber-100 text-sm font-medium">Total Parents</p>
+          <h3 className="text-4xl font-bold mb-1">{stats.totalParents}</h3>
+          <p className="text-amber-100 text-sm font-medium">Total Parents</p>
+        </div>
+      </div>
+
+      {/* Summary Strip */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex items-center gap-4">
+          <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+            <TeamOutlined className="text-2xl text-indigo-600" />
           </div>
-        </Col>
-      </Row>
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
+              Student–Teacher Ratio
+            </p>
+            <p className="text-2xl font-bold text-slate-900">
+              {stats.totalTeachers > 0
+                ? `${Math.round(stats.totalStudents / stats.totalTeachers)}:1`
+                : "—"}
+            </p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex items-center gap-4">
+          <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center shrink-0">
+            <BookOutlined className="text-2xl text-emerald-600" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
+              Avg Students / Class
+            </p>
+            <p className="text-2xl font-bold text-slate-900">
+              {stats.totalClasses > 0
+                ? Math.round(stats.totalStudents / stats.totalClasses)
+                : "—"}
+            </p>
+          </div>
+        </div>
+        <div className="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex items-center gap-4">
+          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center shrink-0">
+            <UsergroupAddOutlined className="text-2xl text-amber-600" />
+          </div>
+          <div>
+            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
+              Parent Engagement
+            </p>
+            <p className="text-2xl font-bold text-slate-900">
+              {stats.totalStudents > 0
+                ? `${Math.round((stats.totalParents / stats.totalStudents) * 100)}%`
+                : "—"}
+            </p>
+          </div>
+        </div>
+      </div>
 
       <Row gutter={[16, 16]}>
         {/* Classes with Teachers */}

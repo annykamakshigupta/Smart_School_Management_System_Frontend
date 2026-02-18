@@ -1,6 +1,7 @@
 /**
  * Student Dashboard
  * Premium SaaS-style — solid colors, clean hierarchy, no gradients
+ * Enhanced with activity timeline and hero summary
  */
 
 import { useState, useEffect, useCallback } from "react";
@@ -18,8 +19,11 @@ import {
   IdcardOutlined,
   ClockCircleOutlined,
   ArrowRightOutlined,
+  StarOutlined,
+  RiseOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+
 import {
   getMyStudentProfile,
   getMyAttendance,
@@ -150,13 +154,43 @@ const StudentDashboard = () => {
       : null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-emerald-50 via-white to-emerald-50 min-h-screen">
+      {/* ── Hero Summary Card - NEW ── */}
+      <div className="bg-linear-to-r from-emerald-600 to-emerald-700 rounded-3xl p-8 text-white shadow-2xl border border-emerald-400/20">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div className="flex items-center gap-6">
+            <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border-2 border-white/30">
+              <span className="text-4xl">🎓</span>
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">
+                Welcome back, {studentProfile.userId?.name || "Student"}!
+              </h1>
+              <p className="text-emerald-100 text-lg">
+                {classInfo?.name || "N/A"} • Section{" "}
+                {studentProfile.section || "N/A"} • Roll #
+                {studentProfile.rollNumber || "N/A"}
+              </p>
+            </div>
+          </div>
+          <div className="hidden md:flex items-center gap-6">
+            <div className="bg-white/10 rounded-2xl px-6 py-4 border border-white/20 text-center">
+              <p className="text-3xl font-bold">
+                {avgPerformance != null ? `${avgPerformance}%` : "—"}
+              </p>
+              <p className="text-emerald-100 text-sm mt-1">Avg Score</p>
+            </div>
+            <div className="bg-white/10 rounded-2xl px-6 py-4 border border-white/20 text-center">
+              <p className="text-3xl font-bold">{attendanceRate}%</p>
+              <p className="text-emerald-100 text-sm mt-1">Attendance</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── Page header ── */}
       <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
-            Welcome back, {studentProfile.userId?.name || "Student"}
-          </h1>
           <p className="text-slate-500 mt-1">
             {new Date().toLocaleDateString("en-US", {
               weekday: "long",
@@ -167,78 +201,126 @@ const StudentDashboard = () => {
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
-          <Tag className="border-slate-300 text-slate-700 font-medium px-3 py-0.5">
-            {classInfo?.name || "N/A"} — {studentProfile.section || "N/A"}
-          </Tag>
-          <Tag className="border-slate-300 text-slate-700 font-medium px-3 py-0.5">
-            Roll #{studentProfile.rollNumber || "N/A"}
-          </Tag>
-          <Tag className="border-slate-300 text-slate-700 font-medium px-3 py-0.5">
+          <Tag className="border-emerald-300 bg-emerald-50 text-emerald-700 font-medium px-3 py-1 rounded-lg">
             {studentProfile.academicYear || "N/A"}
           </Tag>
         </div>
       </div>
 
-      {/* ── KPI strip ── */}
+      {/* ── KPI strip - Enhanced ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <CheckCircleOutlined className="text-emerald-600 text-lg" />
+            <span className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <CheckCircleOutlined className="text-emerald-600 text-xl" />
             </span>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wide">
               This Month
             </span>
           </div>
-          <p className="text-3xl font-bold text-slate-900">{attendanceRate}%</p>
-          <p className="text-sm text-slate-500 mt-1">Attendance</p>
+          <p className="text-4xl font-bold text-slate-900 mb-1">
+            {attendanceRate}%
+          </p>
+          <p className="text-sm text-slate-500">Attendance</p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
-              <BookOutlined className="text-blue-600 text-lg" />
+            <span className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+              <BookOutlined className="text-blue-600 text-xl" />
             </span>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wide">
               Active
             </span>
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-4xl font-bold text-slate-900 mb-1">
             {subjects.length || 0}
           </p>
-          <p className="text-sm text-slate-500 mt-1">Subjects</p>
+          <p className="text-sm text-slate-500">Subjects</p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-lg bg-violet-50 flex items-center justify-center">
-              <TrophyOutlined className="text-violet-600 text-lg" />
+            <span className="w-12 h-12 rounded-xl bg-violet-50 flex items-center justify-center">
+              <TrophyOutlined className="text-violet-600 text-xl" />
             </span>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-violet-600 uppercase tracking-wide">
               Average
             </span>
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-4xl font-bold text-slate-900 mb-1">
             {avgPerformance != null ? `${avgPerformance}%` : "—"}
           </p>
-          <p className="text-sm text-slate-500 mt-1">Performance</p>
+          <p className="text-sm text-slate-500">Performance</p>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+        <div className="bg-white border-0 shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
-            <span className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
-              <FileTextOutlined className="text-amber-600 text-lg" />
+            <span className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
+              <FileTextOutlined className="text-amber-600 text-xl" />
             </span>
-            <span className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+            <span className="text-xs font-semibold text-amber-600 uppercase tracking-wide">
               Balance
             </span>
           </div>
-          <p className="text-3xl font-bold text-slate-900">
+          <p className="text-4xl font-bold text-slate-900 mb-1">
             ₹{fees.summary?.totalBalance || 0}
           </p>
-          <p className="text-sm text-slate-500 mt-1">Pending Fees</p>
+          <p className="text-sm text-slate-500">Pending Fees</p>
         </div>
       </div>
+
+      {/* ── Recent Activity Timeline ── */}
+      {results.length > 0 && (
+        <Card
+          className="border border-slate-200 shadow-sm rounded-2xl"
+          title={
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-emerald-50 rounded-xl flex items-center justify-center">
+                <TrophyOutlined className="text-xl text-emerald-600" />
+              </div>
+              <span className="font-bold text-lg">Recent Exam Results</span>
+            </div>
+          }
+          extra={
+            <Link
+              to="/student/results"
+              className="text-sm font-medium text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
+              View All <ArrowRightOutlined className="text-xs" />
+            </Link>
+          }>
+          <div className="space-y-3">
+            {results.slice(0, 4).map((r) => (
+              <div
+                key={r._id}
+                className="flex items-center justify-between py-2 px-3 bg-slate-50 rounded-xl">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-white rounded-lg border border-slate-200 flex items-center justify-center">
+                    <FileTextOutlined className="text-slate-500" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-800 text-sm">
+                      {r.examId?.name || "Exam"}
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      {r.subjectId?.name || "—"}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-slate-900">
+                    {r.marksObtained}/{r.maxMarks ?? r.totalMarks ?? "—"}
+                  </p>
+                  <p
+                    className={`text-xs font-semibold ${r.isPassed ? "text-emerald-600" : "text-rose-600"}`}>
+                    {r.isPassed ? "PASS" : "FAIL"}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
 
       {/* ── Main content grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

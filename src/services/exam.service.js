@@ -196,6 +196,33 @@ export const getTeacherExams = async () => {
   return res.data;
 };
 
+// ===== ADMIN OVERVIEW =====
+
+export const getAdminOverview = async () => {
+  const res = await axios.get(`${API_URL}/admin/overview`, getAuthHeaders());
+  return res.data;
+};
+
+// ===== STUDENT PUBLISHED EXAMS =====
+
+export const getStudentPublishedExams = async () => {
+  const res = await axios.get(
+    `${API_URL}/student/published-exams`,
+    getAuthHeaders(),
+  );
+  return res.data;
+};
+
+// ===== PARENT: CHILD PUBLISHED EXAMS =====
+
+export const getChildPublishedExams = async (studentId) => {
+  const res = await axios.get(
+    `${API_URL}/parent/child/${studentId}/exams`,
+    getAuthHeaders(),
+  );
+  return res.data;
+};
+
 export default {
   createExam,
   getAllExams,
@@ -218,4 +245,7 @@ export default {
   getChildExamResults,
   getReportCard,
   getTeacherExams,
+  getAdminOverview,
+  getStudentPublishedExams,
+  getChildPublishedExams,
 };

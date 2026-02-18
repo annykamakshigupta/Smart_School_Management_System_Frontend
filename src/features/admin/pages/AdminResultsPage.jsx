@@ -91,6 +91,12 @@ const AdminResultsPage = () => {
   // Approval queue
   const [approvalQueue, setApprovalQueue] = useState([]);
 
+  // Approval details (view marks)
+  const [approvalDetailsOpen, setApprovalDetailsOpen] = useState(false);
+  const [selectedApprovalItem, setSelectedApprovalItem] = useState(null);
+  const [approvalMarks, setApprovalMarks] = useState([]);
+  const [approvalMarksLoading, setApprovalMarksLoading] = useState(false);
+
   // Results view
   const [resultsModalOpen, setResultsModalOpen] = useState(false);
   const [resultsData, setResultsData] = useState([]);
@@ -151,6 +157,31 @@ const AdminResultsPage = () => {
       message.error(e.message || "Error fetching approval queue");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openApprovalDetails = async (row) => {
+    const examId = row?.examId?._id;
+    const classId = row?.classId?._id;
+    const subjectId = row?.subjectId?._id;
+
+    if (!examId || !classId || !subjectId) {
+      message.error("Missing exam/class/subject for this approval item");
+      return;
+    }
+
+    setSelectedApprovalItem(row);
+    setApprovalDetailsOpen(true);
+    setApprovalMarks([]);
+    setApprovalMarksLoading(true);
+    try {
+      const res = await getExamResults(examId, classId, subjectId);
+      setApprovalMarks(res.data || []);
+    } catch (e) {
+      message.error(e?.message || "Error loading marks");
+      setApprovalMarks([]);
+    } finally {
+      setApprovalMarksLoading(false);
     }
   };
 
@@ -248,6 +279,11 @@ const AdminResultsPage = () => {
       await approveMarks(id);
       message.success("Marks approved");
       fetchApprovalQueue();
+      if (selectedApprovalItem?._id === id) {
+        setApprovalDetailsOpen(false);
+        setSelectedApprovalItem(null);
+        setApprovalMarks([]);
+      }
     } catch (e) {
       message.error(e.message || "Error approving");
     }
@@ -258,6 +294,11 @@ const AdminResultsPage = () => {
       await rejectMarks(id);
       message.success("Marks rejected");
       fetchApprovalQueue();
+      if (selectedApprovalItem?._id === id) {
+        setApprovalDetailsOpen(false);
+        setSelectedApprovalItem(null);
+        setApprovalMarks([]);
+      }
     } catch (e) {
       message.error(e.message || "Error rejecting");
     }
@@ -471,9 +512,15 @@ const AdminResultsPage = () => {
     {
       title: "Actions",
       key: "actions",
-      width: 200,
+      width: 260,
       render: (_, r) => (
         <Space>
+          <Button
+            size="small"
+            icon={<EyeOutlined />}
+            onClick={() => openApprovalDetails(r)}>
+            View Marks
+          </Button>
           <Button
             type="primary"
             size="small"
@@ -491,6 +538,46 @@ const AdminResultsPage = () => {
           </Button>
         </Space>
       ),
+    },
+  ];
+
+  const approvalMarksColumns = [
+    {
+      title: "Roll No",
+      key: "roll",
+      width: 100,
+      render: (_, r) => r.studentId?.rollNumber ?? "—",
+    },
+    {
+      title: "Student",
+      key: "student",
+      render: (_, r) => r.studentId?.userId?.name || "—",
+    },
+    {
+      title: "Marks",
+      key: "marks",
+      width: 120,
+      render: (_, r) => (
+        <span className="font-semibold">
+          {typeof r.marksObtained === "number" ? r.marksObtained : "—"}
+        </span>
+      ),
+    },
+    {
+      title: "Status",
+      key: "status",
+      width: 120,
+      render: (_, r) => (
+        <Tag color={r.isPassed ? "green" : "red"}>
+          {r.isPassed ? "PASS" : "FAIL"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Remarks",
+      dataIndex: "remarks",
+      key: "remarks",
+      render: (v) => v || "—",
     },
   ];
 
@@ -574,6 +661,90 @@ const AdminResultsPage = () => {
         items={tabItems}
         size="large"
       />
+
+      {/* Approval Details Modal */}
+      <Modal
+        title="Review Submitted Marks"
+        open={approvalDetailsOpen}
+        onCancel={() => {
+          setApprovalDetailsOpen(false);
+          setSelectedApprovalItem(null);
+          setApprovalMarks([]);
+        }}
+        footer={
+          selectedApprovalItem
+            ? [
+                <Button
+                  key="close"
+                  onClick={() => {
+                    setApprovalDetailsOpen(false);
+                    setSelectedApprovalItem(null);
+                    setApprovalMarks([]);
+                  }}>
+                  Close
+                </Button>,
+                <Button
+                  key="reject"
+                  danger
+                  icon={<CloseCircleOutlined />}
+                  onClick={() => handleReject(selectedApprovalItem._id)}>
+                  Reject
+                </Button>,
+                <Button
+                  key="approve"
+                  type="primary"
+                  className="bg-green-600"
+                  icon={<CheckCircleOutlined />}
+                  onClick={() => handleApprove(selectedApprovalItem._id)}>
+                  Approve
+                </Button>,
+              ]
+            : null
+        }
+        width={900}>
+        {selectedApprovalItem ? (
+          <div className="space-y-3">
+            <div className="text-sm text-slate-600">
+              <div>
+                <span className="font-semibold text-slate-900">
+                  {selectedApprovalItem.examId?.name}
+                </span>
+                <span className="ml-2 text-slate-500">
+                  {examTypes.find(
+                    (e) => e.value === selectedApprovalItem.examId?.examType,
+                  )?.label || selectedApprovalItem.examId?.examType}
+                </span>
+              </div>
+              <div>
+                {selectedApprovalItem.subjectId?.name} (
+                {selectedApprovalItem.subjectId?.code}) •{" "}
+                {selectedApprovalItem.classId?.name}-
+                {selectedApprovalItem.classId?.section}
+              </div>
+              <div className="text-xs text-slate-500">
+                Max: {selectedApprovalItem.maxMarks} | Pass:{" "}
+                {selectedApprovalItem.passingMarks} | Submitted by:{" "}
+                {selectedApprovalItem.submittedBy?.userId?.name || "—"}
+              </div>
+            </div>
+
+            <Table
+              columns={approvalMarksColumns}
+              dataSource={approvalMarks}
+              rowKey="_id"
+              loading={approvalMarksLoading}
+              pagination={{ pageSize: 10 }}
+              locale={{
+                emptyText: approvalMarksLoading
+                  ? "Loading..."
+                  : "No marks found for this submission",
+              }}
+            />
+          </div>
+        ) : (
+          <Empty description="No approval selected" />
+        )}
+      </Modal>
 
       {/* Create/Edit Exam Modal */}
       <Modal
