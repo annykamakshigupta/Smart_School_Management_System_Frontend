@@ -14,8 +14,10 @@ import {
   SettingOutlined,
   LogoutOutlined,
   BellOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Role display names and styling - Solid colors only
@@ -57,6 +59,7 @@ const DashboardHeader = ({
   userRole,
 }) => {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
 
   const roleConfig = ROLE_CONFIG[userRole] || ROLE_CONFIG.admin;
@@ -152,6 +155,23 @@ const DashboardHeader = ({
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
+          {/* Calendar Button */}
+          <button
+            onClick={() => navigate(`/${userRole}/calendar`)}
+            className="
+              relative w-10 h-10 flex items-center justify-center
+              rounded-lg text-indigo-600 bg-indigo-50
+              hover:bg-indigo-100 hover:text-indigo-700
+              hover:shadow-md hover:shadow-indigo-100
+              hover:scale-105 active:scale-95
+              transition-all duration-300 ease-out
+              border border-indigo-200
+            "
+            aria-label="Academic Calendar"
+            title="Academic Calendar">
+            <CalendarOutlined className="text-lg" />
+          </button>
+
           {/* Notifications */}
           <button
             className="
@@ -202,7 +222,7 @@ const DashboardHeader = ({
 
               {/* User Info - Hidden on small screens */}
               <div className="hidden lg:block text-left">
-                <div className="text-sm font-medium text-slate-900 truncate max-w-[120px]">
+                <div className="text-sm font-medium text-slate-900 truncate max-w-30">
                   {userName || "User"}
                 </div>
                 <div className="text-xs text-slate-500">{roleConfig.label}</div>

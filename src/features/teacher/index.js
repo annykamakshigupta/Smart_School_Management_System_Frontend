@@ -11,3 +11,4 @@ export { default as MySchedulePage } from "./pages/MySchedulePage";
 export { default as TeacherAssignmentsPage } from "./pages/TeacherAssignmentsPage";
 export { default as TeacherProfilePage } from "./pages/TeacherProfilePage";
 export { default as TeacherResultsPage } from "./pages/TeacherResultsPage";
+export { default as TeacherCalendarPage } from "./pages/TeacherCalendarPage";

@@ -10,3 +10,4 @@ export { default as StudentClassesPage } from "./pages/StudentClassesPage";
 export { default as StudentProfilePage } from "./pages/StudentProfilePage";
 export { default as StudentFeePage } from "./pages/StudentFeePage";
 export { default as StudentResultsPage } from "./pages/StudentResultsPage";
+export { default as StudentCalendarPage } from "./pages/StudentCalendarPage";

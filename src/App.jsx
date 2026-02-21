@@ -39,6 +39,7 @@ import {
   AdminProfilePage,
   AdminFeeDashboardPage,
   AdminResultsPage,
+  AdminCalendarPage,
 } from "./features/admin";
 
 // Feature Pages - Teacher
@@ -52,6 +53,7 @@ import {
   TeacherAssignmentsPage,
   TeacherProfilePage,
   TeacherResultsPage,
+  TeacherCalendarPage,
 } from "./features/teacher";
 
 // Feature Pages - Student
@@ -64,6 +66,7 @@ import {
   StudentProfilePage,
   StudentFeePage,
   StudentResultsPage,
+  StudentCalendarPage,
 } from "./features/student";
 
 // Assignment Detail Pages
@@ -80,6 +83,7 @@ import {
   ChildDetailsPage,
   ParentProfilePage,
   ParentResultsPage,
+  ParentCalendarPage,
 } from "./features/parent";
 
 // Styles
@@ -220,6 +224,10 @@ function App() {
                     element={<AdminSettingsPage />}
                   />
                   <Route path="/admin/profile" element={<AdminProfilePage />} />
+                  <Route
+                    path="/admin/calendar"
+                    element={<AdminCalendarPage />}
+                  />
                 </Route>
               </Route>
 
@@ -281,6 +289,10 @@ function App() {
                     element={<TeacherProfilePage />}
                   />
                   <Route
+                    path="/teacher/calendar"
+                    element={<TeacherCalendarPage />}
+                  />
+                  <Route
                     path="/teacher/settings"
                     element={<PlaceholderPage title="Teacher Settings" />}
                   />
@@ -338,6 +350,10 @@ function App() {
                   <Route
                     path="/student/profile"
                     element={<StudentProfilePage />}
+                  />
+                  <Route
+                    path="/student/calendar"
+                    element={<StudentCalendarPage />}
                   />
                   <Route
                     path="/student/settings"
@@ -402,6 +418,10 @@ function App() {
                   <Route
                     path="/parent/profile"
                     element={<ParentProfilePage />}
+                  />
+                  <Route
+                    path="/parent/calendar"
+                    element={<ParentCalendarPage />}
                   />
                   <Route
                     path="/parent/settings"

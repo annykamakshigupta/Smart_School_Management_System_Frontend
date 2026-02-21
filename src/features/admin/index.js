@@ -23,3 +23,4 @@ export { default as ClassSubjectAssignmentPage } from "./pages/ClassSubjectAssig
 export { default as AdminProfilePage } from "./pages/AdminProfilePage";
 export { default as AdminFeeDashboardPage } from "./pages/AdminFeeDashboardPage";
 export { default as AdminResultsPage } from "./pages/AdminResultsPage";
+export { default as AdminCalendarPage } from "./pages/AdminCalendarPage";
