@@ -1,6 +1,11 @@
-import React, { useEffect, useRef } from 'react';
-import { Button } from 'antd';
-import { RocketOutlined, SafetyOutlined, LineChartOutlined, PlayCircleOutlined } from '@ant-design/icons';
+import React, { useEffect, useRef } from "react";
+import { Button } from "antd";
+import {
+  RocketOutlined,
+  SafetyOutlined,
+  LineChartOutlined,
+  PlayCircleOutlined,
+} from "@ant-design/icons";
 
 const HeroSection = () => {
   const heroRef = useRef(null);
@@ -8,21 +13,23 @@ const HeroSection = () => {
 
   useEffect(() => {
     // Check for reduced motion preference
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (!prefersReducedMotion && heroRef.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
+              entry.target.classList.add("animate-in");
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
-      const elements = heroRef.current.querySelectorAll('.animate-on-scroll');
+      const elements = heroRef.current.querySelectorAll(".animate-on-scroll");
       elements.forEach((el) => observer.observe(el));
 
       return () => observer.disconnect();
@@ -38,12 +45,15 @@ const HeroSection = () => {
         <div className="bg-gradient-orb orb-2"></div>
         <div className="floating-particles">
           {[...Array(20)].map((_, i) => (
-            <div key={i} className="particle" style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 5}s`,
-              animationDuration: `${15 + Math.random() * 10}s`
-            }}></div>
+            <div
+              key={i}
+              className="particle"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${15 + Math.random() * 10}s`,
+              }}></div>
           ))}
         </div>
       </div>
@@ -51,23 +61,32 @@ const HeroSection = () => {
       <div className="hero-container">
         {/* Left Content */}
         <div className="hero-content">
-          <div className="badge animate-on-scroll" style={{ animationDelay: '0ms' }}>
+          <div
+            className="badge animate-on-scroll"
+            style={{ animationDelay: "0ms" }}>
             <span className="badge-icon">✨</span>
             <span className="badge-text">AI-Powered Platform</span>
           </div>
 
-          <h1 className="hero-title animate-on-scroll" style={{ animationDelay: '100ms' }}>
+          <h1
+            className="hero-title animate-on-scroll"
+            style={{ animationDelay: "100ms" }}>
             Smart School
             <br />
             <span className="title-gradient">Management System</span>
           </h1>
 
-          <p className="hero-subtitle animate-on-scroll" style={{ animationDelay: '200ms' }}>
-            An intelligent, AI-powered platform to manage academic, administrative, 
-            financial, and communication processes in educational institutions.
+          <p
+            className="hero-subtitle animate-on-scroll"
+            style={{ animationDelay: "200ms" }}>
+            An intelligent, AI-powered platform to manage academic,
+            administrative, financial, and communication processes in
+            educational institutions.
           </p>
 
-          <div className="feature-grid animate-on-scroll" style={{ animationDelay: '300ms' }}>
+          <div
+            className="feature-grid animate-on-scroll"
+            style={{ animationDelay: "300ms" }}>
             <div className="feature-item">
               <div className="feature-icon">
                 <RocketOutlined />
@@ -88,25 +107,27 @@ const HeroSection = () => {
             </div>
           </div>
 
-          <div className="cta-buttons animate-on-scroll" style={{ animationDelay: '400ms' }}>
-            <Button 
-              type="primary" 
-              size="large" 
+          <div
+            className="cta-buttons animate-on-scroll"
+            style={{ animationDelay: "400ms" }}>
+            <Button
+              type="primary"
+              size="large"
               className="btn-primary"
-              icon={<RocketOutlined />}
-            >
+              icon={<RocketOutlined />}>
               Get Started
             </Button>
-            <Button 
-              size="large" 
+            <Button
+              size="large"
               className="btn-secondary"
-              icon={<PlayCircleOutlined />}
-            >
+              icon={<PlayCircleOutlined />}>
               Request Demo
             </Button>
           </div>
 
-          <div className="trust-badge animate-on-scroll" style={{ animationDelay: '500ms' }}>
+          <div
+            className="trust-badge animate-on-scroll"
+            style={{ animationDelay: "500ms" }}>
             <div className="trust-item">
               <strong>500+</strong> Schools
             </div>
@@ -122,13 +143,16 @@ const HeroSection = () => {
         </div>
 
         {/* Right Visual */}
-        <div className="hero-visual animate-on-scroll" style={{ animationDelay: '300ms' }} ref={imageRef}>
+        <div
+          className="hero-visual animate-on-scroll"
+          style={{ animationDelay: "300ms" }}
+          ref={imageRef}>
           <div className="scene-container floating">
             {/* 3D School Playground Scene */}
             <div className="school-scene">
               {/* Sky and Background */}
               <div className="sky-gradient"></div>
-              
+
               {/* Clouds */}
               <div className="cloud cloud-1"></div>
               <div className="cloud cloud-2"></div>
@@ -284,11 +308,19 @@ const HeroSection = () => {
         .bg-grid {
           position: absolute;
           inset: 0;
-          background-image: 
+          background-image:
             linear-gradient(rgba(148, 163, 184, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(148, 163, 184, 0.03) 1px, transparent 1px);
+            linear-gradient(
+              90deg,
+              rgba(148, 163, 184, 0.03) 1px,
+              transparent 1px
+            );
           background-size: 48px 48px;
-          mask-image: radial-gradient(ellipse 80% 50% at 50% 50%, black 40%, transparent 100%);
+          mask-image: radial-gradient(
+            ellipse 80% 50% at 50% 50%,
+            black 40%,
+            transparent 100%
+          );
         }
 
         .bg-gradient-orb {
@@ -302,7 +334,11 @@ const HeroSection = () => {
         .orb-1 {
           width: 500px;
           height: 500px;
-          background: linear-gradient(135deg, var(--hero-primary), var(--hero-secondary));
+          background: linear-gradient(
+            135deg,
+            var(--hero-primary),
+            var(--hero-secondary)
+          );
           top: -10%;
           right: -10%;
         }
@@ -310,16 +346,27 @@ const HeroSection = () => {
         .orb-2 {
           width: 400px;
           height: 400px;
-          background: linear-gradient(225deg, var(--hero-accent), var(--hero-primary));
+          background: linear-gradient(
+            225deg,
+            var(--hero-accent),
+            var(--hero-primary)
+          );
           bottom: -10%;
           left: -10%;
           animation-delay: -10s;
         }
 
         @keyframes float-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -30px) scale(1.1); }
-          66% { transform: translate(-20px, 20px) scale(0.9); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(30px, -30px) scale(1.1);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.9);
+          }
         }
 
         .floating-particles {
@@ -338,10 +385,20 @@ const HeroSection = () => {
         }
 
         @keyframes float-particle {
-          0% { transform: translateY(0) translateX(0); opacity: 0; }
-          10% { opacity: 0.2; }
-          90% { opacity: 0.2; }
-          100% { transform: translateY(-100vh) translateX(50px); opacity: 0; }
+          0% {
+            transform: translateY(0) translateX(0);
+            opacity: 0;
+          }
+          10% {
+            opacity: 0.2;
+          }
+          90% {
+            opacity: 0.2;
+          }
+          100% {
+            transform: translateY(-100vh) translateX(50px);
+            opacity: 0;
+          }
         }
 
         /* Container */
@@ -399,7 +456,11 @@ const HeroSection = () => {
           gap: 0.5rem;
           width: fit-content;
           padding: 0.5rem 1rem;
-          background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(139, 92, 246, 0.08));
+          background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.08),
+            rgba(139, 92, 246, 0.08)
+          );
           border: 1px solid var(--hero-border);
           border-radius: 9999px;
           font-size: 0.875rem;
@@ -413,7 +474,6 @@ const HeroSection = () => {
         }
 
         .hero-title {
-          font-family: 'Cal Sans', 'SF Pro Display', -apple-system, system-ui, sans-serif;
           font-size: clamp(2.5rem, 6vw, 4.5rem);
           font-weight: 700;
           line-height: 1.1;
@@ -423,14 +483,17 @@ const HeroSection = () => {
         }
 
         .title-gradient {
-          background: linear-gradient(135deg, var(--hero-primary), var(--hero-secondary));
+          background: linear-gradient(
+            135deg,
+            var(--hero-primary),
+            var(--hero-secondary)
+          );
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
 
         .hero-subtitle {
-          font-family: 'Inter', -apple-system, system-ui, sans-serif;
           font-size: clamp(1rem, 2vw, 1.25rem);
           line-height: 1.7;
           color: var(--hero-text-secondary);
@@ -459,7 +522,11 @@ const HeroSection = () => {
           justify-content: center;
           width: 40px;
           height: 40px;
-          background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(139, 92, 246, 0.1));
+          background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.1),
+            rgba(139, 92, 246, 0.1)
+          );
           border-radius: 12px;
           color: var(--hero-primary);
           font-size: 1.25rem;
@@ -559,8 +626,13 @@ const HeroSection = () => {
         }
 
         @keyframes float-visual {
-          0%, 100% { transform: translateY(0px) rotateX(5deg); }
-          50% { transform: translateY(-20px) rotateX(5deg); }
+          0%,
+          100% {
+            transform: translateY(0px) rotateX(5deg);
+          }
+          50% {
+            transform: translateY(-20px) rotateX(5deg);
+          }
         }
 
         /* School Scene */
@@ -568,10 +640,15 @@ const HeroSection = () => {
           position: relative;
           width: 100%;
           height: 100%;
-          background: linear-gradient(to bottom, #87ceeb 0%, #b8e6ff 50%, #d4f1ff 100%);
+          background: linear-gradient(
+            to bottom,
+            #87ceeb 0%,
+            #b8e6ff 50%,
+            #d4f1ff 100%
+          );
           border-radius: 32px;
           overflow: hidden;
-          box-shadow: 
+          box-shadow:
             0 40px 80px rgba(15, 23, 42, 0.15),
             0 0 0 1px rgba(255, 255, 255, 0.8) inset;
           transform-style: preserve-3d;
@@ -600,8 +677,13 @@ const HeroSection = () => {
         }
 
         @keyframes sun-pulse {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.05); }
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.05);
+          }
         }
 
         .sun-ray {
@@ -610,19 +692,36 @@ const HeroSection = () => {
           left: 50%;
           width: 120px;
           height: 2px;
-          background: linear-gradient(to right, transparent, rgba(255, 213, 79, 0.6), transparent);
+          background: linear-gradient(
+            to right,
+            transparent,
+            rgba(255, 213, 79, 0.6),
+            transparent
+          );
           transform-origin: left center;
           animation: rotate-ray 20s linear infinite;
         }
 
-        .sun-ray:nth-child(1) { transform: rotate(0deg); }
-        .sun-ray:nth-child(2) { transform: rotate(45deg); }
-        .sun-ray:nth-child(3) { transform: rotate(90deg); }
-        .sun-ray:nth-child(4) { transform: rotate(135deg); }
+        .sun-ray:nth-child(1) {
+          transform: rotate(0deg);
+        }
+        .sun-ray:nth-child(2) {
+          transform: rotate(45deg);
+        }
+        .sun-ray:nth-child(3) {
+          transform: rotate(90deg);
+        }
+        .sun-ray:nth-child(4) {
+          transform: rotate(135deg);
+        }
 
         @keyframes rotate-ray {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         /* Clouds */
@@ -637,7 +736,7 @@ const HeroSection = () => {
 
         .cloud::before,
         .cloud::after {
-          content: '';
+          content: "";
           position: absolute;
           background: white;
           border-radius: 100px;
@@ -712,8 +811,12 @@ const HeroSection = () => {
         }
 
         @keyframes float-cloud {
-          from { transform: translateX(0); }
-          to { transform: translateX(100vw); }
+          from {
+            transform: translateX(0);
+          }
+          to {
+            transform: translateX(100vw);
+          }
         }
 
         /* School Building */
@@ -727,8 +830,14 @@ const HeroSection = () => {
         }
 
         @keyframes building-appear {
-          from { transform: translateX(-50%) translateY(50px); opacity: 0; }
-          to { transform: translateX(-50%) translateY(0); opacity: 1; }
+          from {
+            transform: translateX(-50%) translateY(50px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+          }
         }
 
         .building-main {
@@ -771,8 +880,13 @@ const HeroSection = () => {
         }
 
         @keyframes window-shine {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.7; }
+          0%,
+          100% {
+            opacity: 1;
+          }
+          50% {
+            opacity: 0.7;
+          }
         }
 
         .entrance {
@@ -794,7 +908,7 @@ const HeroSection = () => {
         }
 
         .door::after {
-          content: '';
+          content: "";
           position: absolute;
           right: 8px;
           top: 50%;
@@ -826,8 +940,13 @@ const HeroSection = () => {
         }
 
         @keyframes flag-wave {
-          0%, 100% { transform: rotateY(0deg); }
-          50% { transform: rotateY(15deg); }
+          0%,
+          100% {
+            transform: rotateY(0deg);
+          }
+          50% {
+            transform: rotateY(15deg);
+          }
         }
 
         /* Playground */
@@ -857,8 +976,16 @@ const HeroSection = () => {
           bottom: 0;
         }
 
-        .swing-frame-left { left: 0; transform: rotate(-5deg); transform-origin: bottom; }
-        .swing-frame-right { right: 0; transform: rotate(5deg); transform-origin: bottom; }
+        .swing-frame-left {
+          left: 0;
+          transform: rotate(-5deg);
+          transform-origin: bottom;
+        }
+        .swing-frame-right {
+          right: 0;
+          transform: rotate(5deg);
+          transform-origin: bottom;
+        }
 
         .swing-top {
           position: absolute;
@@ -874,12 +1001,24 @@ const HeroSection = () => {
           bottom: 10px;
         }
 
-        .swing-1 { left: 20px; animation: swing-motion 2s ease-in-out infinite; }
-        .swing-2 { right: 20px; animation: swing-motion 2s ease-in-out infinite; animation-delay: -1s; }
+        .swing-1 {
+          left: 20px;
+          animation: swing-motion 2s ease-in-out infinite;
+        }
+        .swing-2 {
+          right: 20px;
+          animation: swing-motion 2s ease-in-out infinite;
+          animation-delay: -1s;
+        }
 
         @keyframes swing-motion {
-          0%, 100% { transform: rotate(-8deg); }
-          50% { transform: rotate(8deg); }
+          0%,
+          100% {
+            transform: rotate(-8deg);
+          }
+          50% {
+            transform: rotate(8deg);
+          }
         }
 
         .swing-chain {
@@ -917,7 +1056,7 @@ const HeroSection = () => {
 
         .slide-ladder::before,
         .slide-ladder::after {
-          content: '';
+          content: "";
           position: absolute;
           left: 0;
           width: 20px;
@@ -925,8 +1064,12 @@ const HeroSection = () => {
           background: #ff6f00;
         }
 
-        .slide-ladder::before { top: 20px; }
-        .slide-ladder::after { top: 40px; }
+        .slide-ladder::before {
+          top: 20px;
+        }
+        .slide-ladder::after {
+          top: 40px;
+        }
 
         .slide-platform {
           position: absolute;
@@ -981,13 +1124,18 @@ const HeroSection = () => {
         }
 
         @keyframes seesaw-motion {
-          0%, 100% { transform: translateX(-50%) rotate(-5deg); }
-          50% { transform: translateX(-50%) rotate(5deg); }
+          0%,
+          100% {
+            transform: translateX(-50%) rotate(-5deg);
+          }
+          50% {
+            transform: translateX(-50%) rotate(5deg);
+          }
         }
 
         .seesaw-plank::before,
         .seesaw-plank::after {
-          content: '';
+          content: "";
           position: absolute;
           top: -8px;
           width: 12px;
@@ -996,8 +1144,12 @@ const HeroSection = () => {
           border-radius: 50%;
         }
 
-        .seesaw-plank::before { left: 5px; }
-        .seesaw-plank::after { right: 5px; }
+        .seesaw-plank::before {
+          left: 5px;
+        }
+        .seesaw-plank::after {
+          right: 5px;
+        }
 
         /* Trees */
         .tree {
@@ -1008,12 +1160,22 @@ const HeroSection = () => {
         }
 
         @keyframes tree-sway {
-          0%, 100% { transform: rotate(-1deg); }
-          50% { transform: rotate(1deg); }
+          0%,
+          100% {
+            transform: rotate(-1deg);
+          }
+          50% {
+            transform: rotate(1deg);
+          }
         }
 
-        .tree-1 { left: 20px; }
-        .tree-2 { right: 30px; animation-delay: -2s; }
+        .tree-1 {
+          left: 20px;
+        }
+        .tree-2 {
+          right: 30px;
+          animation-delay: -2s;
+        }
 
         .tree-trunk {
           width: 12px;
@@ -1034,7 +1196,7 @@ const HeroSection = () => {
 
         .tree-crown::before,
         .tree-crown::after {
-          content: '';
+          content: "";
           position: absolute;
           background: radial-gradient(circle, #66bb6a, #43a047);
           border-radius: 50%;
@@ -1091,7 +1253,7 @@ const HeroSection = () => {
         }
 
         .hoop-ring::before {
-          content: '';
+          content: "";
           position: absolute;
           top: 0;
           left: 0;
@@ -1108,7 +1270,9 @@ const HeroSection = () => {
           bottom: 0;
         }
 
-        .bench-1 { left: 220px; }
+        .bench-1 {
+          left: 220px;
+        }
 
         .bench-seat {
           width: 50px;
@@ -1126,8 +1290,12 @@ const HeroSection = () => {
           background: #6d4c41;
         }
 
-        .bench-leg-left { left: 8px; }
-        .bench-leg-right { right: 8px; }
+        .bench-leg-left {
+          left: 8px;
+        }
+        .bench-leg-right {
+          right: 8px;
+        }
 
         /* Ground */
         .ground {
@@ -1191,8 +1359,13 @@ const HeroSection = () => {
         }
 
         @keyframes float-card {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-15px); }
+          0%,
+          100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-15px);
+          }
         }
 
         .card-icon {

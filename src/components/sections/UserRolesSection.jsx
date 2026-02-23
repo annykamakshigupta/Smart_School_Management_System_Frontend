@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import { Row, Col } from "antd";
 import {
   UserOutlined,
@@ -11,21 +11,24 @@ const UserRolesSection = () => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (!prefersReducedMotion && sectionRef.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
+              entry.target.classList.add("animate-in");
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
-      const elements = sectionRef.current.querySelectorAll('.animate-on-scroll');
+      const elements =
+        sectionRef.current.querySelectorAll(".animate-on-scroll");
       elements.forEach((el) => observer.observe(el));
 
       return () => observer.disconnect();
@@ -113,7 +116,8 @@ const UserRolesSection = () => {
           </div>
           <h2 className="roles-heading">Who Can Use SSMS?</h2>
           <p className="roles-description">
-            Tailored experiences for every stakeholder in the education ecosystem
+            Tailored experiences for every stakeholder in the education
+            ecosystem
           </p>
         </div>
 
@@ -121,27 +125,34 @@ const UserRolesSection = () => {
         <Row gutter={[24, 24]} className="roles-grid">
           {roles.map((role, index) => (
             <Col key={index} xs={24} sm={12} lg={6}>
-              <div 
+              <div
                 className="role-card animate-on-scroll"
-                style={{ animationDelay: `${100 + index * 80}ms` }}
-              >
-                <div className="role-card-glow" style={{ background: role.gradient }}></div>
-                
+                style={{ animationDelay: `${100 + index * 80}ms` }}>
+                <div
+                  className="role-card-glow"
+                  style={{ background: role.gradient }}></div>
+
                 {/* Character Illustration */}
                 <div className="role-illustration-container">
-                  <div className="role-illustration" style={{ 
-                    background: role.gradient 
-                  }}>
-                    <span className="illustration-emoji">{role.illustration}</span>
+                  <div
+                    className="role-illustration"
+                    style={{
+                      background: role.gradient,
+                    }}>
+                    <span className="illustration-emoji">
+                      {role.illustration}
+                    </span>
                     <div className="illustration-glow"></div>
                   </div>
                 </div>
 
                 {/* Icon Badge */}
-                <div className="role-icon-badge" style={{ 
-                  background: `${role.color}15`,
-                  color: role.color 
-                }}>
+                <div
+                  className="role-icon-badge"
+                  style={{
+                    background: `${role.color}15`,
+                    color: role.color,
+                  }}>
                   {role.icon}
                 </div>
 
@@ -149,13 +160,15 @@ const UserRolesSection = () => {
                 <div className="role-content">
                   <h3 className="role-title">{role.title}</h3>
                   <p className="role-description">{role.description}</p>
-                  
+
                   <div className="role-features">
                     <div className="features-header">Key Features:</div>
                     <ul className="features-list">
                       {role.features.map((feature, idx) => (
                         <li key={idx} className="feature-item">
-                          <span className="feature-dot" style={{ background: role.color }}></span>
+                          <span
+                            className="feature-dot"
+                            style={{ background: role.color }}></span>
                           <span className="feature-text">{feature}</span>
                         </li>
                       ))}
@@ -190,7 +203,7 @@ const UserRolesSection = () => {
         .roles-pattern {
           position: absolute;
           inset: 0;
-          background-image: 
+          background-image:
             linear-gradient(rgba(37, 99, 235, 0.02) 1px, transparent 1px),
             linear-gradient(90deg, rgba(37, 99, 235, 0.02) 1px, transparent 1px);
           background-size: 36px 36px;
@@ -222,9 +235,16 @@ const UserRolesSection = () => {
         }
 
         @keyframes float-roles-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -30px) scale(1.08); }
-          66% { transform: translate(-20px, 20px) scale(0.92); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(30px, -30px) scale(1.08);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.92);
+          }
         }
 
         /* Container */
@@ -261,7 +281,6 @@ const UserRolesSection = () => {
         }
 
         .roles-heading {
-          font-family: 'Cal Sans', 'SF Pro Display', -apple-system, system-ui, sans-serif;
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
           line-height: 1.2;
@@ -373,13 +392,24 @@ const UserRolesSection = () => {
         .illustration-glow {
           position: absolute;
           inset: -20%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.3) 0%,
+            transparent 70%
+          );
           animation: pulse-illustration 3s ease-in-out infinite;
         }
 
         @keyframes pulse-illustration {
-          0%, 100% { transform: scale(1); opacity: 1; }
-          50% { transform: scale(1.15); opacity: 0.7; }
+          0%,
+          100% {
+            transform: scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: scale(1.15);
+            opacity: 0.7;
+          }
         }
 
         /* Icon Badge */
@@ -423,7 +453,11 @@ const UserRolesSection = () => {
 
         /* Features */
         .role-features {
-          background: linear-gradient(135deg, rgba(248, 250, 252, 0.9), rgba(241, 245, 249, 0.9));
+          background: linear-gradient(
+            135deg,
+            rgba(248, 250, 252, 0.9),
+            rgba(241, 245, 249, 0.9)
+          );
           border-radius: 16px;
           padding: 1rem;
           text-align: left;
@@ -486,13 +520,21 @@ const UserRolesSection = () => {
         .rbac-glow {
           position: absolute;
           inset: -100%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.15) 0%,
+            transparent 70%
+          );
           animation: rotate-rbac 16s linear infinite;
         }
 
         @keyframes rotate-rbac {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .rbac-content {

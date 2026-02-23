@@ -12,3 +12,4 @@ export { default as TeacherAssignmentsPage } from "./pages/TeacherAssignmentsPag
 export { default as TeacherProfilePage } from "./pages/TeacherProfilePage";
 export { default as TeacherResultsPage } from "./pages/TeacherResultsPage";
 export { default as TeacherCalendarPage } from "./pages/TeacherCalendarPage";
+export { default as TeacherFeePage } from "./pages/TeacherFeePage";

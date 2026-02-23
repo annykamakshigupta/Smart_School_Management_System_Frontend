@@ -17,6 +17,7 @@ import {
   CalendarOutlined,
 } from "@ant-design/icons";
 import { useAuth } from "../../hooks/useAuth";
+import { useSidebar } from "../../context/SidebarContext";
 import { useNavigate } from "react-router-dom";
 
 /**
@@ -52,13 +53,9 @@ const ROLE_CONFIG = {
 /**
  * DashboardHeader Component
  */
-const DashboardHeader = ({
-  collapsed,
-  onToggleSidebar,
-  userName,
-  userRole,
-}) => {
+const DashboardHeader = ({ userName, userRole }) => {
   const { logout } = useAuth();
+  const { collapsed, toggleSidebar } = useSidebar();
   const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -132,7 +129,7 @@ const DashboardHeader = ({
         <div className="flex items-center gap-3 lg:gap-4">
           {/* Sidebar Toggle */}
           <button
-            onClick={onToggleSidebar}
+            onClick={toggleSidebar}
             className="
               w-10 h-10 flex items-center justify-center
               rounded-lg text-slate-600 bg-slate-50

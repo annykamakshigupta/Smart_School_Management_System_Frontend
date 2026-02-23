@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import { Card, Row, Col } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 
@@ -6,21 +6,24 @@ const ObjectivesSection = () => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (!prefersReducedMotion && sectionRef.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
+              entry.target.classList.add("animate-in");
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
-      const elements = sectionRef.current.querySelectorAll('.animate-on-scroll');
+      const elements =
+        sectionRef.current.querySelectorAll(".animate-on-scroll");
       elements.forEach((el) => observer.observe(el));
 
       return () => observer.disconnect();
@@ -92,19 +95,22 @@ const ObjectivesSection = () => {
         {/* Objectives List */}
         <div className="objectives-list">
           {objectives.map((objective, index) => (
-            <div 
-              key={index} 
+            <div
+              key={index}
               className="objective-card animate-on-scroll"
-              style={{ animationDelay: `${100 + index * 100}ms` }}
-            >
-              <div className="objective-glow" style={{ background: `${objective.color}20` }}></div>
+              style={{ animationDelay: `${100 + index * 100}ms` }}>
+              <div
+                className="objective-glow"
+                style={{ background: `${objective.color}20` }}></div>
               <div className="objective-content">
-                <div className="objective-number" style={{ background: `linear-gradient(135deg, ${objective.color}, ${objective.color}dd)` }}>
+                <div
+                  className="objective-number"
+                  style={{
+                    background: `linear-gradient(135deg, ${objective.color}, ${objective.color}dd)`,
+                  }}>
                   {index + 1}
                 </div>
-                <div className="objective-icon">
-                  {objective.icon}
-                </div>
+                <div className="objective-icon">{objective.icon}</div>
                 <div className="objective-text">
                   <h3 className="objective-title">{objective.title}</h3>
                   <p className="objective-desc">{objective.description}</p>
@@ -116,7 +122,9 @@ const ObjectivesSection = () => {
         </div>
 
         {/* Project Scope */}
-        <div className="scope-section animate-on-scroll" style={{ animationDelay: '600ms' }}>
+        <div
+          className="scope-section animate-on-scroll"
+          style={{ animationDelay: "600ms" }}>
           <div className="scope-card">
             <div className="scope-header">
               <h3 className="scope-title">Project Scope & Target Users</h3>
@@ -171,15 +179,18 @@ const ObjectivesSection = () => {
         </div>
 
         {/* Development Methodology */}
-        <div className="methodology-section animate-on-scroll" style={{ animationDelay: '700ms' }}>
+        <div
+          className="methodology-section animate-on-scroll"
+          style={{ animationDelay: "700ms" }}>
           <div className="methodology-card">
             <div className="methodology-glow"></div>
             <div className="methodology-content">
               <div className="methodology-icon">🔄</div>
               <h3 className="methodology-title">Agile Scrum Methodology</h3>
               <p className="methodology-desc">
-                Developed using Agile Scrum principles for iterative development,
-                continuous improvement, and rapid delivery of features
+                Developed using Agile Scrum principles for iterative
+                development, continuous improvement, and rapid delivery of
+                features
               </p>
             </div>
           </div>
@@ -208,9 +219,13 @@ const ObjectivesSection = () => {
         .bg-objectives-pattern {
           position: absolute;
           inset: 0;
-          background-image: 
+          background-image:
             linear-gradient(rgba(139, 92, 246, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(139, 92, 246, 0.03) 1px, transparent 1px);
+            linear-gradient(
+              90deg,
+              rgba(139, 92, 246, 0.03) 1px,
+              transparent 1px
+            );
           background-size: 40px 40px;
         }
 
@@ -240,9 +255,16 @@ const ObjectivesSection = () => {
         }
 
         @keyframes float-objectives-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(40px, -40px) scale(1.12); }
-          66% { transform: translate(-30px, 30px) scale(0.88); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(40px, -40px) scale(1.12);
+          }
+          66% {
+            transform: translate(-30px, 30px) scale(0.88);
+          }
         }
 
         /* Container */
@@ -283,12 +305,18 @@ const ObjectivesSection = () => {
         }
 
         @keyframes pulse-objectives {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.85); }
+          0%,
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(0.85);
+          }
         }
 
         .objectives-heading {
-          font-family: 'Cal Sans', 'SF Pro Display', -apple-system, system-ui, sans-serif;
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
           line-height: 1.2;
@@ -318,7 +346,8 @@ const ObjectivesSection = () => {
         }
 
         .animate-on-scroll.animate-in {
-          animation: slide-up-objectives 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          animation: slide-up-objectives 0.8s cubic-bezier(0.22, 1, 0.36, 1)
+            forwards;
         }
 
         @keyframes slide-up-objectives {
@@ -476,7 +505,11 @@ const ObjectivesSection = () => {
         }
 
         .scope-column {
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.03), rgba(99, 102, 241, 0.03));
+          background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.03),
+            rgba(99, 102, 241, 0.03)
+          );
           border-radius: 20px;
           padding: 2rem;
           height: 100%;
@@ -564,13 +597,21 @@ const ObjectivesSection = () => {
         .methodology-glow {
           position: absolute;
           inset: -100%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.15) 0%,
+            transparent 70%
+          );
           animation: rotate-methodology 20s linear infinite;
         }
 
         @keyframes rotate-methodology {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .methodology-content {
@@ -585,8 +626,13 @@ const ObjectivesSection = () => {
         }
 
         @keyframes rotate-icon {
-          0%, 100% { transform: rotate(0deg); }
-          50% { transform: rotate(180deg); }
+          0%,
+          100% {
+            transform: rotate(0deg);
+          }
+          50% {
+            transform: rotate(180deg);
+          }
         }
 
         .methodology-title {

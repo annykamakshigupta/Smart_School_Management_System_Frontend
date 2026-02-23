@@ -1,93 +1,175 @@
+import { lazy, Suspense } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from "react-router-dom";
-import { ConfigProvider } from "antd";
+import { ConfigProvider, Spin } from "antd";
 
 // Providers
 import { AuthProvider } from "./app/providers/AuthProvider";
 
-// Layouts
+// Layouts (loaded eagerly — needed immediately)
 import { AuthLayout, DashboardLayout } from "./app/layouts";
 
-// Route Guards
+// Route Guards (loaded eagerly — needed for auth checks)
 import { PublicRoutes, PrivateRoute, RoleRoute } from "./app/routes";
 
-// Public Pages
+// Public Pages (loaded eagerly — entry points)
 import LandingPage from "./pages/LandingPage";
 import AuthPage from "./pages/AuthPage";
 import { UnauthorizedPage, NotFoundPage } from "./pages";
 
-// Feature Pages - Admin
-import {
-  AdminDashboard,
-  AdminAssignmentsPage,
-  TeachersPage,
-  StudentsPage,
-  ParentsPage,
-  SettingsPage as AdminSettingsPage,
-  SchedulesPage,
-  ClassesPage,
-  SubjectsPage,
-  AdminAttendancePage,
-  UserManagementPage,
-  StudentEnrollmentPage,
-  ParentChildMappingPage,
-  ClassSubjectAssignmentPage,
-  AdminProfilePage,
-  AdminFeeDashboardPage,
-  AdminResultsPage,
-  AdminCalendarPage,
-} from "./features/admin";
+/* ================================================
+   LAZY-LOADED FEATURE PAGES
+   Code-split per role for smaller initial bundles
+   ================================================ */
 
-// Feature Pages - Teacher
-import {
-  TeacherDashboard,
-  AttendancePage as TeacherAttendancePage,
-  MarkAttendancePage,
-  MyStudentsPage,
-  MyClassesPage,
-  MySchedulePage,
-  TeacherAssignmentsPage,
-  TeacherProfilePage,
-  TeacherResultsPage,
-  TeacherCalendarPage,
-} from "./features/teacher";
+// Admin
+const AdminDashboard = lazy(
+  () => import("./features/admin/pages/AdminDashboard"),
+);
+const AdminAssignmentsPage = lazy(
+  () => import("./features/admin/pages/AdminAssignmentsPage"),
+);
+const TeachersPage = lazy(() => import("./features/admin/pages/TeachersPage"));
+const StudentsPage = lazy(() => import("./features/admin/pages/StudentsPage"));
+const ParentsPage = lazy(() => import("./features/admin/pages/ParentsPage"));
+const AdminSettingsPage = lazy(
+  () => import("./features/admin/pages/SettingsPage"),
+);
+const SchedulesPage = lazy(
+  () => import("./features/admin/pages/SchedulesPage"),
+);
+const ClassesPage = lazy(() => import("./features/admin/pages/ClassesPage"));
+const SubjectsPage = lazy(() => import("./features/admin/pages/SubjectsPage"));
+const AdminAttendancePage = lazy(
+  () => import("./features/admin/pages/AdminAttendancePage"),
+);
+const UserManagementPage = lazy(
+  () => import("./features/admin/pages/UserManagementPage"),
+);
+const StudentEnrollmentPage = lazy(
+  () => import("./features/admin/pages/StudentEnrollmentPage"),
+);
+const ParentChildMappingPage = lazy(
+  () => import("./features/admin/pages/ParentChildMappingPage"),
+);
+const ClassSubjectAssignmentPage = lazy(
+  () => import("./features/admin/pages/ClassSubjectAssignmentPage"),
+);
+const AdminProfilePage = lazy(
+  () => import("./features/admin/pages/AdminProfilePage"),
+);
+const AdminFeeDashboardPage = lazy(
+  () => import("./features/admin/pages/AdminFeeDashboardPage"),
+);
+const AdminResultsPage = lazy(
+  () => import("./features/admin/pages/AdminResultsPage"),
+);
+const AdminCalendarPage = lazy(
+  () => import("./features/admin/pages/AdminCalendarPage"),
+);
 
-// Feature Pages - Student
-import {
-  StudentDashboard,
-  StudentAttendancePage,
-  TimetablePage,
-  StudentAssignmentsPage,
-  StudentClassesPage,
-  StudentProfilePage,
-  StudentFeePage,
-  StudentResultsPage,
-  StudentCalendarPage,
-} from "./features/student";
+// Teacher
+const TeacherDashboard = lazy(
+  () => import("./features/teacher/pages/TeacherDashboard"),
+);
+const TeacherAttendancePage = lazy(
+  () => import("./features/teacher/pages/AttendancePage"),
+);
+const MarkAttendancePage = lazy(
+  () => import("./features/teacher/pages/MarkAttendancePage"),
+);
+const MyStudentsPage = lazy(
+  () => import("./features/teacher/pages/MyStudentsPage"),
+);
+const MyClassesPage = lazy(
+  () => import("./features/teacher/pages/MyClassesPage"),
+);
+const MySchedulePage = lazy(
+  () => import("./features/teacher/pages/MySchedulePage"),
+);
+const TeacherAssignmentsPage = lazy(
+  () => import("./features/teacher/pages/TeacherAssignmentsPage"),
+);
+const TeacherProfilePage = lazy(
+  () => import("./features/teacher/pages/TeacherProfilePage"),
+);
+const TeacherResultsPage = lazy(
+  () => import("./features/teacher/pages/TeacherResultsPage"),
+);
+const TeacherCalendarPage = lazy(
+  () => import("./features/teacher/pages/TeacherCalendarPage"),
+);
+const TeacherAssignmentDetailPage = lazy(
+  () => import("./features/teacher/pages/TeacherAssignmentDetailPage"),
+);
+const TeacherFeePage = lazy(
+  () => import("./features/teacher/pages/TeacherFeePage"),
+);
 
-// Assignment Detail Pages
-import TeacherAssignmentDetailPage from "./features/teacher/pages/TeacherAssignmentDetailPage";
-import StudentAssignmentDetailPage from "./features/student/pages/StudentAssignmentDetailPage";
+// Student
+const StudentDashboard = lazy(
+  () => import("./features/student/pages/StudentDashboard"),
+);
+const StudentAttendancePage = lazy(
+  () => import("./features/student/pages/StudentAttendancePage"),
+);
+const TimetablePage = lazy(
+  () => import("./features/student/pages/TimetablePage"),
+);
+const StudentAssignmentsPage = lazy(
+  () => import("./features/student/pages/StudentAssignmentsPage"),
+);
+const StudentClassesPage = lazy(
+  () => import("./features/student/pages/StudentClassesPage"),
+);
+const StudentProfilePage = lazy(
+  () => import("./features/student/pages/StudentProfilePage"),
+);
+const StudentFeePage = lazy(
+  () => import("./features/student/pages/StudentFeePage"),
+);
+const StudentResultsPage = lazy(
+  () => import("./features/student/pages/StudentResultsPage"),
+);
+const StudentCalendarPage = lazy(
+  () => import("./features/student/pages/StudentCalendarPage"),
+);
+const StudentAssignmentDetailPage = lazy(
+  () => import("./features/student/pages/StudentAssignmentDetailPage"),
+);
 
-// Feature Pages - Parent
-import {
-  ParentDashboard,
-  MyChildrenPage,
-  FeePaymentPage,
-  ParentChildAttendancePage,
-  ChildSchedulePage,
-  ChildDetailsPage,
-  ParentProfilePage,
-  ParentResultsPage,
-  ParentCalendarPage,
-} from "./features/parent";
-
-// Styles
-import "./App.css";
+// Parent
+const ParentDashboard = lazy(
+  () => import("./features/parent/pages/ParentDashboard"),
+);
+const MyChildrenPage = lazy(
+  () => import("./features/parent/pages/MyChildrenPage"),
+);
+const FeePaymentPage = lazy(
+  () => import("./features/parent/pages/FeePaymentPage"),
+);
+const ParentChildAttendancePage = lazy(
+  () => import("./features/parent/pages/ParentChildAttendancePage"),
+);
+const ChildSchedulePage = lazy(
+  () => import("./features/parent/pages/ChildSchedulePage"),
+);
+const ChildDetailsPage = lazy(
+  () => import("./features/parent/pages/ChildDetailsPage"),
+);
+const ParentProfilePage = lazy(
+  () => import("./features/parent/pages/ParentProfilePage"),
+);
+const ParentResultsPage = lazy(
+  () => import("./features/parent/pages/ParentResultsPage"),
+);
+const ParentCalendarPage = lazy(
+  () => import("./features/parent/pages/ParentCalendarPage"),
+);
 
 // Role constants
 const ROLES = {
@@ -102,7 +184,7 @@ const themeConfig = {
   token: {
     colorPrimary: "#6366f1",
     borderRadius: 8,
-    fontFamily: "Inter, system-ui, -apple-system, sans-serif",
+    fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
   },
   components: {
     Button: {
@@ -117,325 +199,353 @@ const themeConfig = {
   },
 };
 
+// Suspense fallback for lazy-loaded routes
+const LazyFallback = () => (
+  <div className="flex items-center justify-center min-h-[60vh]">
+    <Spin size="large" />
+  </div>
+);
+
 function App() {
   return (
     <ConfigProvider theme={themeConfig}>
       <Router>
         <AuthProvider>
-          <Routes>
-            {/* ========== PUBLIC ROUTES ========== */}
-            <Route element={<PublicRoutes />}>
-              <Route path="/" element={<LandingPage />} />
-            </Route>
-
-            {/* Auth Routes - Redirect if already logged in */}
-            <Route element={<PublicRoutes restricted />}>
-              <Route element={<AuthLayout />}>
-                <Route path="/auth" element={<AuthPage />} />
-                <Route path="/login" element={<AuthPage />} />
-                <Route path="/signup" element={<AuthPage />} />
+          <Suspense fallback={<LazyFallback />}>
+            <Routes>
+              {/* ========== PUBLIC ROUTES ========== */}
+              <Route element={<PublicRoutes />}>
+                <Route path="/" element={<LandingPage />} />
               </Route>
-            </Route>
 
-            {/* ========== PROTECTED ROUTES ========== */}
-            <Route element={<PrivateRoute />}>
-              {/* ----- ADMIN ROUTES ----- */}
-              <Route element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
-                  {/* User Management Module */}
-                  <Route path="/admin/users" element={<UserManagementPage />} />
-                  <Route
-                    path="/admin/users/teachers"
-                    element={<TeachersPage />}
-                  />
-                  <Route
-                    path="/admin/users/students"
-                    element={<StudentsPage />}
-                  />
-                  <Route
-                    path="/admin/users/parents"
-                    element={<ParentsPage />}
-                  />
-                  <Route
-                    path="/admin/students/enroll"
-                    element={<StudentEnrollmentPage />}
-                  />
-                  <Route
-                    path="/admin/parents/mapping"
-                    element={<ParentChildMappingPage />}
-                  />
-                  <Route
-                    path="/admin/assignments"
-                    element={<AdminAssignmentsPage />}
-                  />
-                  <Route
-                    path="/admin/academics/teacher-assignments"
-                    element={<ClassSubjectAssignmentPage />}
-                  />
-
-                  {/* Academics */}
-                  <Route
-                    path="/admin/academics/classes"
-                    element={<ClassesPage />}
-                  />
-                  <Route
-                    path="/admin/academics/subjects"
-                    element={<SubjectsPage />}
-                  />
-                  <Route
-                    path="/admin/academics/timetable"
-                    element={<SchedulesPage />}
-                  />
-
-                  {/* Attendance */}
-                  <Route
-                    path="/admin/attendance"
-                    element={<AdminAttendancePage />}
-                  />
-
-                  {/* Fee Management */}
-                  <Route
-                    path="/admin/fees"
-                    element={<AdminFeeDashboardPage />}
-                  />
-                  <Route
-                    path="/admin/fees/structure"
-                    element={<AdminFeeDashboardPage />}
-                  />
-                  <Route
-                    path="/admin/fees/collection"
-                    element={<AdminFeeDashboardPage />}
-                  />
-                  <Route
-                    path="/admin/fees/reports"
-                    element={<AdminFeeDashboardPage />}
-                  />
-
-                  {/* Reports & Settings */}
-                  <Route path="/admin/results" element={<AdminResultsPage />} />
-                  <Route
-                    path="/admin/reports"
-                    element={<PlaceholderPage title="Reports & Analytics" />}
-                  />
-                  <Route
-                    path="/admin/settings"
-                    element={<AdminSettingsPage />}
-                  />
-                  <Route path="/admin/profile" element={<AdminProfilePage />} />
-                  <Route
-                    path="/admin/calendar"
-                    element={<AdminCalendarPage />}
-                  />
+              {/* Auth Routes - Redirect if already logged in */}
+              <Route element={<PublicRoutes restricted />}>
+                <Route element={<AuthLayout />}>
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route path="/login" element={<AuthPage />} />
+                  <Route path="/signup" element={<AuthPage />} />
                 </Route>
               </Route>
 
-              {/* ----- TEACHER ROUTES ----- */}
-              <Route element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}>
-                <Route element={<DashboardLayout />}>
-                  <Route
-                    path="/teacher/dashboard"
-                    element={<TeacherDashboard />}
-                  />
+              {/* ========== PROTECTED ROUTES ========== */}
+              <Route element={<PrivateRoute />}>
+                {/* ----- ADMIN ROUTES ----- */}
+                <Route element={<RoleRoute allowedRoles={[ROLES.ADMIN]} />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route
+                      path="/admin/dashboard"
+                      element={<AdminDashboard />}
+                    />
 
-                  {/* Attendance */}
-                  <Route
-                    path="/teacher/attendance"
-                    element={<TeacherAttendancePage />}
-                  />
-                  <Route
-                    path="/teacher/attendance/mark"
-                    element={<MarkAttendancePage />}
-                  />
-                  {/* Grades */}
-                  <Route
-                    path="/teacher/assignments"
-                    element={<TeacherAssignmentsPage />}
-                  />
-                  <Route
-                    path="/teacher/assignments/:id"
-                    element={<TeacherAssignmentDetailPage />}
-                  />
-                  <Route
-                    path="/teacher/grades/enter"
-                    element={<TeacherResultsPage />}
-                  />
-                  <Route
-                    path="/teacher/grades/results"
-                    element={<TeacherResultsPage />}
-                  />
+                    {/* User Management Module */}
+                    <Route
+                      path="/admin/users"
+                      element={<UserManagementPage />}
+                    />
+                    <Route
+                      path="/admin/users/teachers"
+                      element={<TeachersPage />}
+                    />
+                    <Route
+                      path="/admin/users/students"
+                      element={<StudentsPage />}
+                    />
+                    <Route
+                      path="/admin/users/parents"
+                      element={<ParentsPage />}
+                    />
+                    <Route
+                      path="/admin/students/enroll"
+                      element={<StudentEnrollmentPage />}
+                    />
+                    <Route
+                      path="/admin/parents/mapping"
+                      element={<ParentChildMappingPage />}
+                    />
+                    <Route
+                      path="/admin/assignments"
+                      element={<AdminAssignmentsPage />}
+                    />
+                    <Route
+                      path="/admin/academics/teacher-assignments"
+                      element={<ClassSubjectAssignmentPage />}
+                    />
 
-                  {/* Other */}
-                  <Route
-                    path="/teacher/students"
-                    element={<MyStudentsPage />}
-                  />
-                  <Route
-                    path="/teacher/students/:id"
-                    element={<PlaceholderPage title="Student Details" />}
-                  />
-                  <Route path="/teacher/classes" element={<MyClassesPage />} />
-                  <Route
-                    path="/teacher/schedule"
-                    element={<MySchedulePage />}
-                  />
-                  <Route
-                    path="/teacher/communication"
-                    element={<PlaceholderPage title="Communication" />}
-                  />
-                  <Route
-                    path="/teacher/profile"
-                    element={<TeacherProfilePage />}
-                  />
-                  <Route
-                    path="/teacher/calendar"
-                    element={<TeacherCalendarPage />}
-                  />
-                  <Route
-                    path="/teacher/settings"
-                    element={<PlaceholderPage title="Teacher Settings" />}
-                  />
-                  <Route
-                    path="/teacher/notifications"
-                    element={<PlaceholderPage title="Notifications" />}
-                  />
+                    {/* Academics */}
+                    <Route
+                      path="/admin/academics/classes"
+                      element={<ClassesPage />}
+                    />
+                    <Route
+                      path="/admin/academics/subjects"
+                      element={<SubjectsPage />}
+                    />
+                    <Route
+                      path="/admin/academics/timetable"
+                      element={<SchedulesPage />}
+                    />
+
+                    {/* Attendance */}
+                    <Route
+                      path="/admin/attendance"
+                      element={<AdminAttendancePage />}
+                    />
+
+                    {/* Fee Management */}
+                    <Route
+                      path="/admin/fees"
+                      element={<AdminFeeDashboardPage />}
+                    />
+                    <Route
+                      path="/admin/fees/structure"
+                      element={<AdminFeeDashboardPage />}
+                    />
+                    <Route
+                      path="/admin/fees/collection"
+                      element={<AdminFeeDashboardPage />}
+                    />
+                    <Route
+                      path="/admin/fees/reports"
+                      element={<AdminFeeDashboardPage />}
+                    />
+
+                    {/* Reports & Settings */}
+                    <Route
+                      path="/admin/results"
+                      element={<AdminResultsPage />}
+                    />
+                    <Route
+                      path="/admin/reports"
+                      element={<PlaceholderPage title="Reports & Analytics" />}
+                    />
+                    <Route
+                      path="/admin/settings"
+                      element={<AdminSettingsPage />}
+                    />
+                    <Route
+                      path="/admin/profile"
+                      element={<AdminProfilePage />}
+                    />
+                    <Route
+                      path="/admin/calendar"
+                      element={<AdminCalendarPage />}
+                    />
+                  </Route>
+                </Route>
+
+                {/* ----- TEACHER ROUTES ----- */}
+                <Route element={<RoleRoute allowedRoles={[ROLES.TEACHER]} />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route
+                      path="/teacher/dashboard"
+                      element={<TeacherDashboard />}
+                    />
+
+                    {/* Attendance */}
+                    <Route
+                      path="/teacher/attendance"
+                      element={<TeacherAttendancePage />}
+                    />
+                    <Route
+                      path="/teacher/attendance/mark"
+                      element={<MarkAttendancePage />}
+                    />
+                    {/* Grades */}
+                    <Route
+                      path="/teacher/assignments"
+                      element={<TeacherAssignmentsPage />}
+                    />
+                    <Route
+                      path="/teacher/assignments/:id"
+                      element={<TeacherAssignmentDetailPage />}
+                    />
+                    <Route
+                      path="/teacher/grades/enter"
+                      element={<TeacherResultsPage />}
+                    />
+                    <Route
+                      path="/teacher/grades/results"
+                      element={<TeacherResultsPage />}
+                    />
+
+                    {/* Other */}
+                    <Route
+                      path="/teacher/students"
+                      element={<MyStudentsPage />}
+                    />
+                    <Route
+                      path="/teacher/students/:id"
+                      element={<PlaceholderPage title="Student Details" />}
+                    />
+                    <Route
+                      path="/teacher/classes"
+                      element={<MyClassesPage />}
+                    />
+                    <Route
+                      path="/teacher/schedule"
+                      element={<MySchedulePage />}
+                    />
+                    <Route
+                      path="/teacher/communication"
+                      element={<PlaceholderPage title="Communication" />}
+                    />
+                    <Route
+                      path="/teacher/profile"
+                      element={<TeacherProfilePage />}
+                    />
+                    <Route
+                      path="/teacher/calendar"
+                      element={<TeacherCalendarPage />}
+                    />
+                    <Route path="/teacher/fees" element={<TeacherFeePage />} />
+                    <Route
+                      path="/teacher/settings"
+                      element={<PlaceholderPage title="Teacher Settings" />}
+                    />
+                    <Route
+                      path="/teacher/notifications"
+                      element={<PlaceholderPage title="Notifications" />}
+                    />
+                  </Route>
+                </Route>
+
+                {/* ----- STUDENT ROUTES ----- */}
+                <Route element={<RoleRoute allowedRoles={[ROLES.STUDENT]} />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route
+                      path="/student/dashboard"
+                      element={<StudentDashboard />}
+                    />
+
+                    {/* Academics */}
+                    <Route
+                      path="/student/attendance"
+                      element={<StudentAttendancePage />}
+                    />
+                    <Route
+                      path="/student/academics/grades"
+                      element={<PlaceholderPage title="My Grades" />}
+                    />
+                    <Route
+                      path="/student/assignments"
+                      element={<StudentAssignmentsPage />}
+                    />
+                    <Route
+                      path="/student/assignments/:id"
+                      element={<StudentAssignmentDetailPage />}
+                    />
+                    <Route
+                      path="/student/academics/results"
+                      element={<StudentResultsPage />}
+                    />
+
+                    {/* Other */}
+                    <Route
+                      path="/student/timetable"
+                      element={<TimetablePage />}
+                    />
+                    <Route
+                      path="/student/classes"
+                      element={<StudentClassesPage />}
+                    />
+                    <Route path="/student/fees" element={<StudentFeePage />} />
+                    <Route
+                      path="/student/notifications"
+                      element={<PlaceholderPage title="Notifications" />}
+                    />
+                    <Route
+                      path="/student/profile"
+                      element={<StudentProfilePage />}
+                    />
+                    <Route
+                      path="/student/calendar"
+                      element={<StudentCalendarPage />}
+                    />
+                    <Route
+                      path="/student/settings"
+                      element={<PlaceholderPage title="Student Settings" />}
+                    />
+                  </Route>
+                </Route>
+
+                {/* ----- PARENT ROUTES ----- */}
+                <Route element={<RoleRoute allowedRoles={[ROLES.PARENT]} />}>
+                  <Route element={<DashboardLayout />}>
+                    <Route
+                      path="/parent/dashboard"
+                      element={<ParentDashboard />}
+                    />
+                    {/* Children */}
+                    <Route
+                      path="/parent/children"
+                      element={<MyChildrenPage />}
+                    />
+                    <Route
+                      path="/parent/children/:id"
+                      element={<ChildDetailsPage />}
+                    />
+                    <Route
+                      path="/parent/child-schedule"
+                      element={<ChildSchedulePage />}
+                    />
+                    {/* Performance */}
+                    {/* Performance */}
+                    <Route
+                      path="/parent/performance/grades"
+                      element={<ParentResultsPage />}
+                    />
+
+                    {/* Attendance */}
+                    <Route
+                      path="/parent/attendance"
+                      element={<ParentChildAttendancePage />}
+                    />
+
+                    <Route
+                      path="/parent/performance/reports"
+                      element={<PlaceholderPage title="Performance Reports" />}
+                    />
+
+                    {/* Fees */}
+                    <Route
+                      path="/parent/fees/status"
+                      element={<FeePaymentPage />}
+                    />
+                    <Route
+                      path="/parent/fees/history"
+                      element={<FeePaymentPage />}
+                    />
+                    {/* Other */}
+                    <Route
+                      path="/parent/communication"
+                      element={<PlaceholderPage title="Communication" />}
+                    />
+                    <Route
+                      path="/parent/notifications"
+                      element={<PlaceholderPage title="Notifications" />}
+                    />
+                    <Route
+                      path="/parent/profile"
+                      element={<ParentProfilePage />}
+                    />
+                    <Route
+                      path="/parent/calendar"
+                      element={<ParentCalendarPage />}
+                    />
+                    <Route
+                      path="/parent/settings"
+                      element={<PlaceholderPage title="Parent Settings" />}
+                    />
+                  </Route>
                 </Route>
               </Route>
 
-              {/* ----- STUDENT ROUTES ----- */}
-              <Route element={<RoleRoute allowedRoles={[ROLES.STUDENT]} />}>
-                <Route element={<DashboardLayout />}>
-                  <Route
-                    path="/student/dashboard"
-                    element={<StudentDashboard />}
-                  />
-
-                  {/* Academics */}
-                  <Route
-                    path="/student/attendance"
-                    element={<StudentAttendancePage />}
-                  />
-                  <Route
-                    path="/student/academics/grades"
-                    element={<PlaceholderPage title="My Grades" />}
-                  />
-                  <Route
-                    path="/student/assignments"
-                    element={<StudentAssignmentsPage />}
-                  />
-                  <Route
-                    path="/student/assignments/:id"
-                    element={<StudentAssignmentDetailPage />}
-                  />
-                  <Route
-                    path="/student/academics/results"
-                    element={<StudentResultsPage />}
-                  />
-
-                  {/* Other */}
-                  <Route
-                    path="/student/timetable"
-                    element={<TimetablePage />}
-                  />
-                  <Route
-                    path="/student/classes"
-                    element={<StudentClassesPage />}
-                  />
-                  <Route path="/student/fees" element={<StudentFeePage />} />
-                  <Route
-                    path="/student/notifications"
-                    element={<PlaceholderPage title="Notifications" />}
-                  />
-                  <Route
-                    path="/student/profile"
-                    element={<StudentProfilePage />}
-                  />
-                  <Route
-                    path="/student/calendar"
-                    element={<StudentCalendarPage />}
-                  />
-                  <Route
-                    path="/student/settings"
-                    element={<PlaceholderPage title="Student Settings" />}
-                  />
-                </Route>
-              </Route>
-
-              {/* ----- PARENT ROUTES ----- */}
-              <Route element={<RoleRoute allowedRoles={[ROLES.PARENT]} />}>
-                <Route element={<DashboardLayout />}>
-                  <Route
-                    path="/parent/dashboard"
-                    element={<ParentDashboard />}
-                  />
-                  {/* Children */}
-                  <Route path="/parent/children" element={<MyChildrenPage />} />
-                  <Route
-                    path="/parent/children/:id"
-                    element={<ChildDetailsPage />}
-                  />
-                  <Route
-                    path="/parent/child-schedule"
-                    element={<ChildSchedulePage />}
-                  />
-                  {/* Performance */}
-                  {/* Performance */}
-                  <Route
-                    path="/parent/performance/grades"
-                    element={<ParentResultsPage />}
-                  />
-
-                  {/* Attendance */}
-                  <Route
-                    path="/parent/attendance"
-                    element={<ParentChildAttendancePage />}
-                  />
-
-                  <Route
-                    path="/parent/performance/reports"
-                    element={<PlaceholderPage title="Performance Reports" />}
-                  />
-
-                  {/* Fees */}
-                  <Route
-                    path="/parent/fees/status"
-                    element={<FeePaymentPage />}
-                  />
-                  <Route
-                    path="/parent/fees/history"
-                    element={<FeePaymentPage />}
-                  />
-                  {/* Other */}
-                  <Route
-                    path="/parent/communication"
-                    element={<PlaceholderPage title="Communication" />}
-                  />
-                  <Route
-                    path="/parent/notifications"
-                    element={<PlaceholderPage title="Notifications" />}
-                  />
-                  <Route
-                    path="/parent/profile"
-                    element={<ParentProfilePage />}
-                  />
-                  <Route
-                    path="/parent/calendar"
-                    element={<ParentCalendarPage />}
-                  />
-                  <Route
-                    path="/parent/settings"
-                    element={<PlaceholderPage title="Parent Settings" />}
-                  />
-                </Route>
-              </Route>
-            </Route>
-
-            {/* ========== ERROR ROUTES ========== */}
-            <Route path="/unauthorized" element={<UnauthorizedPage />} />
-            <Route path="/404" element={<NotFoundPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+              {/* ========== ERROR ROUTES ========== */}
+              <Route path="/unauthorized" element={<UnauthorizedPage />} />
+              <Route path="/404" element={<NotFoundPage />} />
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
         </AuthProvider>
       </Router>
     </ConfigProvider>

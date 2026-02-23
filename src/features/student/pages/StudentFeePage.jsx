@@ -1,71 +1,31 @@
 /**
  * Student Fee Page
- * Read-only view of student's fee status and payment history
+ * Read-only view with fee summary, breakdown, payment history, and bill download
  */
 
-import { useState, useEffect } from "react";
-import { Card, Tag, Empty, Skeleton, Timeline, Progress } from "antd";
-import {
-  DollarOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  WarningOutlined,
-  ExclamationCircleOutlined,
-  BankOutlined,
-  HistoryOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { useState, useEffect, useCallback } from "react";
+import { Skeleton } from "antd";
 import { message } from "antd";
 import * as feeService from "../../../services/fee.service";
-
-const STATUS_CONFIG = {
-  paid: {
-    color: "success",
-    label: "Paid",
-    icon: <CheckCircleOutlined />,
-    borderColor: "border-l-emerald-500",
-  },
-  unpaid: {
-    color: "default",
-    label: "Unpaid",
-    icon: <ClockCircleOutlined />,
-    borderColor: "border-l-slate-400",
-  },
-  partial: {
-    color: "warning",
-    label: "Partial",
-    icon: <ExclamationCircleOutlined />,
-    borderColor: "border-l-amber-500",
-  },
-  overdue: {
-    color: "error",
-    label: "Overdue",
-    icon: <WarningOutlined />,
-    borderColor: "border-l-red-500",
-  },
-};
-
-const FEE_TYPE_LABELS = {
-  tuition: "Tuition Fee",
-  exam: "Exam Fee",
-  transport: "Transport Fee",
-  library: "Library Fee",
-  lab: "Lab Fee",
-  admission: "Admission Fee",
-  sports: "Sports Fee",
-  other: "Other",
-};
+import {
+  FeeSummaryCard,
+  FeeBreakdownCard,
+  PaymentHistoryTable,
+  DueWarningBanner,
+  PdfPreviewModal,
+} from "../../fee/components";
+import { buildFeeBillPdf } from "../../fee/utils/pdfGenerator";
 
 const StudentFeePage = () => {
   const [loading, setLoading] = useState(true);
   const [fees, setFees] = useState([]);
   const [summary, setSummary] = useState(null);
+  const [payments, setPayments] = useState([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [activeView, setActiveView] = useState("fees");
+  const [billPreviewOpen, setBillPreviewOpen] = useState(false);
 
-  useEffect(() => {
-    fetchFees();
-  }, []);
-
-  const fetchFees = async () => {
+  const fetchFees = useCallback(async () => {
     setLoading(true);
     try {
       const response = await feeService.getMyFees();
@@ -76,235 +36,236 @@ const StudentFeePage = () => {
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const fetchPaymentHistory = useCallback(async () => {
+    setHistoryLoading(true);
+    try {
+      const student = fees[0]?.studentId;
+      if (student) {
+        const sid = student?._id || student;
+        const res = await feeService.getPaymentHistory(sid);
+        setPayments(res.data || []);
+      }
+    } catch (error) {
+      console.error("Could not load payment history:", error);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, [fees]);
+
+  useEffect(() => {
+    fetchFees();
+  }, [fetchFees]);
+
+  useEffect(() => {
+    if (activeView === "history" && fees.length > 0 && payments.length === 0) {
+      fetchPaymentHistory();
+    }
+  }, [activeView, fees, payments.length, fetchPaymentHistory]);
+
+  const handleDownloadBill = () => {
+    if (fees.length === 0) {
+      message.warning("No fee records to generate bill");
+      return;
+    }
+    setBillPreviewOpen(true);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 -m-6 p-6">
-        <Card className="border-0 shadow-sm mb-6">
-          <Skeleton active />
-        </Card>
-        <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="min-h-screen bg-slate-50 -m-6 p-6 space-y-4">
+        <div className="h-40 bg-slate-200 rounded-2xl animate-pulse" />
+        <div className="grid grid-cols-3 gap-4">
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="border-0 shadow-sm">
-              <Skeleton active paragraph={{ rows: 1 }} />
-            </Card>
+            <div
+              key={i}
+              className="h-20 bg-slate-100 rounded-2xl animate-pulse"
+            />
           ))}
         </div>
+        <Skeleton active paragraph={{ rows: 6 }} />
       </div>
     );
   }
 
-  const paidPercentage =
-    summary?.totalAmount > 0
-      ? Math.round((summary.totalPaid / summary.totalAmount) * 100)
-      : 0;
+  const pendingFees = fees.filter((f) => f.paymentStatus !== "paid");
+  const paidFees = fees.filter((f) => f.paymentStatus === "paid");
 
   return (
-    <div className="min-h-screen bg-slate-50 -m-6 p-6">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 mb-6">
-        <div className="flex items-center gap-3">
-          <BankOutlined className="text-2xl text-blue-600" />
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900">Fee Status</h1>
-            <p className="text-slate-500">
-              View your fee details and payment status
-            </p>
+    <div className="min-h-screen bg-slate-50 -m-6 p-6 space-y-5">
+      {/* Page Header */}
+      <div className="bg-linear-to-r from-blue-600 to-indigo-700 rounded-2xl px-6 py-5 text-white shadow-lg">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-2xl font-black leading-tight">My Fees</h1>
+              <p className="text-blue-200 text-sm">
+                View your fee status and download bill
+              </p>
+            </div>
           </div>
+          <button
+            onClick={handleDownloadBill}
+            disabled={fees.length === 0}
+            className="flex items-center gap-2 px-5 py-2.5 bg-white text-blue-700 font-bold rounded-xl text-sm hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm">
+            <svg
+              className="w-4 h-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            Download Bill PDF
+          </button>
         </div>
       </div>
 
       {/* Info Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 flex items-center gap-3">
-        <InfoCircleOutlined className="text-blue-600 text-lg" />
+      <div className="flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
+        <svg
+          className="w-4 h-4 text-blue-600 shrink-0"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
         <p className="text-sm text-blue-700">
-          This is a read-only view. Please contact your parent or the school
-          administration for fee payments.
+          This is a <strong>read-only</strong> view. Contact your parent or
+          school administration for fee payments.
         </p>
       </div>
 
-      {/* Summary Cards */}
-      {summary && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="border-0 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center">
-                <DollarOutlined className="text-xl text-blue-600" />
-              </div>
-              <div>
-                <p className="text-slate-500 text-sm">Total Fees</p>
-                <p className="text-xl font-bold text-slate-900">
-                  ₹{summary.totalAmount?.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </Card>
+      {/* Due Warnings */}
+      <DueWarningBanner fees={fees} />
 
-          <Card className="border-0 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center">
-                <CheckCircleOutlined className="text-xl text-emerald-600" />
-              </div>
-              <div>
-                <p className="text-slate-500 text-sm">Paid</p>
-                <p className="text-xl font-bold text-emerald-600">
-                  ₹{summary.totalPaid?.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </Card>
+      {/* Summary Card */}
+      {summary && <FeeSummaryCard summary={summary} />}
 
-          <Card className="border-0 shadow-sm">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center">
-                <WarningOutlined className="text-xl text-red-600" />
-              </div>
-              <div>
-                <p className="text-slate-500 text-sm">Outstanding</p>
-                <p className="text-xl font-bold text-red-600">
-                  ₹{summary.totalBalance?.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="border-0 shadow-sm">
-            <div className="flex items-center justify-center py-2">
-              <Progress
-                type="circle"
-                percent={paidPercentage}
-                size={80}
-                strokeColor="#10b981"
-                format={(percent) => (
-                  <span className="text-sm font-bold">{percent}%</span>
-                )}
+      {/* Empty State */}
+      {fees.length === 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-16 text-center">
+          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-10 h-10 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
               />
-            </div>
-          </Card>
+            </svg>
+          </div>
+          <h3 className="text-lg font-bold text-slate-700 mb-1">
+            No Fees Assigned
+          </h3>
+          <p className="text-slate-400">
+            Your fee records will appear here once assigned by the school.
+          </p>
         </div>
       )}
 
-      {/* Fee List */}
-      {fees.length === 0 ? (
-        <Card className="border-0 shadow-sm">
-          <Empty description="No fee records found" className="py-12" />
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          {/* Pending / Unpaid */}
-          {fees.filter((f) => f.paymentStatus !== "paid").length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <ClockCircleOutlined className="text-amber-500" />
-                Pending Fees
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {fees
-                  .filter((f) => f.paymentStatus !== "paid")
-                  .sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate))
-                  .map((fee) => {
-                    const config =
-                      STATUS_CONFIG[fee.paymentStatus] || STATUS_CONFIG.unpaid;
-                    const isOverdue = new Date(fee.dueDate) < new Date();
-                    return (
-                      <Card
-                        key={fee._id}
-                        className={`border-l-4 ${config.borderColor} shadow-sm`}>
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <p className="font-semibold text-slate-900">
-                              {fee.description ||
-                                FEE_TYPE_LABELS[fee.feeType] ||
-                                fee.feeType}
-                            </p>
-                            <Tag
-                              icon={config.icon}
-                              color={config.color}
-                              className="mt-1">
-                              {config.label}
-                            </Tag>
-                          </div>
-                          <div className="text-right">
-                            <p className="text-xl font-bold text-slate-900">
-                              ₹{fee.balanceDue?.toLocaleString()}
-                            </p>
-                            <p className="text-xs text-slate-500">
-                              of ₹{fee.totalAmount?.toLocaleString()}
-                            </p>
-                          </div>
-                        </div>
-                        {fee.amountPaid > 0 && (
-                          <p className="text-sm text-emerald-600 mb-2">
-                            Paid so far: ₹{fee.amountPaid?.toLocaleString()}
-                          </p>
-                        )}
-                        <p className="text-sm text-slate-500">
-                          Due:{" "}
-                          <span
-                            className={
-                              isOverdue
-                                ? "text-red-600 font-medium"
-                                : "font-medium"
-                            }>
-                            {new Date(fee.dueDate).toLocaleDateString()}
-                          </span>
-                          {isOverdue && (
-                            <span className="text-red-500 ml-1">(Overdue)</span>
-                          )}
-                        </p>
-                      </Card>
-                    );
-                  })}
-              </div>
+      {fees.length > 0 && (
+        <>
+          {/* Tab Toggle */}
+          <div className="flex gap-1 bg-slate-100 rounded-xl p-1 w-fit">
+            {[
+              { key: "fees", label: "Fee Breakdown" },
+              { key: "history", label: "Payment History" },
+            ].map(({ key, label }) => (
+              <button
+                key={key}
+                onClick={() => setActiveView(key)}
+                className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${
+                  activeView === key
+                    ? "bg-white text-blue-700 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {activeView === "fees" && (
+            <div className="space-y-5">
+              {pendingFees.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full" />
+                    <h3 className="font-bold text-slate-800">Pending Fees</h3>
+                    <span className="text-xs bg-amber-100 text-amber-700 font-bold px-2 py-0.5 rounded-full">
+                      {pendingFees.length}
+                    </span>
+                  </div>
+                  <FeeBreakdownCard
+                    fees={pendingFees}
+                    onDownloadBill={handleDownloadBill}
+                    showDownload={true}
+                  />
+                </div>
+              )}
+
+              {paidFees.length > 0 && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className="w-2 h-2 bg-emerald-500 rounded-full" />
+                    <h3 className="font-bold text-slate-800">Paid Fees</h3>
+                    <span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-2 py-0.5 rounded-full">
+                      {paidFees.length}
+                    </span>
+                  </div>
+                  <FeeBreakdownCard fees={paidFees} showDownload={false} />
+                </div>
+              )}
             </div>
           )}
 
-          {/* Paid Fees */}
-          {fees.filter((f) => f.paymentStatus === "paid").length > 0 && (
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-3 flex items-center gap-2">
-                <CheckCircleOutlined className="text-emerald-500" />
-                Paid Fees
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {fees
-                  .filter((f) => f.paymentStatus === "paid")
-                  .map((fee) => (
-                    <Card
-                      key={fee._id}
-                      className="border-l-4 border-l-emerald-500 shadow-sm opacity-75">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="font-semibold text-slate-900">
-                            {fee.description ||
-                              FEE_TYPE_LABELS[fee.feeType] ||
-                              fee.feeType}
-                          </p>
-                          <Tag
-                            icon={<CheckCircleOutlined />}
-                            color="success"
-                            className="mt-1">
-                            Paid
-                          </Tag>
-                          {fee.paidDate && (
-                            <p className="text-xs text-slate-400 mt-2">
-                              Paid on{" "}
-                              {new Date(fee.paidDate).toLocaleDateString()}
-                            </p>
-                          )}
-                        </div>
-                        <p className="text-xl font-bold text-emerald-600">
-                          ₹{fee.totalAmount?.toLocaleString()}
-                        </p>
-                      </div>
-                    </Card>
-                  ))}
-              </div>
-            </div>
-          )}
-        </div>
+          {activeView === "history" &&
+            (historyLoading ? (
+              <Skeleton active paragraph={{ rows: 4 }} />
+            ) : (
+              <PaymentHistoryTable payments={payments} />
+            ))}
+        </>
       )}
+
+      <PdfPreviewModal
+        open={billPreviewOpen}
+        title="Fee Bill Preview"
+        build={() => {
+          const student = fees[0]?.studentId || {};
+          return buildFeeBillPdf(student, fees, summary);
+        }}
+        onClose={() => setBillPreviewOpen(false)}
+        onDownloaded={() => message.success("Bill PDF downloaded")}
+      />
     </div>
   );
 };

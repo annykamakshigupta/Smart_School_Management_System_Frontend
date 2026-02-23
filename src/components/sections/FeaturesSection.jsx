@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import { Row, Col } from "antd";
 import {
   UserOutlined,
@@ -16,21 +16,24 @@ const FeaturesSection = () => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (!prefersReducedMotion && sectionRef.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
+              entry.target.classList.add("animate-in");
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
-      const elements = sectionRef.current.querySelectorAll('.animate-on-scroll');
+      const elements =
+        sectionRef.current.querySelectorAll(".animate-on-scroll");
       elements.forEach((el) => observer.observe(el));
 
       return () => observer.disconnect();
@@ -129,7 +132,8 @@ const FeaturesSection = () => {
           </div>
           <h2 className="features-heading">Key Features of SSMS</h2>
           <p className="features-description">
-            Comprehensive features designed to streamline every aspect of school management
+            Comprehensive features designed to streamline every aspect of school
+            management
           </p>
         </div>
 
@@ -137,23 +141,30 @@ const FeaturesSection = () => {
         <Row gutter={[32, 32]} className="features-grid">
           {features.map((feature, index) => (
             <Col key={index} xs={24} sm={12} lg={8}>
-              <div 
+              <div
                 className="feature-card-modern animate-on-scroll"
-                style={{ animationDelay: `${100 + index * 80}ms` }}
-              >
-                <div className="card-glow" style={{ background: feature.gradient }}></div>
+                style={{ animationDelay: `${100 + index * 80}ms` }}>
+                <div
+                  className="card-glow"
+                  style={{ background: feature.gradient }}></div>
                 <div className="card-content">
-                  <div className="feature-icon-box" style={{ 
-                    background: `${feature.color}15`,
-                    color: feature.color 
-                  }}>
+                  <div
+                    className="feature-icon-box"
+                    style={{
+                      background: `${feature.color}15`,
+                      color: feature.color,
+                    }}>
                     {feature.icon}
                   </div>
                   <h3 className="feature-card-title">{feature.title}</h3>
                   <ul className="feature-list">
                     {feature.items.map((item, idx) => (
                       <li key={idx} className="feature-list-item">
-                        <span className="feature-check" style={{ color: feature.color }}>✓</span>
+                        <span
+                          className="feature-check"
+                          style={{ color: feature.color }}>
+                          ✓
+                        </span>
                         <span className="feature-text">{item}</span>
                       </li>
                     ))}
@@ -166,14 +177,17 @@ const FeaturesSection = () => {
         </Row>
 
         {/* Bottom Highlight */}
-        <div className="platform-highlight animate-on-scroll" style={{ animationDelay: '600ms' }}>
+        <div
+          className="platform-highlight animate-on-scroll"
+          style={{ animationDelay: "600ms" }}>
           <div className="highlight-glow"></div>
           <div className="highlight-content">
             <div className="highlight-header">
               <h3 className="highlight-title">All-in-One Platform</h3>
               <p className="highlight-desc">
-                SSMS integrates all essential school management features into a single,
-                user-friendly platform, ensuring seamless operations and improved efficiency.
+                SSMS integrates all essential school management features into a
+                single, user-friendly platform, ensuring seamless operations and
+                improved efficiency.
               </p>
             </div>
             <div className="platform-stats">
@@ -223,8 +237,11 @@ const FeaturesSection = () => {
         .bg-grid-pattern {
           position: absolute;
           inset: 0;
-          background-image: 
-            radial-gradient(circle, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+          background-image: radial-gradient(
+            circle,
+            rgba(37, 99, 235, 0.04) 1px,
+            transparent 1px
+          );
           background-size: 24px 24px;
         }
 
@@ -254,9 +271,16 @@ const FeaturesSection = () => {
         }
 
         @keyframes float-feature-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(50px, -50px) scale(1.15); }
-          66% { transform: translate(-40px, 40px) scale(0.85); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(50px, -50px) scale(1.15);
+          }
+          66% {
+            transform: translate(-40px, 40px) scale(0.85);
+          }
         }
 
         .floating-shapes {
@@ -301,8 +325,13 @@ const FeaturesSection = () => {
         }
 
         @keyframes float-shape {
-          0%, 100% { transform: translateY(0) rotate(45deg); }
-          50% { transform: translateY(-30px) rotate(65deg); }
+          0%,
+          100% {
+            transform: translateY(0) rotate(45deg);
+          }
+          50% {
+            transform: translateY(-30px) rotate(65deg);
+          }
         }
 
         /* Container */
@@ -324,7 +353,11 @@ const FeaturesSection = () => {
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
-          background: linear-gradient(135deg, rgba(139, 92, 246, 0.08), rgba(37, 99, 235, 0.08));
+          background: linear-gradient(
+            135deg,
+            rgba(139, 92, 246, 0.08),
+            rgba(37, 99, 235, 0.08)
+          );
           border: 1px solid rgba(148, 163, 184, 0.1);
           border-radius: 9999px;
           font-size: 0.875rem;
@@ -338,7 +371,6 @@ const FeaturesSection = () => {
         }
 
         .features-heading {
-          font-family: 'Cal Sans', 'SF Pro Display', -apple-system, system-ui, sans-serif;
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
           line-height: 1.2;
@@ -361,7 +393,8 @@ const FeaturesSection = () => {
         }
 
         .animate-on-scroll.animate-in {
-          animation: slide-up-features 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          animation: slide-up-features 0.8s cubic-bezier(0.22, 1, 0.36, 1)
+            forwards;
         }
 
         @keyframes slide-up-features {
@@ -519,8 +552,12 @@ const FeaturesSection = () => {
         }
 
         @keyframes rotate-highlight {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .highlight-content {

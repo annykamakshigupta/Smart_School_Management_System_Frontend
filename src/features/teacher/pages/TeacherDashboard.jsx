@@ -24,10 +24,6 @@ import {
   FileTextOutlined,
   CalendarOutlined,
   BookOutlined,
-  UserOutlined,
-  MailOutlined,
-  PhoneOutlined,
-  IdcardOutlined,
   HomeOutlined,
   TrophyOutlined,
 } from "@ant-design/icons";
@@ -269,38 +265,7 @@ const TeacherDashboard = () => {
         </div>
       </div>
 
-      {/* Quick Overview */}
-      {teacherData.assignedClasses.length > 0 && (
-        <Row gutter={[16, 16]}>
-          <Col xs={24}>
-            <Card
-              className="border-0 shadow-md rounded-2xl"
-              title={
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <HomeOutlined className="text-xl text-blue-600" />
-                  </div>
-                  <span className="font-bold text-lg">My Classes Overview</span>
-                </div>
-              }>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {teacherData.assignedClasses.slice(0, 8).map((cls, idx) => (
-                  <div
-                    key={cls._id || idx}
-                    className="bg-slate-50 rounded-xl p-4 border border-slate-100 hover:border-blue-200 hover:bg-blue-50 transition-all">
-                    <p className="font-semibold text-slate-800 truncate">
-                      {cls.name || cls.className || `Class ${idx + 1}`}
-                    </p>
-                    <p className="text-xs text-slate-500 mt-1">
-                      {cls.students?.length ?? 0} students
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </Card>
-          </Col>
-        </Row>
-      )}
+   
 
       <Row gutter={[16, 16]}>
         {/* Today's Schedule */}

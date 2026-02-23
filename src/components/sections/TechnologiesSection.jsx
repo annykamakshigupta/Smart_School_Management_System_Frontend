@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import { Row, Col } from "antd";
 import {
   Html5Outlined,
@@ -13,21 +13,24 @@ const TechnologiesSection = () => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (!prefersReducedMotion && sectionRef.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
+              entry.target.classList.add("animate-in");
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
-      const elements = sectionRef.current.querySelectorAll('.animate-on-scroll');
+      const elements =
+        sectionRef.current.querySelectorAll(".animate-on-scroll");
       elements.forEach((el) => observer.observe(el));
 
       return () => observer.disconnect();
@@ -102,7 +105,10 @@ const TechnologiesSection = () => {
   ];
 
   return (
-    <section id="technologies" className="technologies-section" ref={sectionRef}>
+    <section
+      id="technologies"
+      className="technologies-section"
+      ref={sectionRef}>
       {/* Background Elements */}
       <div className="tech-bg">
         <div className="tech-pattern"></div>
@@ -125,7 +131,8 @@ const TechnologiesSection = () => {
             Technologies <span className="tech-gradient">Used</span>
           </h2>
           <p className="tech-description">
-            Built with modern, industry-standard technologies for optimal performance
+            Built with modern, industry-standard technologies for optimal
+            performance
           </p>
         </div>
 
@@ -133,17 +140,20 @@ const TechnologiesSection = () => {
         <Row gutter={[24, 24]} className="tech-grid">
           {techStack.map((stack, index) => (
             <Col key={index} xs={24} sm={12} lg={8}>
-              <div 
+              <div
                 className="tech-stack-card animate-on-scroll"
-                style={{ animationDelay: `${100 + index * 80}ms` }}
-              >
-                <div className="tech-card-glow" style={{ background: stack.gradient }}></div>
+                style={{ animationDelay: `${100 + index * 80}ms` }}>
+                <div
+                  className="tech-card-glow"
+                  style={{ background: stack.gradient }}></div>
                 <div className="tech-card-content">
                   <div className="tech-card-header">
-                    <div className="tech-icon-box" style={{ 
-                      background: `${stack.color}15`,
-                      color: stack.color 
-                    }}>
+                    <div
+                      className="tech-icon-box"
+                      style={{
+                        background: `${stack.color}15`,
+                        color: stack.color,
+                      }}>
                       {stack.icon}
                     </div>
                     <h3 className="tech-card-title">{stack.category}</h3>
@@ -163,15 +173,17 @@ const TechnologiesSection = () => {
         </Row>
 
         {/* Architecture Highlight */}
-        <div className="architecture-section animate-on-scroll" style={{ animationDelay: '600ms' }}>
+        <div
+          className="architecture-section animate-on-scroll"
+          style={{ animationDelay: "600ms" }}>
           <div className="architecture-card">
             <div className="architecture-glow"></div>
             <div className="architecture-content">
               <div className="architecture-header">
                 <h3 className="architecture-title">Modern Architecture</h3>
                 <p className="architecture-desc">
-                  SSMS is built using a modern, scalable architecture that ensures
-                  high performance, security, and maintainability.
+                  SSMS is built using a modern, scalable architecture that
+                  ensures high performance, security, and maintainability.
                 </p>
               </div>
               <div className="architecture-features">
@@ -183,12 +195,16 @@ const TechnologiesSection = () => {
                 <div className="arch-feature">
                   <div className="arch-feature-icon">🔒</div>
                   <div className="arch-feature-title">Secure</div>
-                  <div className="arch-feature-desc">Enterprise-Grade Security</div>
+                  <div className="arch-feature-desc">
+                    Enterprise-Grade Security
+                  </div>
                 </div>
                 <div className="arch-feature">
                   <div className="arch-feature-icon">📱</div>
                   <div className="arch-feature-title">Responsive</div>
-                  <div className="arch-feature-desc">Mobile-Friendly Design</div>
+                  <div className="arch-feature-desc">
+                    Mobile-Friendly Design
+                  </div>
                 </div>
                 <div className="arch-feature">
                   <div className="arch-feature-icon">⚡</div>
@@ -223,8 +239,11 @@ const TechnologiesSection = () => {
         .tech-pattern {
           position: absolute;
           inset: 0;
-          background-image: 
-            radial-gradient(circle, rgba(37, 99, 235, 0.03) 2px, transparent 2px);
+          background-image: radial-gradient(
+            circle,
+            rgba(37, 99, 235, 0.03) 2px,
+            transparent 2px
+          );
           background-size: 30px 30px;
         }
 
@@ -254,9 +273,16 @@ const TechnologiesSection = () => {
         }
 
         @keyframes float-tech-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(35px, -35px) scale(1.08); }
-          66% { transform: translate(-25px, 25px) scale(0.92); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(35px, -35px) scale(1.08);
+          }
+          66% {
+            transform: translate(-25px, 25px) scale(0.92);
+          }
         }
 
         .tech-shapes {
@@ -290,8 +316,13 @@ const TechnologiesSection = () => {
         }
 
         @keyframes float-tech-shape {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-25px) rotate(180deg); }
+          0%,
+          100% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-25px) rotate(180deg);
+          }
         }
 
         /* Container */
@@ -329,12 +360,16 @@ const TechnologiesSection = () => {
         }
 
         @keyframes sparkle {
-          0%, 100% { transform: scale(1) rotate(0deg); }
-          50% { transform: scale(1.2) rotate(180deg); }
+          0%,
+          100% {
+            transform: scale(1) rotate(0deg);
+          }
+          50% {
+            transform: scale(1.2) rotate(180deg);
+          }
         }
 
         .tech-heading {
-          font-family: 'Cal Sans', 'SF Pro Display', -apple-system, system-ui, sans-serif;
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
           line-height: 1.2;
@@ -468,13 +503,21 @@ const TechnologiesSection = () => {
           align-items: center;
           gap: 0.75rem;
           padding: 0.75rem;
-          background: linear-gradient(135deg, rgba(248, 250, 252, 0.8), rgba(241, 245, 249, 0.8));
+          background: linear-gradient(
+            135deg,
+            rgba(248, 250, 252, 0.8),
+            rgba(241, 245, 249, 0.8)
+          );
           border-radius: 12px;
           transition: all 0.3s ease;
         }
 
         .tech-item:hover {
-          background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+          background: linear-gradient(
+            135deg,
+            rgba(99, 102, 241, 0.08),
+            rgba(139, 92, 246, 0.08)
+          );
           transform: translateX(4px);
         }
 
@@ -506,13 +549,21 @@ const TechnologiesSection = () => {
         .architecture-glow {
           position: absolute;
           inset: -100%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.15) 0%,
+            transparent 70%
+          );
           animation: rotate-architecture 18s linear infinite;
         }
 
         @keyframes rotate-architecture {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .architecture-content {

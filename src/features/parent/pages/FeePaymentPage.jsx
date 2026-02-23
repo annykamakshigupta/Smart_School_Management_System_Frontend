@@ -21,6 +21,17 @@ import {
 } from "@ant-design/icons";
 import * as feeService from "../../../services/fee.service";
 import * as parentService from "../../../services/parent.service";
+import {
+  FeeSummaryCard,
+  FeeBreakdownCard,
+  PaymentHistoryTable,
+  DueWarningBanner,
+  PdfPreviewModal,
+} from "../../fee/components";
+import {
+  buildFeeBillPdf,
+  generatePaymentReceipt,
+} from "../../fee/utils/pdfGenerator";
 
 const PAYMENT_METHODS = [
   { value: "upi", label: "UPI", icon: "📱" },
@@ -37,6 +48,7 @@ const ParentFeePaymentPage = () => {
   const [summary, setSummary] = useState(null);
   const [paymentHistory, setPaymentHistory] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
+  const [billPreviewOpen, setBillPreviewOpen] = useState(false);
 
   // Payment modal
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
@@ -204,16 +216,31 @@ const ParentFeePaymentPage = () => {
               View, manage, and pay your children&apos;s fees securely
             </p>
           </div>
-          <button
-            onClick={() => setShowHistory(!showHistory)}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
-              showHistory
-                ? "bg-white text-blue-700"
-                : "bg-white/15 text-white border border-white/30 hover:bg-white/25"
-            }`}>
-            <HistoryOutlined />
-            {showHistory ? "View Fees" : "Payment History"}
-          </button>
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={() => {
+                if (fees.length === 0) {
+                  message.warning("No fees to generate bill");
+                  return;
+                }
+                setBillPreviewOpen(true);
+              }}
+              disabled={fees.length === 0}
+              className="flex items-center gap-2 px-4 py-2.5 bg-white/20 hover:bg-white/30 rounded-xl text-sm font-bold border border-white/30 transition-colors disabled:opacity-40">
+              <DownloadOutlined />
+              Download Bill
+            </button>
+            <button
+              onClick={() => setShowHistory(!showHistory)}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+                showHistory
+                  ? "bg-white text-blue-700"
+                  : "bg-white/15 text-white border border-white/30 hover:bg-white/25"
+              }`}>
+              <HistoryOutlined />
+              {showHistory ? "View Fees" : "Payment History"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -255,132 +282,34 @@ const ParentFeePaymentPage = () => {
         </div>
       </div>
 
-      {/* Summary Cards */}
+      {/* Due Warnings */}
+      <DueWarningBanner fees={fees} />
+
+      {/* Summary Card */}
       {summary && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            {
-              icon: <DollarOutlined className="text-xl" />,
-              label: "Total Fees",
-              value: `₹${summary.totalAmount?.toLocaleString() || 0}`,
-              bg: "bg-slate-600",
-              light: "bg-slate-50",
-              text: "text-slate-700",
-            },
-            {
-              icon: <CheckCircleOutlined className="text-xl" />,
-              label: "Amount Paid",
-              value: `₹${summary.totalPaid?.toLocaleString() || 0}`,
-              bg: "bg-emerald-500",
-              light: "bg-emerald-50",
-              text: "text-emerald-700",
-            },
-            {
-              icon: <WarningOutlined className="text-xl" />,
-              label: "Outstanding",
-              value: `₹${summary.totalBalance?.toLocaleString() || 0}`,
-              bg: "bg-red-500",
-              light: "bg-red-50",
-              text: "text-red-700",
-            },
-            {
-              icon: <ClockCircleOutlined className="text-xl" />,
-              label: "Pending Items",
-              value:
-                (summary.unpaidCount || 0) +
-                (summary.partialCount || 0) +
-                (summary.overdueCount || 0),
-              bg: "bg-amber-500",
-              light: "bg-amber-50",
-              text: "text-amber-700",
-            },
-          ].map(({ icon, label, value, bg, light, text }) => (
-            <div
-              key={label}
-              className={`${light} rounded-2xl p-4 flex items-center gap-3 border border-white shadow-sm`}>
-              <div
-                className={`w-11 h-11 ${bg} rounded-xl flex items-center justify-center text-white shrink-0`}>
-                {icon}
-              </div>
-              <div className="min-w-0">
-                <div className={`text-xl font-black ${text} truncate`}>
-                  {value}
-                </div>
-                <div className="text-xs text-slate-500">{label}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <FeeSummaryCard
+          summary={summary}
+          studentName={selectedChild?.userId?.name}
+          academicYear={fees[0]?.academicYear}
+        />
       )}
 
       {/* Main Content */}
       {showHistory ? (
-        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-              <HistoryOutlined className="text-blue-600" />
-            </div>
-            <span className="font-bold text-slate-800">Payment History</span>
-            {paymentHistory.length > 0 && (
-              <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full ml-auto">
-                {paymentHistory.length}
-              </span>
-            )}
-          </div>
-          <div className="p-5">
-            {paymentHistory.length > 0 ? (
-              <div className="space-y-3">
-                {paymentHistory.map((payment, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors">
-                    <div
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
-                        payment.status === "success"
-                          ? "bg-emerald-100"
-                          : "bg-red-100"
-                      }`}>
-                      {payment.status === "success" ? (
-                        <CheckCircleOutlined className="text-emerald-600" />
-                      ) : (
-                        <WarningOutlined className="text-red-600" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 flex-wrap">
-                        <span className="font-bold text-slate-800">
-                          ₹{payment.amount?.toLocaleString()}
-                        </span>
-                        <span className="text-xs bg-blue-100 text-blue-700 font-semibold px-2 py-0.5 rounded-full">
-                          {payment.paymentMethod?.toUpperCase()}
-                        </span>
-                      </div>
-                      <p className="text-sm text-slate-500 mt-0.5">
-                        {payment.feeId?.feeType} —{" "}
-                        {payment.feeId?.description || "Fee Payment"}
-                      </p>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-xs text-slate-400">
-                          {new Date(payment.createdAt).toLocaleString()}
-                        </p>
-                        {payment.receiptNumber && (
-                          <p className="text-xs font-mono text-blue-500">
-                            {payment.receiptNumber}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <Empty
-                description="No payment history yet"
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-              />
-            )}
-          </div>
-        </div>
+        <PaymentHistoryTable
+          payments={paymentHistory}
+          onDownloadReceipt={(payment) => {
+            const relatedFee = fees.find(
+              (f) => f._id === (payment.feeId?._id || payment.feeId),
+            );
+            generatePaymentReceipt(
+              payment,
+              relatedFee || payment.feeId,
+              selectedChild,
+            );
+            message.success("Receipt downloaded");
+          }}
+        />
       ) : (
         <div className="space-y-6">
           {/* Pending Fees */}
@@ -525,6 +454,17 @@ const ParentFeePaymentPage = () => {
           )}
         </div>
       )}
+
+      <PdfPreviewModal
+        open={billPreviewOpen}
+        title="Fee Bill Preview"
+        build={() => {
+          const student = fees[0]?.studentId || selectedChild || {};
+          return buildFeeBillPdf(student, fees, summary);
+        }}
+        onClose={() => setBillPreviewOpen(false)}
+        onDownloaded={() => message.success("Bill PDF downloaded")}
+      />
 
       {/* Payment Modal */}
       <Modal

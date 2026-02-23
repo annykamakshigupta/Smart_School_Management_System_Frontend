@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import { Row, Col } from "antd";
 import {
   FileTextOutlined,
@@ -13,21 +13,24 @@ const ProblemsSection = () => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (!prefersReducedMotion && sectionRef.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
+              entry.target.classList.add("animate-in");
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
-      const elements = sectionRef.current.querySelectorAll('.animate-on-scroll');
+      const elements =
+        sectionRef.current.querySelectorAll(".animate-on-scroll");
       elements.forEach((el) => observer.observe(el));
 
       return () => observer.disconnect();
@@ -38,42 +41,48 @@ const ProblemsSection = () => {
     {
       icon: <FileTextOutlined />,
       title: "Paper-Based Records",
-      description: "Heavy reliance on paper-based records leading to inefficiency and data loss",
+      description:
+        "Heavy reliance on paper-based records leading to inefficiency and data loss",
       emoji: "📄",
       color: "#ef4444",
     },
     {
       icon: <ClockCircleOutlined />,
       title: "Time-Consuming Processes",
-      description: "Manual administrative processes consuming valuable time and resources",
+      description:
+        "Manual administrative processes consuming valuable time and resources",
       emoji: "⏰",
       color: "#f59e0b",
     },
     {
       icon: <MessageOutlined />,
       title: "Poor Communication",
-      description: "Difficulty in maintaining effective communication between school, parents, and students",
+      description:
+        "Difficulty in maintaining effective communication between school, parents, and students",
       emoji: "💬",
       color: "#ec4899",
     },
     {
       icon: <BarChartOutlined />,
       title: "Performance Tracking",
-      description: "Challenges in tracking and analyzing student performance effectively",
+      description:
+        "Challenges in tracking and analyzing student performance effectively",
       emoji: "📊",
       color: "#8b5cf6",
     },
     {
       icon: <DollarOutlined />,
       title: "Manual Fee Management",
-      description: "Error-prone manual fee management leading to delays and discrepancies",
+      description:
+        "Error-prone manual fee management leading to delays and discrepancies",
       emoji: "💰",
       color: "#06b6d4",
     },
     {
       icon: <WarningOutlined />,
       title: "Lack of Data Insights",
-      description: "Absence of data-driven decision-making capabilities for better outcomes",
+      description:
+        "Absence of data-driven decision-making capabilities for better outcomes",
       emoji: "⚠️",
       color: "#f97316",
     },
@@ -96,10 +105,12 @@ const ProblemsSection = () => {
             <span>Current Challenges</span>
           </div>
           <h2 className="problems-heading">
-            Problems in Traditional <br />School Management
+            Problems in Traditional <br />
+            School Management
           </h2>
           <p className="problems-description">
-            Challenges faced by educational institutions using manual or fragmented systems
+            Challenges faced by educational institutions using manual or
+            fragmented systems
           </p>
         </div>
 
@@ -107,38 +118,46 @@ const ProblemsSection = () => {
         <Row gutter={[24, 24]} className="problems-grid">
           {problems.map((problem, index) => (
             <Col key={index} xs={24} sm={12} lg={8}>
-              <div 
+              <div
                 className="problem-card animate-on-scroll"
-                style={{ animationDelay: `${100 + index * 80}ms` }}
-              >
-                <div className="problem-glow" style={{ background: `${problem.color}30` }}></div>
+                style={{ animationDelay: `${100 + index * 80}ms` }}>
+                <div
+                  className="problem-glow"
+                  style={{ background: `${problem.color}30` }}></div>
                 <div className="problem-content">
                   <div className="problem-emoji">{problem.emoji}</div>
-                  <div className="problem-icon-box" style={{ 
-                    background: `${problem.color}15`,
-                    color: problem.color 
-                  }}>
+                  <div
+                    className="problem-icon-box"
+                    style={{
+                      background: `${problem.color}15`,
+                      color: problem.color,
+                    }}>
                     {problem.icon}
                   </div>
                   <h3 className="problem-title">{problem.title}</h3>
                   <p className="problem-desc">{problem.description}</p>
                 </div>
-                <div className="problem-accent" style={{ background: problem.color }}></div>
+                <div
+                  className="problem-accent"
+                  style={{ background: problem.color }}></div>
               </div>
             </Col>
           ))}
         </Row>
 
         {/* CTA */}
-        <div className="solution-cta animate-on-scroll" style={{ animationDelay: '600ms' }}>
+        <div
+          className="solution-cta animate-on-scroll"
+          style={{ animationDelay: "600ms" }}>
           <div className="solution-card">
             <div className="solution-glow"></div>
             <div className="solution-content">
               <div className="solution-icon">✅</div>
               <h3 className="solution-title">Ready for a Modern Solution?</h3>
               <p className="solution-desc">
-                SSMS addresses all these challenges with an intelligent, integrated platform
-                that transforms how educational institutions operate.
+                SSMS addresses all these challenges with an intelligent,
+                integrated platform that transforms how educational institutions
+                operate.
               </p>
               <div className="solution-features">
                 <div className="solution-feature">
@@ -185,7 +204,7 @@ const ProblemsSection = () => {
         .problems-pattern {
           position: absolute;
           inset: 0;
-          background-image: 
+          background-image:
             linear-gradient(rgba(239, 68, 68, 0.02) 1px, transparent 1px),
             linear-gradient(90deg, rgba(239, 68, 68, 0.02) 1px, transparent 1px);
           background-size: 32px 32px;
@@ -217,9 +236,16 @@ const ProblemsSection = () => {
         }
 
         @keyframes float-problems-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(30px, -30px) scale(1.08); }
-          66% { transform: translate(-20px, 20px) scale(0.92); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(30px, -30px) scale(1.08);
+          }
+          66% {
+            transform: translate(-20px, 20px) scale(0.92);
+          }
         }
 
         /* Container */
@@ -257,12 +283,16 @@ const ProblemsSection = () => {
         }
 
         @keyframes pulse-warning {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.15); }
+          0%,
+          100% {
+            transform: scale(1);
+          }
+          50% {
+            transform: scale(1.15);
+          }
         }
 
         .problems-heading {
-          font-family: 'Cal Sans', 'SF Pro Display', -apple-system, system-ui, sans-serif;
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
           line-height: 1.2;
@@ -285,7 +315,8 @@ const ProblemsSection = () => {
         }
 
         .animate-on-scroll.animate-in {
-          animation: slide-up-problems 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+          animation: slide-up-problems 0.8s cubic-bezier(0.22, 1, 0.36, 1)
+            forwards;
         }
 
         @keyframes slide-up-problems {
@@ -421,13 +452,21 @@ const ProblemsSection = () => {
         .solution-glow {
           position: absolute;
           inset: -100%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.15) 0%,
+            transparent 70%
+          );
           animation: rotate-solution 16s linear infinite;
         }
 
         @keyframes rotate-solution {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .solution-content {

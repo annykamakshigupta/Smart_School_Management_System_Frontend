@@ -132,6 +132,12 @@ export const teacherNavigation = [
     path: "/teacher/schedule",
   },
   {
+    key: "fees",
+    label: "Fee Overview",
+    icon: CreditCardOutlined,
+    path: "/teacher/fees",
+  },
+  {
     key: "communication",
     label: "Communication",
     icon: MessageOutlined,

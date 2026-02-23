@@ -52,28 +52,52 @@ import {
 import * as feeService from "../../../services/fee.service";
 import * as classService from "../../../services/class.service";
 import dayjs from "dayjs";
-
-const FEE_TYPES = [
-  { value: "tuition", label: "Tuition", color: "#2563eb" },
-  { value: "exam", label: "Exam", color: "#7c3aed" },
-  { value: "transport", label: "Transport", color: "#059669" },
-  { value: "library", label: "Library", color: "#d97706" },
-  { value: "lab", label: "Lab", color: "#dc2626" },
-  { value: "admission", label: "Admission", color: "#0891b2" },
-  { value: "sports", label: "Sports", color: "#ca8a04" },
-  { value: "other", label: "Other", color: "#6b7280" },
-];
+import {
+  PdfPreviewModal,
+  BillPreviewModal,
+  FeeTypeChart,
+  PaymentStatusPieChart,
+} from "../../fee/components";
+import {
+  buildFeeBillPdf,
+  generatePaymentReceipt,
+  generateFeeReport,
+} from "../../fee/utils/pdfGenerator";
 
 const PAYMENT_STATUS_CONFIG = {
-  paid: { color: "success", label: "Paid", icon: <CheckCircleOutlined /> },
-  unpaid: { color: "default", label: "Unpaid", icon: <ClockCircleOutlined /> },
+  paid: {
+    color: "success",
+    label: "Paid",
+    icon: <CheckCircleOutlined />,
+  },
+  unpaid: {
+    color: "default",
+    label: "Unpaid",
+    icon: <ClockCircleOutlined />,
+  },
   partial: {
     color: "warning",
     label: "Partial",
     icon: <ExclamationCircleOutlined />,
   },
-  overdue: { color: "error", label: "Overdue", icon: <WarningOutlined /> },
+  overdue: {
+    color: "error",
+    label: "Overdue",
+    icon: <WarningOutlined />,
+  },
 };
+
+const FEE_TYPES = [
+  { value: "tuition", label: "Tuition", color: "blue" },
+  { value: "exam", label: "Exam", color: "purple" },
+  { value: "transport", label: "Transport", color: "green" },
+  { value: "fine", label: "Fine", color: "red" },
+  { value: "library", label: "Library", color: "gold" },
+  { value: "lab", label: "Lab", color: "magenta" },
+  { value: "admission", label: "Admission", color: "cyan" },
+  { value: "sports", label: "Sports", color: "orange" },
+  { value: "other", label: "Other", color: "default" },
+];
 
 const AdminFeeDashboardPage = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -89,6 +113,18 @@ const AdminFeeDashboardPage = () => {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [editingStructure, setEditingStructure] = useState(null);
   const [selectedFee, setSelectedFee] = useState(null);
+  const [billPreviewOpen, setBillPreviewOpen] = useState(false);
+  const [billPreviewPayload, setBillPreviewPayload] = useState(null);
+  const [professionalBillPreview, setProfessionalBillPreview] = useState(false);
+  const [professionalBillData, setProfessionalBillData] = useState(null);
+
+  // Fee components for edit mode
+  const [feeComponents, setFeeComponents] = useState({
+    tuition: 0,
+    exam: 0,
+    transport: 0,
+    fine: 0,
+  });
 
   // Filters
   const [feeFilters, setFeeFilters] = useState({
@@ -148,17 +184,96 @@ const AdminFeeDashboardPage = () => {
 
   const handleCreateStructure = async (values) => {
     try {
-      const data = {
-        ...values,
+      const base = {
+        name: values.name,
+        classId: values.classId,
+        academicYear: values.academicYear,
         dueDate: values.dueDate?.toISOString(),
+        frequency: values.frequency,
+        description: values.description,
       };
-      if (editingStructure) {
+
+      // Editing with component breakdown
+      if (editingStructure && values.multiType) {
+        const amounts = values.amounts || {};
+        const totalAmount =
+          Number(amounts.tuition || 0) +
+          Number(amounts.exam || 0) +
+          Number(amounts.transport || 0) +
+          Number(amounts.fine || 0);
+
+        if (totalAmount === 0) {
+          message.error("Total amount must be greater than 0");
+          return;
+        }
+
+        const data = {
+          ...base,
+          feeType: editingStructure.feeType,
+          amount: totalAmount,
+        };
+
         await feeService.updateFeeStructure(editingStructure._id, data);
-        message.success("Fee structure updated");
-      } else {
-        await feeService.createFeeStructure(data);
-        message.success("Fee structure created");
+        message.success(
+          `Fee structure updated with total ₹${totalAmount.toLocaleString()}`,
+        );
+        setStructureModalOpen(false);
+        setEditingStructure(null);
+        structureForm.resetFields();
+        fetchInitialData();
+        return;
       }
+
+      // Multi-create mode (create several fee structures at once)
+      if (!editingStructure && values.multiType) {
+        const amounts = values.amounts || {};
+        const items = [
+          { feeType: "tuition", label: "Tuition", amount: amounts.tuition },
+          { feeType: "exam", label: "Exam", amount: amounts.exam },
+          {
+            feeType: "transport",
+            label: "Transport",
+            amount: amounts.transport,
+          },
+          { feeType: "fine", label: "Fine", amount: amounts.fine },
+        ].filter((i) => Number(i.amount || 0) > 0);
+
+        if (items.length === 0) {
+          message.error(
+            "Enter at least one amount (Tuition/Exam/Transport/Fine)",
+          );
+          return;
+        }
+
+        await Promise.all(
+          items.map((i) =>
+            feeService.createFeeStructure({
+              ...base,
+              name: `${values.name} - ${i.label}`,
+              feeType: i.feeType,
+              amount: Number(i.amount),
+            }),
+          ),
+        );
+
+        message.success(`${items.length} fee structures created`);
+      } else {
+        // Single create/edit mode
+        const data = {
+          ...base,
+          feeType: values.feeType,
+          amount: values.amount,
+        };
+
+        if (editingStructure) {
+          await feeService.updateFeeStructure(editingStructure._id, data);
+          message.success("Fee structure updated");
+        } else {
+          await feeService.createFeeStructure(data);
+          message.success("Fee structure created");
+        }
+      }
+
       setStructureModalOpen(false);
       setEditingStructure(null);
       structureForm.resetFields();
@@ -212,6 +327,22 @@ const AdminFeeDashboardPage = () => {
     }
   };
 
+  const handleDownloadBillFromPreview = (
+    student,
+    fees,
+    summary,
+    billNumber,
+  ) => {
+    try {
+      const doc = buildFeeBillPdf(student, fees, summary);
+      const fileName = `Fee-Bill-${student?.userId?.name?.replace(/\s+/g, "-")}-${billNumber}.pdf`;
+      doc.save(fileName);
+      message.success("Bill PDF downloaded successfully");
+    } catch (error) {
+      message.error("Failed to generate PDF");
+    }
+  };
+
   const handleDeleteFee = async (feeId) => {
     try {
       await feeService.deleteFee(feeId);
@@ -234,62 +365,98 @@ const AdminFeeDashboardPage = () => {
   // ═══════════════════════════════════════
   const renderOverview = () => (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center">
-              <DollarOutlined className="text-2xl text-blue-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Total Fees Generated</p>
-              <p className="text-2xl font-bold text-slate-900">
-                ₹{(overall.totalAmount || 0).toLocaleString()}
-              </p>
-            </div>
-          </div>
+      {/* Enhanced Stats Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          {
+            label: "Total Generated",
+            value: `₹${(overall.totalAmount || 0).toLocaleString("en-IN")}`,
+            sub: `${(overall.paidCount || 0) + (overall.unpaidCount || 0) + (overall.partialCount || 0) + (overall.overdueCount || 0)} fee records`,
+            iconBg: "bg-blue-600",
+            cardBg: "from-blue-50 to-blue-100/50",
+            textColor: "text-blue-700",
+            icon: <DollarOutlined className="text-white text-xl" />,
+          },
+          {
+            label: "Total Collected",
+            value: `₹${(overall.totalCollected || 0).toLocaleString("en-IN")}`,
+            sub: `${collectionRate}% collection rate`,
+            iconBg: "bg-emerald-600",
+            cardBg: "from-emerald-50 to-emerald-100/50",
+            textColor: "text-emerald-700",
+            icon: <CheckCircleOutlined className="text-white text-xl" />,
+            trend: collectionRate >= 70 ? "up" : "down",
+          },
+          {
+            label: "Pending Amount",
+            value: `₹${(overall.totalPending || 0).toLocaleString("en-IN")}`,
+            sub: `${(overall.unpaidCount || 0) + (overall.partialCount || 0)} unpaid/partial`,
+            iconBg: "bg-amber-500",
+            cardBg: "from-amber-50 to-amber-100/50",
+            textColor: "text-amber-700",
+            icon: <ClockCircleOutlined className="text-white text-xl" />,
+          },
+          {
+            label: "Overdue Students",
+            value: overall.overdueCount || 0,
+            sub: "require immediate attention",
+            iconBg: "bg-red-600",
+            cardBg: "from-red-50 to-red-100/50",
+            textColor: "text-red-700",
+            icon: <WarningOutlined className="text-white text-xl" />,
+          },
+        ].map(
+          ({ label, value, sub, iconBg, cardBg, textColor, icon, trend }) => (
+            <Card
+              key={label}
+              className={`border-0 shadow-sm hover:shadow-md transition-all hover:-translate-y-0.5 bg-linear-to-br ${cardBg}`}>
+              <div className="flex items-start justify-between">
+                <div
+                  className={`w-12 h-12 ${iconBg} rounded-2xl flex items-center justify-center shadow-sm`}>
+                  {icon}
+                </div>
+                {trend && (
+                  <span
+                    className={`text-xs font-bold px-2 py-1 rounded-full ${trend === "up" ? "bg-emerald-100 text-emerald-700" : "bg-red-100 text-red-600"}`}>
+                    {trend === "up" ? <RiseOutlined /> : <FallOutlined />}{" "}
+                    {trend === "up" ? "Good" : "Low"}
+                  </span>
+                )}
+              </div>
+              <div className="mt-3">
+                <p className="text-slate-500 text-sm">{label}</p>
+                <p className={`text-2xl font-black mt-0.5 ${textColor}`}>
+                  {value}
+                </p>
+                <p className="text-xs text-slate-400 mt-1">{sub}</p>
+              </div>
+            </Card>
+          ),
+        )}
+      </div>
+
+      {/* Revenue Charts Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card
+          title={
+            <span className="flex items-center gap-2 text-slate-800 font-bold">
+              <BankOutlined className="text-blue-500" />
+              Fee Collection by Type
+            </span>
+          }
+          className="border-0 shadow-sm">
+          <FeeTypeChart data={stats?.byFeeType || []} />
         </Card>
 
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center">
-              <CheckCircleOutlined className="text-2xl text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Total Collected</p>
-              <p className="text-2xl font-bold text-emerald-600">
-                ₹{(overall.totalCollected || 0).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center">
-              <ClockCircleOutlined className="text-2xl text-amber-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Pending Amount</p>
-              <p className="text-2xl font-bold text-amber-600">
-                ₹{(overall.totalPending || 0).toLocaleString()}
-              </p>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="border-0 shadow-sm hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center">
-              <WarningOutlined className="text-2xl text-red-600" />
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm">Overdue</p>
-              <p className="text-2xl font-bold text-red-600">
-                {overall.overdueCount || 0}
-              </p>
-            </div>
-          </div>
+        <Card
+          title={
+            <span className="flex items-center gap-2 text-slate-800 font-bold">
+              <TeamOutlined className="text-purple-500" />
+              Payment Status Distribution
+            </span>
+          }
+          className="border-0 shadow-sm">
+          <PaymentStatusPieChart stats={stats} />
         </Card>
       </div>
 
@@ -708,6 +875,24 @@ const AdminFeeDashboardPage = () => {
       key: "actions",
       render: (_, record) => (
         <div className="flex gap-2">
+          <Tooltip title="View Bill">
+            <Button
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => {
+                setProfessionalBillData({
+                  student: record.studentId,
+                  fees: [record],
+                  summary: {
+                    totalAmount: record.totalAmount,
+                    totalPaid: record.amountPaid,
+                    totalBalance: record.balanceDue,
+                  },
+                });
+                setProfessionalBillPreview(true);
+              }}
+            />
+          </Tooltip>
           {record.paymentStatus !== "paid" && (
             <Tooltip title="Record Payment">
               <Button
@@ -877,6 +1062,26 @@ const AdminFeeDashboardPage = () => {
         </Tag>
       ),
     },
+    {
+      title: "Receipt",
+      key: "receipt",
+      align: "center",
+      render: (_, record) =>
+        record.status === "success" ? (
+          <Tooltip title="Download Receipt PDF">
+            <Button
+              size="small"
+              icon={<DownloadOutlined />}
+              className="text-green-600 border-green-300 hover:bg-green-50"
+              onClick={() =>
+                generatePaymentReceipt(record, record.feeId, record.studentId)
+              }
+            />
+          </Tooltip>
+        ) : (
+          <span className="text-slate-400 text-xs">—</span>
+        ),
+    },
   ];
 
   const renderPayments = () => (
@@ -930,6 +1135,11 @@ const AdminFeeDashboardPage = () => {
             <div className="flex gap-3">
               <Button icon={<ReloadOutlined />} onClick={fetchInitialData}>
                 Refresh
+              </Button>
+              <Button
+                icon={<DownloadOutlined />}
+                onClick={() => generateFeeReport(fees, stats)}>
+                Fee Report PDF
               </Button>
               <Button
                 type="primary"
@@ -1023,21 +1233,26 @@ const AdminFeeDashboardPage = () => {
             <Form.Item
               name="name"
               label="Structure Name"
+              className="col-span-2"
               rules={[{ required: true, message: "Required" }]}>
               <Input placeholder="e.g., Tuition Fee - Class 10" />
             </Form.Item>
 
             <Form.Item
-              name="feeType"
-              label="Fee Type"
-              rules={[{ required: true, message: "Required" }]}>
-              <Select placeholder="Select type">
-                {FEE_TYPES.map((ft) => (
-                  <Select.Option key={ft.value} value={ft.value}>
-                    {ft.label}
-                  </Select.Option>
-                ))}
-              </Select>
+              label={
+                editingStructure
+                  ? "Edit Fee Components (amounts will be summed)"
+                  : "Add multiple fee amounts (Tuition/Exam/Transport/Fine)"
+              }
+              name="multiType"
+              valuePropName="checked"
+              className="col-span-2"
+              tooltip={
+                editingStructure
+                  ? "Enable to edit fee breakdown by components"
+                  : "Creates separate fee structures for each non-zero amount"
+              }>
+              <Switch />
             </Form.Item>
 
             <Form.Item
@@ -1053,15 +1268,113 @@ const AdminFeeDashboardPage = () => {
               </Select>
             </Form.Item>
 
-            <Form.Item
-              name="amount"
-              label="Amount (₹)"
-              rules={[{ required: true, message: "Required" }]}>
-              <InputNumber
-                min={0}
-                className="w-full"
-                placeholder="Enter amount"
-              />
+            <Form.Item noStyle shouldUpdate>
+              {({ getFieldValue }) => {
+                const multi = !!getFieldValue("multiType");
+                const tuition = getFieldValue(["amounts", "tuition"]) || 0;
+                const exam = getFieldValue(["amounts", "exam"]) || 0;
+                const transport = getFieldValue(["amounts", "transport"]) || 0;
+                const fine = getFieldValue(["amounts", "fine"]) || 0;
+                const calculatedTotal =
+                  Number(tuition) +
+                  Number(exam) +
+                  Number(transport) +
+                  Number(fine);
+
+                if (multi) {
+                  return (
+                    <div className="col-span-2 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                      <div className="text-sm font-semibold text-slate-800 mb-1">
+                        Fee Components Breakdown
+                      </div>
+                      <div className="text-xs text-slate-600 mb-3">
+                        {editingStructure
+                          ? "Update individual fee components. Total will be calculated automatically."
+                          : "Enter amounts for each fee type. Separate structures will be created for non-zero amounts."}
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-4">
+                        <Form.Item
+                          label="Tuition Fee (₹)"
+                          name={["amounts", "tuition"]}>
+                          <InputNumber
+                            min={0}
+                            className="w-full"
+                            placeholder="0"
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label="Exam Fee (₹)"
+                          name={["amounts", "exam"]}>
+                          <InputNumber
+                            min={0}
+                            className="w-full"
+                            placeholder="0"
+                          />
+                        </Form.Item>
+                        <Form.Item
+                          label="Transport Fee (₹)"
+                          name={["amounts", "transport"]}>
+                          <InputNumber
+                            min={0}
+                            className="w-full"
+                            placeholder="0"
+                          />
+                        </Form.Item>
+                        <Form.Item label="Fine (₹)" name={["amounts", "fine"]}>
+                          <InputNumber
+                            min={0}
+                            className="w-full"
+                            placeholder="0"
+                          />
+                        </Form.Item>
+                      </div>
+                      {editingStructure && calculatedTotal > 0 && (
+                        <div className="mt-4 pt-3 border-t border-blue-300 flex justify-between items-center">
+                          <span className="text-sm font-semibold text-slate-700">
+                            Total Amount:
+                          </span>
+                          <span className="text-lg font-bold text-blue-700">
+                            ₹{calculatedTotal.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      <div className="text-xs text-slate-500 mt-2">
+                        {editingStructure
+                          ? "Total will be saved to this structure."
+                          : "Leave blank/0 to skip a type."}
+                      </div>
+                    </div>
+                  );
+                }
+
+                return (
+                  <>
+                    <Form.Item
+                      name="feeType"
+                      label="Fee Type"
+                      rules={[{ required: true, message: "Required" }]}>
+                      <Select placeholder="Select type">
+                        {FEE_TYPES.map((ft) => (
+                          <Select.Option key={ft.value} value={ft.value}>
+                            {ft.label}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      name="amount"
+                      label="Amount (₹)"
+                      rules={[{ required: true, message: "Required" }]}>
+                      <InputNumber
+                        min={0}
+                        className="w-full"
+                        placeholder="Enter amount"
+                      />
+                    </Form.Item>
+                  </>
+                );
+              }}
             </Form.Item>
 
             <Form.Item
@@ -1221,6 +1534,35 @@ const AdminFeeDashboardPage = () => {
           </div>
         )}
       </Modal>
+
+      <PdfPreviewModal
+        open={billPreviewOpen}
+        title="Fee Bill Preview"
+        build={() =>
+          buildFeeBillPdf(
+            billPreviewPayload?.student,
+            billPreviewPayload?.fees,
+            billPreviewPayload?.summary,
+          )
+        }
+        onClose={() => {
+          setBillPreviewOpen(false);
+          setBillPreviewPayload(null);
+        }}
+        onDownloaded={() => message.success("Bill PDF downloaded")}
+      />
+
+      <BillPreviewModal
+        open={professionalBillPreview}
+        student={professionalBillData?.student}
+        fees={professionalBillData?.fees || []}
+        summary={professionalBillData?.summary}
+        onClose={() => {
+          setProfessionalBillPreview(false);
+          setProfessionalBillData(null);
+        }}
+        onDownload={handleDownloadBillFromPreview}
+      />
     </div>
   );
 };

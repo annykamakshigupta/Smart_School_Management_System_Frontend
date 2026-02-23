@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from "react";
 import { Card, Timeline } from "antd";
 import { CheckCircleOutlined } from "@ant-design/icons";
 import { FaRegLightbulb, FaRocket } from "react-icons/fa";
@@ -7,21 +7,24 @@ const AboutSection = () => {
   const sectionRef = useRef(null);
 
   useEffect(() => {
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (!prefersReducedMotion && sectionRef.current) {
       const observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
             if (entry.isIntersecting) {
-              entry.target.classList.add('animate-in');
+              entry.target.classList.add("animate-in");
             }
           });
         },
-        { threshold: 0.1 }
+        { threshold: 0.1 },
       );
 
-      const elements = sectionRef.current.querySelectorAll('.animate-on-scroll');
+      const elements =
+        sectionRef.current.querySelectorAll(".animate-on-scroll");
       elements.forEach((el) => observer.observe(el));
 
       return () => observer.disconnect();
@@ -62,7 +65,9 @@ const AboutSection = () => {
         <div className="about-grid">
           {/* Left - Content */}
           <div className="about-content">
-            <div className="content-card animate-on-scroll" style={{ animationDelay: '100ms' }}>
+            <div
+              className="content-card animate-on-scroll"
+              style={{ animationDelay: "100ms" }}>
               <div className="card-icon-header">
                 <div className="feature-icon-large">
                   <FaRegLightbulb />
@@ -83,7 +88,9 @@ const AboutSection = () => {
               </p>
             </div>
 
-            <div className="ai-highlight-card animate-on-scroll" style={{ animationDelay: '200ms' }}>
+            <div
+              className="ai-highlight-card animate-on-scroll"
+              style={{ animationDelay: "200ms" }}>
               <div className="ai-glow"></div>
               <p className="ai-text">
                 By leveraging <strong>Artificial Intelligence (AI)</strong>,
@@ -94,15 +101,16 @@ const AboutSection = () => {
               </p>
             </div>
 
-            <div className="highlights-section animate-on-scroll" style={{ animationDelay: '300ms' }}>
+            <div
+              className="highlights-section animate-on-scroll"
+              style={{ animationDelay: "300ms" }}>
               <h4 className="highlights-title">Key Highlights</h4>
               <div className="highlights-grid">
                 {highlights.map((highlight, index) => (
-                  <div 
-                    key={index} 
+                  <div
+                    key={index}
                     className="highlight-item"
-                    style={{ animationDelay: `${400 + index * 50}ms` }}
-                  >
+                    style={{ animationDelay: `${400 + index * 50}ms` }}>
                     <CheckCircleOutlined className="highlight-icon" />
                     <span className="highlight-text">{highlight}</span>
                   </div>
@@ -113,7 +121,9 @@ const AboutSection = () => {
 
           {/* Right - Visual */}
           <div className="about-visual">
-            <div className="timeline-card animate-on-scroll" style={{ animationDelay: '200ms' }}>
+            <div
+              className="timeline-card animate-on-scroll"
+              style={{ animationDelay: "200ms" }}>
               <div className="timeline-header">
                 <h4 className="timeline-title">System Components</h4>
                 <div className="timeline-badge">5 Modules</div>
@@ -125,8 +135,12 @@ const AboutSection = () => {
                     dot: <div className="custom-timeline-dot">📚</div>,
                     children: (
                       <div className="timeline-content">
-                        <div className="timeline-item-title">Academic Management</div>
-                        <div className="timeline-item-desc">Student records, attendance, grading</div>
+                        <div className="timeline-item-title">
+                          Academic Management
+                        </div>
+                        <div className="timeline-item-desc">
+                          Student records, attendance, grading
+                        </div>
                       </div>
                     ),
                   },
@@ -135,8 +149,12 @@ const AboutSection = () => {
                     dot: <div className="custom-timeline-dot">⚙️</div>,
                     children: (
                       <div className="timeline-content">
-                        <div className="timeline-item-title">Administrative Operations</div>
-                        <div className="timeline-item-desc">Staff management, role-based access</div>
+                        <div className="timeline-item-title">
+                          Administrative Operations
+                        </div>
+                        <div className="timeline-item-desc">
+                          Staff management, role-based access
+                        </div>
                       </div>
                     ),
                   },
@@ -145,8 +163,12 @@ const AboutSection = () => {
                     dot: <div className="custom-timeline-dot">🤖</div>,
                     children: (
                       <div className="timeline-content">
-                        <div className="timeline-item-title">AI Intelligence</div>
-                        <div className="timeline-item-desc">Performance prediction, insights</div>
+                        <div className="timeline-item-title">
+                          AI Intelligence
+                        </div>
+                        <div className="timeline-item-desc">
+                          Performance prediction, insights
+                        </div>
                       </div>
                     ),
                   },
@@ -155,8 +177,12 @@ const AboutSection = () => {
                     dot: <div className="custom-timeline-dot">💬</div>,
                     children: (
                       <div className="timeline-content">
-                        <div className="timeline-item-title">Communication Hub</div>
-                        <div className="timeline-item-desc">Real-time notifications, announcements</div>
+                        <div className="timeline-item-title">
+                          Communication Hub
+                        </div>
+                        <div className="timeline-item-desc">
+                          Real-time notifications, announcements
+                        </div>
                       </div>
                     ),
                   },
@@ -165,8 +191,12 @@ const AboutSection = () => {
                     dot: <div className="custom-timeline-dot">💰</div>,
                     children: (
                       <div className="timeline-content">
-                        <div className="timeline-item-title">Financial Management</div>
-                        <div className="timeline-item-desc">Fee tracking, invoicing, analytics</div>
+                        <div className="timeline-item-title">
+                          Financial Management
+                        </div>
+                        <div className="timeline-item-desc">
+                          Fee tracking, invoicing, analytics
+                        </div>
                       </div>
                     ),
                   },
@@ -174,14 +204,17 @@ const AboutSection = () => {
               />
             </div>
 
-            <div className="vision-card animate-on-scroll" style={{ animationDelay: '300ms' }}>
+            <div
+              className="vision-card animate-on-scroll"
+              style={{ animationDelay: "300ms" }}>
               <div className="vision-glow"></div>
               <div className="vision-content">
                 <FaRocket className="vision-icon" />
                 <div className="vision-text">
                   <div className="vision-title">Project Vision</div>
                   <div className="vision-desc">
-                    Transforming education through smart technology and AI-driven insights
+                    Transforming education through smart technology and
+                    AI-driven insights
                   </div>
                 </div>
               </div>
@@ -212,9 +245,13 @@ const AboutSection = () => {
         .bg-pattern {
           position: absolute;
           inset: 0;
-          background-image: 
+          background-image:
             linear-gradient(rgba(148, 163, 184, 0.02) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(148, 163, 184, 0.02) 1px, transparent 1px);
+            linear-gradient(
+              90deg,
+              rgba(148, 163, 184, 0.02) 1px,
+              transparent 1px
+            );
           background-size: 32px 32px;
         }
 
@@ -244,9 +281,16 @@ const AboutSection = () => {
         }
 
         @keyframes float-orb {
-          0%, 100% { transform: translate(0, 0) scale(1); }
-          33% { transform: translate(40px, -40px) scale(1.1); }
-          66% { transform: translate(-30px, 30px) scale(0.9); }
+          0%,
+          100% {
+            transform: translate(0, 0) scale(1);
+          }
+          33% {
+            transform: translate(40px, -40px) scale(1.1);
+          }
+          66% {
+            transform: translate(-30px, 30px) scale(0.9);
+          }
         }
 
         /* Container */
@@ -286,12 +330,18 @@ const AboutSection = () => {
         }
 
         @keyframes pulse-dot {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.5; transform: scale(0.8); }
+          0%,
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+          50% {
+            opacity: 0.5;
+            transform: scale(0.8);
+          }
         }
 
         .section-heading {
-          font-family: 'Cal Sans', 'SF Pro Display', -apple-system, system-ui, sans-serif;
           font-size: clamp(2rem, 5vw, 3rem);
           font-weight: 700;
           line-height: 1.2;
@@ -378,7 +428,11 @@ const AboutSection = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(139, 92, 246, 0.1));
+          background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.1),
+            rgba(139, 92, 246, 0.1)
+          );
           border-radius: 16px;
           color: #2563eb;
           font-size: 1.75rem;
@@ -416,14 +470,25 @@ const AboutSection = () => {
           left: 50%;
           width: 200%;
           height: 200%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.15) 0%,
+            transparent 70%
+          );
           transform: translate(-50%, -50%);
           animation: pulse-glow 4s ease-in-out infinite;
         }
 
         @keyframes pulse-glow {
-          0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-          50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.7; }
+          0%,
+          100% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.1);
+            opacity: 0.7;
+          }
         }
 
         .ai-text {
@@ -466,13 +531,21 @@ const AboutSection = () => {
           align-items: flex-start;
           gap: 0.75rem;
           padding: 0.75rem;
-          background: linear-gradient(135deg, rgba(37, 99, 235, 0.03), rgba(139, 92, 246, 0.03));
+          background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.03),
+            rgba(139, 92, 246, 0.03)
+          );
           border-radius: 12px;
           transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .highlight-item:hover {
-          background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(139, 92, 246, 0.08));
+          background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.08),
+            rgba(139, 92, 246, 0.08)
+          );
           transform: translateX(4px);
         }
 
@@ -524,7 +597,11 @@ const AboutSection = () => {
 
         .timeline-badge {
           padding: 0.375rem 0.75rem;
-          background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(139, 92, 246, 0.1));
+          background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.1),
+            rgba(139, 92, 246, 0.1)
+          );
           color: #2563eb;
           font-size: 0.75rem;
           font-weight: 700;
@@ -537,7 +614,11 @@ const AboutSection = () => {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, rgba(37, 99, 235, 0.1), rgba(139, 92, 246, 0.1));
+          background: linear-gradient(
+            135deg,
+            rgba(37, 99, 235, 0.1),
+            rgba(139, 92, 246, 0.1)
+          );
           border-radius: 50%;
           font-size: 1rem;
           box-shadow: 0 2px 8px rgba(37, 99, 235, 0.15);
@@ -572,13 +653,21 @@ const AboutSection = () => {
         .vision-glow {
           position: absolute;
           inset: -50%;
-          background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+          background: radial-gradient(
+            circle,
+            rgba(255, 255, 255, 0.2) 0%,
+            transparent 70%
+          );
           animation: rotate-glow 10s linear infinite;
         }
 
         @keyframes rotate-glow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         .vision-content {
