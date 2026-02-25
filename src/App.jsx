@@ -71,6 +71,9 @@ const AdminResultsPage = lazy(
 const AdminCalendarPage = lazy(
   () => import("./features/admin/pages/AdminCalendarPage"),
 );
+const AdminAnalyticsPage = lazy(
+  () => import("./features/admin/pages/AdminAnalyticsPage"),
+);
 
 // Teacher
 const TeacherDashboard = lazy(
@@ -109,6 +112,9 @@ const TeacherAssignmentDetailPage = lazy(
 const TeacherFeePage = lazy(
   () => import("./features/teacher/pages/TeacherFeePage"),
 );
+const TeacherAnalyticsPage = lazy(
+  () => import("./features/teacher/pages/TeacherAnalyticsPage"),
+);
 
 // Student
 const StudentDashboard = lazy(
@@ -141,6 +147,9 @@ const StudentCalendarPage = lazy(
 const StudentAssignmentDetailPage = lazy(
   () => import("./features/student/pages/StudentAssignmentDetailPage"),
 );
+const StudentAnalyticsPage = lazy(
+  () => import("./features/student/pages/StudentAnalyticsPage"),
+);
 
 // Parent
 const ParentDashboard = lazy(
@@ -170,6 +179,10 @@ const ParentResultsPage = lazy(
 const ParentCalendarPage = lazy(
   () => import("./features/parent/pages/ParentCalendarPage"),
 );
+const ParentAnalyticsPage = lazy(
+  () => import("./features/parent/pages/ParentAnalyticsPage"),
+);
+const UserSettingsPage = lazy(() => import("./pages/UserSettingsPage"));
 
 // Role constants
 const ROLES = {
@@ -330,6 +343,10 @@ function App() {
                       path="/admin/calendar"
                       element={<AdminCalendarPage />}
                     />
+                    <Route
+                      path="/admin/ai-analytics"
+                      element={<AdminAnalyticsPage />}
+                    />
                   </Route>
                 </Route>
 
@@ -399,8 +416,12 @@ function App() {
                     />
                     <Route path="/teacher/fees" element={<TeacherFeePage />} />
                     <Route
+                      path="/teacher/ai-analytics"
+                      element={<TeacherAnalyticsPage />}
+                    />
+                    <Route
                       path="/teacher/settings"
-                      element={<PlaceholderPage title="Teacher Settings" />}
+                      element={<UserSettingsPage />}
                     />
                     <Route
                       path="/teacher/notifications"
@@ -462,8 +483,12 @@ function App() {
                       element={<StudentCalendarPage />}
                     />
                     <Route
+                      path="/student/ai-analytics"
+                      element={<StudentAnalyticsPage />}
+                    />
+                    <Route
                       path="/student/settings"
-                      element={<PlaceholderPage title="Student Settings" />}
+                      element={<UserSettingsPage />}
                     />
                   </Route>
                 </Route>
@@ -533,8 +558,12 @@ function App() {
                       element={<ParentCalendarPage />}
                     />
                     <Route
+                      path="/parent/ai-analytics"
+                      element={<ParentAnalyticsPage />}
+                    />
+                    <Route
                       path="/parent/settings"
-                      element={<PlaceholderPage title="Parent Settings" />}
+                      element={<UserSettingsPage />}
                     />
                   </Route>
                 </Route>

@@ -31,6 +31,21 @@ export const getMyChildren = async () => {
 };
 
 /**
+ * Get current parent's profile
+ * Includes populated userId and (light) children list
+ */
+export const getMyProfile = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/parents/me`, getAuthHeaders());
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.message || "Error fetching parent profile",
+    );
+  }
+};
+
+/**
  * Get specific child's attendance
  */
 export const getChildAttendance = async (studentId, filters = {}) => {
@@ -104,6 +119,7 @@ export const getChildFeeStatus = async (studentId) => {
 };
 
 export default {
+  getMyProfile,
   getMyChildren,
   getChildAttendance,
   getChildPerformance,

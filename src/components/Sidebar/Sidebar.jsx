@@ -30,6 +30,7 @@ import {
   ChevronRight,
   Pencil,
   Eye,
+  BrainCircuit,
 } from "lucide-react";
 import { useSidebar } from "../../context/SidebarContext";
 
@@ -41,45 +42,110 @@ const NAVIGATION_CONFIG = {
     {
       section: "Main",
       items: [
-        { key: "dashboard", label: "Dashboard", path: "/admin/dashboard", icon: LayoutDashboard },
+        {
+          key: "dashboard",
+          label: "Dashboard",
+          path: "/admin/dashboard",
+          icon: LayoutDashboard,
+        },
       ],
     },
     {
       section: "User Management",
       items: [
         { key: "users", label: "All Users", path: "/admin/users", icon: Users },
-        { key: "student-enroll", label: "Enroll Student", path: "/admin/students/enroll", icon: UserPlus },
-        { key: "parent-mapping", label: "Parent-Child Link", path: "/admin/parents/mapping", icon: Link2 },
-        { key: "assignments", label: "Teacher Assign", path: "/admin/academics/teacher-assignments", icon: UserCircle },
+        {
+          key: "student-enroll",
+          label: "Enroll Student",
+          path: "/admin/students/enroll",
+          icon: UserPlus,
+        },
+        {
+          key: "parent-mapping",
+          label: "Parent-Child Link",
+          path: "/admin/parents/mapping",
+          icon: Link2,
+        },
+        {
+          key: "assignments",
+          label: "Teacher Assign",
+          path: "/admin/academics/teacher-assignments",
+          icon: UserCircle,
+        },
       ],
     },
     {
       section: "Academics",
       items: [
-        { key: "classes", label: "Classes", path: "/admin/academics/classes", icon: BookOpen },
-        { key: "subjects", label: "Subjects", path: "/admin/academics/subjects", icon: Book },
-        { key: "timetable", label: "Timetable", path: "/admin/academics/timetable", icon: Calendar },
-        { key: "attendance", label: "Attendance", path: "/admin/attendance", icon: ClipboardCheck },
-        { key: "results", label: "Results", path: "/admin/results", icon: Award },
-        { key: "calendar", label: "Calendar", path: "/admin/calendar", icon: CalendarDays },
+        {
+          key: "classes",
+          label: "Classes",
+          path: "/admin/academics/classes",
+          icon: BookOpen,
+        },
+        {
+          key: "subjects",
+          label: "Subjects",
+          path: "/admin/academics/subjects",
+          icon: Book,
+        },
+        {
+          key: "timetable",
+          label: "Timetable",
+          path: "/admin/academics/timetable",
+          icon: Calendar,
+        },
+        {
+          key: "attendance",
+          label: "Attendance",
+          path: "/admin/attendance",
+          icon: ClipboardCheck,
+        },
+        {
+          key: "results",
+          label: "Results",
+          path: "/admin/results",
+          icon: Award,
+        },
+        {
+          key: "calendar",
+          label: "Calendar",
+          path: "/admin/calendar",
+          icon: CalendarDays,
+        },
       ],
     },
     {
       section: "Finance",
       items: [
-        { key: "fees", label: "Fees & Finance", path: "/admin/fees", icon: DollarSign },
+        {
+          key: "fees",
+          label: "Fees & Finance",
+          path: "/admin/fees",
+          icon: DollarSign,
+        },
       ],
     },
     {
       section: "Reports",
       items: [
-        { key: "reports", label: "Analytics", path: "/admin/reports", icon: BarChart3 },
+        {
+          key: "ai-analytics",
+          label: "AI Analytics",
+          path: "/admin/ai-analytics",
+          icon: BrainCircuit,
+        },
       ],
     },
     {
       section: "System",
       items: [
-        { key: "settings", label: "Settings", path: "/admin/settings", icon: Settings },
+        {
+          key: "settings",
+          label: "Settings",
+          path: "/admin/settings",
+          icon: Settings,
+        },
       ],
     },
   ],
@@ -87,25 +153,92 @@ const NAVIGATION_CONFIG = {
     {
       section: "Main",
       items: [
-        { key: "dashboard", label: "Dashboard", path: "/teacher/dashboard", icon: LayoutDashboard },
+        {
+          key: "dashboard",
+          label: "Dashboard",
+          path: "/teacher/dashboard",
+          icon: LayoutDashboard,
+        },
       ],
     },
     {
       section: "Attendance",
       items: [
-        { key: "mark-attendance", label: "Mark Attendance", path: "/teacher/attendance/mark", icon: Pencil },
-        { key: "view-attendance", label: "View Records", path: "/teacher/attendance", icon: Eye },
+        {
+          key: "mark-attendance",
+          label: "Mark Attendance",
+          path: "/teacher/attendance/mark",
+          icon: Pencil,
+        },
+        {
+          key: "view-attendance",
+          label: "View Records",
+          path: "/teacher/attendance",
+          icon: Eye,
+        },
       ],
     },
     {
       section: "Academics",
       items: [
-        { key: "classes", label: "My Classes", path: "/teacher/classes", icon: BookOpen },
-        { key: "students", label: "My Students", path: "/teacher/students", icon: Users },
-        { key: "assignments", label: "Assignments", path: "/teacher/assignments", icon: FileText },
-        { key: "schedule", label: "My Schedule", path: "/teacher/schedule", icon: Calendar },
-        { key: "results", label: "Results", path: "/teacher/grades/results", icon: Award },
-        { key: "calendar", label: "Calendar", path: "/teacher/calendar", icon: CalendarDays },
+        {
+          key: "classes",
+          label: "My Classes",
+          path: "/teacher/classes",
+          icon: BookOpen,
+        },
+        {
+          key: "students",
+          label: "My Students",
+          path: "/teacher/students",
+          icon: Users,
+        },
+        {
+          key: "assignments",
+          label: "Assignments",
+          path: "/teacher/assignments",
+          icon: FileText,
+        },
+        {
+          key: "schedule",
+          label: "My Schedule",
+          path: "/teacher/schedule",
+          icon: Calendar,
+        },
+        {
+          key: "results",
+          label: "Results",
+          path: "/teacher/grades/results",
+          icon: Award,
+        },
+        {
+          key: "calendar",
+          label: "Calendar",
+          path: "/teacher/calendar",
+          icon: CalendarDays,
+        },
+      ],
+    },
+    {
+      section: "Insights",
+      items: [
+        {
+          key: "ai-analytics",
+          label: "AI Analytics",
+          path: "/teacher/ai-analytics",
+          icon: BrainCircuit,
+        },
+      ],
+    },
+    {
+      section: "Account",
+      items: [
+        {
+          key: "settings",
+          label: "Settings",
+          path: "/teacher/settings",
+          icon: Settings,
+        },
       ],
     },
   ],
@@ -113,24 +246,86 @@ const NAVIGATION_CONFIG = {
     {
       section: "Main",
       items: [
-        { key: "dashboard", label: "Dashboard", path: "/student/dashboard", icon: LayoutDashboard },
+        {
+          key: "dashboard",
+          label: "Dashboard",
+          path: "/student/dashboard",
+          icon: LayoutDashboard,
+        },
       ],
     },
     {
       section: "Academics",
       items: [
-        { key: "classes", label: "My Classes", path: "/student/classes", icon: BookOpen },
-        { key: "attendance", label: "My Attendance", path: "/student/attendance", icon: ClipboardCheck },
-        { key: "assignments", label: "Assignments", path: "/student/assignments", icon: FileText },
-        { key: "results", label: "Results", path: "/student/academics/results", icon: Award },
-        { key: "timetable", label: "Timetable", path: "/student/timetable", icon: Calendar },
-        { key: "calendar", label: "Calendar", path: "/student/calendar", icon: CalendarDays },
+        {
+          key: "classes",
+          label: "My Classes",
+          path: "/student/classes",
+          icon: BookOpen,
+        },
+        {
+          key: "attendance",
+          label: "My Attendance",
+          path: "/student/attendance",
+          icon: ClipboardCheck,
+        },
+        {
+          key: "assignments",
+          label: "Assignments",
+          path: "/student/assignments",
+          icon: FileText,
+        },
+        {
+          key: "results",
+          label: "Results",
+          path: "/student/academics/results",
+          icon: Award,
+        },
+        {
+          key: "timetable",
+          label: "Timetable",
+          path: "/student/timetable",
+          icon: Calendar,
+        },
+        {
+          key: "calendar",
+          label: "Calendar",
+          path: "/student/calendar",
+          icon: CalendarDays,
+        },
       ],
     },
     {
       section: "Finance",
       items: [
-        { key: "fees", label: "Fee Status", path: "/student/fees", icon: CreditCard },
+        {
+          key: "fees",
+          label: "Fee Status",
+          path: "/student/fees",
+          icon: CreditCard,
+        },
+      ],
+    },
+    {
+      section: "Insights",
+      items: [
+        {
+          key: "ai-analytics",
+          label: "AI Analytics",
+          path: "/student/ai-analytics",
+          icon: BrainCircuit,
+        },
+      ],
+    },
+    {
+      section: "Account",
+      items: [
+        {
+          key: "settings",
+          label: "Settings",
+          path: "/student/settings",
+          icon: Settings,
+        },
       ],
     },
   ],
@@ -138,33 +333,90 @@ const NAVIGATION_CONFIG = {
     {
       section: "Main",
       items: [
-        { key: "dashboard", label: "Dashboard", path: "/parent/dashboard", icon: LayoutDashboard },
+        {
+          key: "dashboard",
+          label: "Dashboard",
+          path: "/parent/dashboard",
+          icon: LayoutDashboard,
+        },
       ],
     },
     {
       section: "Children",
       items: [
-        { key: "children", label: "My Children", path: "/parent/children", icon: Users },
-        { key: "attendance", label: "Attendance", path: "/parent/attendance", icon: ClipboardCheck },
-        { key: "schedule", label: "Schedule", path: "/parent/child-schedule", icon: Calendar },
+        {
+          key: "children",
+          label: "My Children",
+          path: "/parent/children",
+          icon: Users,
+        },
+        {
+          key: "attendance",
+          label: "Attendance",
+          path: "/parent/attendance",
+          icon: ClipboardCheck,
+        },
+        {
+          key: "schedule",
+          label: "Schedule",
+          path: "/parent/child-schedule",
+          icon: Calendar,
+        },
       ],
     },
     {
       section: "Performance",
       items: [
-        { key: "results", label: "Results", path: "/parent/performance/grades", icon: Award },
+        {
+          key: "results",
+          label: "Results",
+          path: "/parent/performance/grades",
+          icon: Award,
+        },
       ],
     },
     {
       section: "Finance",
       items: [
-        { key: "fees", label: "Fee Payments", path: "/parent/fees/status", icon: CreditCard },
+        {
+          key: "fees",
+          label: "Fee Payments",
+          path: "/parent/fees/status",
+          icon: CreditCard,
+        },
       ],
     },
     {
       section: "Calendar",
       items: [
-        { key: "calendar", label: "Calendar", path: "/parent/calendar", icon: CalendarDays },
+        {
+          key: "calendar",
+          label: "Calendar",
+          path: "/parent/calendar",
+          icon: CalendarDays,
+        },
+      ],
+    },
+    {
+      section: "Insights",
+      items: [
+        {
+          key: "ai-analytics",
+          label: "AI Analytics",
+          path: "/parent/ai-analytics",
+          icon: BrainCircuit,
+        },
+      ],
+    },
+    {
+      section: "Account",
+      items: [
+        {
+          key: "settings",
+          label: "Settings",
+          path: "/parent/settings",
+          icon: Settings,
+        },
       ],
     },
   ],
@@ -227,18 +479,21 @@ const NavItem = memo(({ item, collapsed, theme, onNavigate }) => {
     (item.path.includes("?") && location.pathname === item.path.split("?")[0]);
 
   return (
-    <NavLink to={item.path} onClick={onNavigate} className="group relative block">
+    <NavLink
+      to={item.path}
+      onClick={onNavigate}
+      className="group relative block">
       <div
         className={`
           flex items-center gap-3 px-3 py-2.5 rounded-xl
           transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-          ${isActive
-            ? `${theme.lightBg} ${theme.lightText} font-semibold shadow-sm`
-            : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          ${
+            isActive
+              ? `${theme.lightBg} ${theme.lightText} font-semibold shadow-sm`
+              : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
           }
           ${collapsed ? "justify-center" : ""}
-        `}
-      >
+        `}>
         {/* Active indicator — smooth slide-in */}
         <div
           className={`
@@ -262,12 +517,12 @@ const NavItem = memo(({ item, collapsed, theme, onNavigate }) => {
           className={`
             text-sm truncate whitespace-nowrap
             transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
-            ${collapsed
-              ? "w-0 opacity-0 -translate-x-2 overflow-hidden"
-              : "w-auto opacity-100 translate-x-0"
+            ${
+              collapsed
+                ? "w-0 opacity-0 -translate-x-2 overflow-hidden"
+                : "w-auto opacity-100 translate-x-0"
             }
-          `}
-        >
+          `}>
           {item.label}
         </span>
       </div>
@@ -285,8 +540,7 @@ const NavItem = memo(({ item, collapsed, theme, onNavigate }) => {
             whitespace-nowrap z-50
             pointer-events-none
             border border-slate-700
-          "
-        >
+          ">
           {item.label}
           <div className="absolute right-full top-1/2 -translate-y-1/2 border-[6px] border-transparent border-r-slate-900" />
         </div>
@@ -309,8 +563,7 @@ const NavSection = memo(({ section, collapsed, theme, onNavigate }) => {
           px-3 py-2 text-xs font-bold text-slate-500 uppercase tracking-widest
           transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
           ${collapsed ? "opacity-0 h-0 overflow-hidden py-0" : "opacity-100 h-auto"}
-        `}
-      >
+        `}>
         {section.section}
       </div>
 
@@ -371,24 +624,25 @@ const Sidebar = ({ userRole = "admin" }) => {
           bg-white border-r border-slate-200 shadow-xl z-40
           transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
           ${collapsed ? "w-20" : "w-64"}
-        `}
-      >
+        `}>
         {/* Logo */}
         <div
           className={`
             flex items-center h-16 px-4 border-b border-slate-200 bg-linear-to-r from-slate-100 to-white
             ${collapsed ? "justify-center px-2" : "justify-between"}
-          `}
-        >
+          `}>
           <div className={`flex items-center ${collapsed ? "" : "gap-3"}`}>
             <div
               className={`
                 flex items-center justify-center shrink-0 w-11 h-11
                 rounded-xl ${theme.primary} shadow-lg ${theme.glow}
                 transition-transform duration-300 hover:scale-110 hover:rotate-3
-              `}
-            >
-              <GraduationCap size={24} strokeWidth={2.5} className="text-white" />
+              `}>
+              <GraduationCap
+                size={24}
+                strokeWidth={2.5}
+                className="text-white"
+              />
             </div>
 
             {/* Brand text — animate opacity + width */}
@@ -397,8 +651,7 @@ const Sidebar = ({ userRole = "admin" }) => {
                 overflow-hidden whitespace-nowrap
                 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
                 ${collapsed ? "w-0 opacity-0" : "w-auto opacity-100"}
-              `}
-            >
+              `}>
               <div className="text-lg font-bold bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
                 SSMS
               </div>
@@ -416,8 +669,7 @@ const Sidebar = ({ userRole = "admin" }) => {
               transition-all duration-300 hover:scale-110 active:scale-95
               ${collapsed ? "hidden" : ""}
             `}
-            aria-label="Collapse sidebar"
-          >
+            aria-label="Collapse sidebar">
             <ChevronLeft size={18} strokeWidth={2} />
           </button>
         </div>
@@ -427,8 +679,7 @@ const Sidebar = ({ userRole = "admin" }) => {
           <button
             onClick={toggleSidebar}
             className="mx-auto mt-3 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all duration-300 hover:scale-110 active:scale-95 shadow-sm"
-            aria-label="Expand sidebar"
-          >
+            aria-label="Expand sidebar">
             <ChevronRight size={18} strokeWidth={2} />
           </button>
         )}
@@ -457,23 +708,22 @@ const Sidebar = ({ userRole = "admin" }) => {
               hover:scale-[1.03] active:scale-95
               ${theme.primary} ${theme.primaryHover}
             `}
-            title="View Schedule"
-          >
+            title="View Schedule">
             <Calendar size={19} strokeWidth={2.5} />
             <span
               className={`
                 tracking-wide whitespace-nowrap
                 transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
                 ${collapsed ? "w-0 opacity-0 overflow-hidden" : "w-auto opacity-100"}
-              `}
-            >
+              `}>
               View Schedule
             </span>
           </button>
         </div>
 
         {/* Footer */}
-        <div className={`px-4 py-3 border-t border-slate-200 ${collapsed ? "text-center px-2" : ""}`}>
+        <div
+          className={`px-4 py-3 border-t border-slate-200 ${collapsed ? "text-center px-2" : ""}`}>
           <div className="text-xs text-slate-400">
             {collapsed ? "\u00A9" : `\u00A9 ${new Date().getFullYear()} SSMS`}
           </div>
@@ -499,8 +749,7 @@ const Sidebar = ({ userRole = "admin" }) => {
           transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
           will-change-transform shadow-2xl
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
-        `}
-      >
+        `}>
         {/* Mobile Header */}
         <div className="flex items-center justify-between h-16 px-5 border-b border-slate-200 bg-linear-to-r from-slate-50 to-white">
           <div className="flex items-center gap-3">
@@ -509,23 +758,27 @@ const Sidebar = ({ userRole = "admin" }) => {
                 flex items-center justify-center w-11 h-11
                 rounded-xl ${theme.primary} shadow-lg ${theme.glow}
                 transition-transform duration-300 hover:scale-110 hover:rotate-3
-              `}
-            >
-              <GraduationCap size={24} strokeWidth={2.5} className="text-white" />
+              `}>
+              <GraduationCap
+                size={24}
+                strokeWidth={2.5}
+                className="text-white"
+              />
             </div>
             <div>
               <div className="text-lg font-bold bg-linear-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent tracking-tight">
                 SSMS
               </div>
-              <div className="text-xs text-slate-500 font-medium">School Management</div>
+              <div className="text-xs text-slate-500 font-medium">
+                School Management
+              </div>
             </div>
           </div>
 
           <button
             onClick={closeMobile}
             className="p-2.5 rounded-xl text-slate-400 hover:bg-red-50 hover:text-red-600 transition-all duration-300 hover:scale-110 active:scale-95"
-            aria-label="Close menu"
-          >
+            aria-label="Close menu">
             <X size={20} strokeWidth={2.5} />
           </button>
         </div>
@@ -554,8 +807,7 @@ const Sidebar = ({ userRole = "admin" }) => {
               transition-all duration-300 ease-out
               hover:scale-[1.03] active:scale-95
               ${theme.primary} ${theme.primaryHover}
-            `}
-          >
+            `}>
             <Calendar size={19} strokeWidth={2.5} />
             <span className="tracking-wide">View Schedule</span>
           </button>
