@@ -255,18 +255,7 @@ function App() {
                       path="/admin/users"
                       element={<UserManagementPage />}
                     />
-                    <Route
-                      path="/admin/users/teachers"
-                      element={<TeachersPage />}
-                    />
-                    <Route
-                      path="/admin/users/students"
-                      element={<StudentEnrollmentPage />}
-                    />
-                    <Route
-                      path="/admin/users/parents"
-                      element={<ParentsPage />}
-                    />
+                  
                     <Route
                       path="/admin/students/enroll"
                       element={<StudentEnrollmentPage />}
