@@ -127,90 +127,90 @@ const AdminDashboard = () => {
   });
 
   return (
-    <div className="space-y-6 p-6 -m-6 bg-linear-to-br from-slate-50 via-white to-slate-50 min-h-screen">
+    <div className="min-h-screen p-6 -m-6 space-y-6 bg-linear-to-br from-slate-50 via-white to-slate-50">
       {/* Welcome Header - Enhanced */}
-      <div className="bg-linear-to-r from-indigo-600 to-indigo-700 rounded-3xl p-8 text-white shadow-2xl border border-indigo-400/20">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="p-8 text-white border shadow-2xl bg-linear-to-r from-indigo-600 to-indigo-700 rounded-3xl border-indigo-400/20">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+            <h1 className="mb-2 text-3xl font-bold md:text-4xl">
               Welcome Back, Admin! 👋
             </h1>
-            <p className="text-indigo-100 text-lg">
+            <p className="text-lg text-indigo-100">
               Here's what's happening in your school today
             </p>
           </div>
           <div className="hidden md:block">
-            <div className="bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 border border-white/20">
+            <div className="px-6 py-4 border bg-white/10 backdrop-blur-sm rounded-2xl border-white/20">
               <p className="text-sm text-indigo-100">Today</p>
               <p className="text-lg font-semibold">{currentDate}</p>
             </div>
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="p-6 text-white transition-all duration-300 transform shadow-lg bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
           <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl">
               <TeamOutlined className="text-2xl" />
             </div>
-            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+            <span className="px-3 py-1 text-xs font-semibold rounded-full bg-white/20">
               Students
             </span>
           </div>
-          <h3 className="text-4xl font-bold mb-1">
+          <h3 className="mb-1 text-4xl font-bold">
             {stats.totalStudents.toLocaleString()}
           </h3>
-          <p className="text-blue-100 text-sm font-medium">Total Students</p>
+          <p className="text-sm font-medium text-blue-100">Total Students</p>
         </div>
 
-        <div className="bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="p-6 text-white transition-all duration-300 transform shadow-lg bg-linear-to-br from-emerald-500 to-emerald-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
           <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl">
               <UserOutlined className="text-2xl" />
             </div>
-            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+            <span className="px-3 py-1 text-xs font-semibold rounded-full bg-white/20">
               Faculty
             </span>
           </div>
-          <h3 className="text-4xl font-bold mb-1">{stats.totalTeachers}</h3>
-          <p className="text-emerald-100 text-sm font-medium">Total Teachers</p>
+          <h3 className="mb-1 text-4xl font-bold">{stats.totalTeachers}</h3>
+          <p className="text-sm font-medium text-emerald-100">Total Teachers</p>
         </div>
 
-        <div className="bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="p-6 text-white transition-all duration-300 transform shadow-lg bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
           <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl">
               <BookOutlined className="text-2xl" />
             </div>
-            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+            <span className="px-3 py-1 text-xs font-semibold rounded-full bg-white/20">
               Active
             </span>
           </div>
-          <h3 className="text-4xl font-bold mb-1">{stats.totalClasses}</h3>
-          <p className="text-purple-100 text-sm font-medium">Total Classes</p>
+          <h3 className="mb-1 text-4xl font-bold">{stats.totalClasses}</h3>
+          <p className="text-sm font-medium text-purple-100">Total Classes</p>
         </div>
 
-        <div className="bg-linear-to-br from-amber-500 to-amber-600 rounded-2xl p-6 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="p-6 text-white transition-all duration-300 transform shadow-lg bg-linear-to-br from-amber-500 to-amber-600 rounded-2xl hover:shadow-xl hover:-translate-y-1">
           <div className="flex items-start justify-between mb-5">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+            <div className="flex items-center justify-center w-12 h-12 bg-white/20 rounded-xl">
               <UsergroupAddOutlined className="text-2xl" />
             </div>
-            <span className="text-xs font-semibold bg-white/20 px-3 py-1 rounded-full">
+            <span className="px-3 py-1 text-xs font-semibold rounded-full bg-white/20">
               Linked
             </span>
           </div>
-          <h3 className="text-4xl font-bold mb-1">{stats.totalParents}</h3>
-          <p className="text-amber-100 text-sm font-medium">Total Parents</p>
+          <h3 className="mb-1 text-4xl font-bold">{stats.totalParents}</h3>
+          <p className="text-sm font-medium text-amber-100">Total Parents</p>
         </div>
       </div>
 
       {/* Summary Strip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex items-center gap-4">
-          <div className="w-14 h-14 bg-indigo-50 rounded-2xl flex items-center justify-center shrink-0">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div className="flex items-center gap-4 p-5 bg-white border shadow-md rounded-2xl border-slate-100">
+          <div className="flex items-center justify-center w-14 h-14 bg-indigo-50 rounded-2xl shrink-0">
             <TeamOutlined className="text-2xl text-indigo-600" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
+            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500">
               Student–Teacher Ratio
             </p>
             <p className="text-2xl font-bold text-slate-900">
@@ -220,12 +220,12 @@ const AdminDashboard = () => {
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex items-center gap-4">
-          <div className="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-4 p-5 bg-white border shadow-md rounded-2xl border-slate-100">
+          <div className="flex items-center justify-center w-14 h-14 bg-emerald-50 rounded-2xl shrink-0">
             <BookOutlined className="text-2xl text-emerald-600" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
+            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500">
               Avg Students / Class
             </p>
             <p className="text-2xl font-bold text-slate-900">
@@ -235,12 +235,12 @@ const AdminDashboard = () => {
             </p>
           </div>
         </div>
-        <div className="bg-white rounded-2xl p-5 shadow-md border border-slate-100 flex items-center gap-4">
-          <div className="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center shrink-0">
+        <div className="flex items-center gap-4 p-5 bg-white border shadow-md rounded-2xl border-slate-100">
+          <div className="flex items-center justify-center w-14 h-14 bg-amber-50 rounded-2xl shrink-0">
             <UsergroupAddOutlined className="text-2xl text-amber-600" />
           </div>
           <div>
-            <p className="text-xs text-slate-500 uppercase tracking-wide font-semibold">
+            <p className="text-xs font-semibold tracking-wide uppercase text-slate-500">
               Parent Engagement
             </p>
             <p className="text-2xl font-bold text-slate-900">
@@ -256,19 +256,19 @@ const AdminDashboard = () => {
         {/* Classes with Teachers */}
         <Col xs={24} lg={12}>
           <Card
-            className="shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0"
+            className="transition-shadow border-0 shadow-md hover:shadow-lg rounded-2xl"
             title={
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+                <div className="flex items-center justify-center w-10 h-10 bg-purple-100 rounded-xl">
                   <HomeOutlined className="text-xl text-purple-600" />
                 </div>
-                <span className="font-bold text-lg">Class Assignments</span>
+                <span className="text-lg font-bold">Class Assignments</span>
               </div>
             }
             extra={
               <Link
                 to="/admin/academics/teacher-assignments"
-                className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800">
                 Manage <ArrowRightOutlined />
               </Link>
             }>
@@ -276,11 +276,11 @@ const AdminDashboard = () => {
               <List
                 dataSource={classesWithTeachers}
                 renderItem={(cls) => (
-                  <List.Item className="hover:bg-slate-50 rounded-lg px-3 transition-colors">
+                  <List.Item className="px-3 transition-colors rounded-lg hover:bg-slate-50">
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-linear-to-br from-purple-100 to-purple-200 rounded-xl flex items-center justify-center">
-                          <BookOutlined className="text-purple-600 text-xl" />
+                        <div className="flex items-center justify-center w-12 h-12 bg-linear-to-br from-purple-100 to-purple-200 rounded-xl">
+                          <BookOutlined className="text-xl text-purple-600" />
                         </div>
                         <div>
                           <div className="font-semibold text-slate-800">
@@ -295,7 +295,7 @@ const AdminDashboard = () => {
                         {cls.classTeacher ? (
                           <Tag
                             color="success"
-                            className="rounded-lg px-3 py-1 font-medium">
+                            className="px-3 py-1 font-medium rounded-lg">
                             <UserOutlined className="mr-1" />
                             {cls.classTeacher.userId?.name ||
                               cls.classTeacher.name ||
@@ -304,7 +304,7 @@ const AdminDashboard = () => {
                         ) : (
                           <Tag
                             color="warning"
-                            className="rounded-lg px-3 py-1 font-medium">
+                            className="px-3 py-1 font-medium rounded-lg">
                             No Teacher
                           </Tag>
                         )}
@@ -325,19 +325,19 @@ const AdminDashboard = () => {
         {/* Recent Students */}
         <Col xs={24} lg={12}>
           <Card
-            className="shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0"
+            className="transition-shadow border-0 shadow-md hover:shadow-lg rounded-2xl"
             title={
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+                <div className="flex items-center justify-center w-10 h-10 bg-blue-100 rounded-xl">
                   <TeamOutlined className="text-xl text-blue-400" />
                 </div>
-                <span className="font-bold text-lg">Recent Students</span>
+                <span className="text-lg font-bold">Recent Students</span>
               </div>
             }
             extra={
               <Link
-                to="/admin/users/students"
-                className="text-indigo-600 hover:text-indigo-800 font-semibold flex items-center gap-1">
+                to="/admin/students/enroll"
+                className="flex items-center gap-1 font-semibold text-indigo-600 hover:text-indigo-800">
                 View All <ArrowRightOutlined />
               </Link>
             }>
@@ -345,10 +345,10 @@ const AdminDashboard = () => {
               <List
                 dataSource={recentStudents}
                 renderItem={(student) => (
-                  <List.Item className="hover:bg-slate-50 rounded-lg px-3 transition-colors">
-                    <div className="flex items-center gap-3 w-full">
-                      <div className="w-12 h-12 bg-linear-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                        <UserOutlined className="text-blue-400 text-xl" />
+                  <List.Item className="px-3 transition-colors rounded-lg hover:bg-slate-50">
+                    <div className="flex items-center w-full gap-3">
+                      <div className="flex items-center justify-center w-12 h-12 bg-linear-to-br from-blue-100 to-blue-200 rounded-xl">
+                        <UserOutlined className="text-xl text-blue-400" />
                       </div>
                       <div className="flex-1">
                         <div className="font-semibold text-slate-800">
@@ -361,7 +361,7 @@ const AdminDashboard = () => {
                       </div>
                       <Tag
                         color="blue"
-                        className="rounded-lg px-3 py-1 font-medium">
+                        className="px-3 py-1 font-medium rounded-lg">
                         {student.enrollmentStatus || "enrolled"}
                       </Tag>
                     </div>
@@ -382,53 +382,53 @@ const AdminDashboard = () => {
       <Card
         title={
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-indigo-100 rounded-xl flex items-center justify-center">
+            <div className="flex items-center justify-center w-10 h-10 bg-indigo-100 rounded-xl">
               <RiseOutlined className="text-xl text-indigo-600" />
             </div>
-            <span className="font-bold text-lg">Quick Actions</span>
+            <span className="text-lg font-bold">Quick Actions</span>
           </div>
         }
-        className="shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        className="transition-shadow border-0 shadow-md hover:shadow-lg rounded-2xl">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Link to="/admin/users/students">
-            <div className="group p-6 bg-linear-to-br from-blue-50 to-blue-100 rounded-2xl text-center hover:from-blue-100 hover:to-blue-200 transition-all cursor-pointer shadow-sm hover:shadow-md transform hover:-translate-y-1 duration-200">
-              <div className="w-14 h-14 mx-auto mb-4 bg-blue-400 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+            <div className="p-6 text-center transition-all duration-200 transform shadow-sm cursor-pointer group bg-linear-to-br from-blue-50 to-blue-100 rounded-2xl hover:from-blue-100 hover:to-blue-200 hover:shadow-md hover:-translate-y-1">
+              <div className="flex items-center justify-center mx-auto mb-4 transition-transform bg-blue-400 shadow-lg w-14 h-14 rounded-2xl group-hover:scale-110">
                 <TeamOutlined className="text-2xl text-white" />
               </div>
-              <div className="font-bold text-slate-800 mb-1">
+              <div className="mb-1 font-bold text-slate-800">
                 Manage Students
               </div>
               <div className="text-xs text-slate-600">Add & edit students</div>
             </div>
           </Link>
           <Link to="/admin/users/teachers">
-            <div className="group p-6 bg-linear-to-br from-green-50 to-green-100 rounded-2xl text-center hover:from-green-100 hover:to-green-200 transition-all cursor-pointer shadow-sm hover:shadow-md transform hover:-translate-y-1 duration-200">
-              <div className="w-14 h-14 mx-auto mb-4 bg-green-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+            <div className="p-6 text-center transition-all duration-200 transform shadow-sm cursor-pointer group bg-linear-to-br from-green-50 to-green-100 rounded-2xl hover:from-green-100 hover:to-green-200 hover:shadow-md hover:-translate-y-1">
+              <div className="flex items-center justify-center mx-auto mb-4 transition-transform bg-green-600 shadow-lg w-14 h-14 rounded-2xl group-hover:scale-110">
                 <UserOutlined className="text-2xl text-white" />
               </div>
-              <div className="font-bold text-slate-800 mb-1">
+              <div className="mb-1 font-bold text-slate-800">
                 Manage Teachers
               </div>
               <div className="text-xs text-slate-600">Add & edit teachers</div>
             </div>
           </Link>
           <Link to="/admin/users/parents">
-            <div className="group p-6 bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl text-center hover:from-amber-100 hover:to-amber-200 transition-all cursor-pointer shadow-sm hover:shadow-md transform hover:-translate-y-1 duration-200">
-              <div className="w-14 h-14 mx-auto mb-4 bg-amber-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+            <div className="p-6 text-center transition-all duration-200 transform shadow-sm cursor-pointer group bg-linear-to-br from-amber-50 to-amber-100 rounded-2xl hover:from-amber-100 hover:to-amber-200 hover:shadow-md hover:-translate-y-1">
+              <div className="flex items-center justify-center mx-auto mb-4 transition-transform shadow-lg w-14 h-14 bg-amber-600 rounded-2xl group-hover:scale-110">
                 <UsergroupAddOutlined className="text-2xl text-white" />
               </div>
-              <div className="font-bold text-slate-800 mb-1">
+              <div className="mb-1 font-bold text-slate-800">
                 Manage Parents
               </div>
               <div className="text-xs text-slate-600">Link to children</div>
             </div>
           </Link>
           <Link to="/admin/academics/teacher-assignments">
-            <div className="group p-6 bg-linear-to-br from-purple-50 to-purple-100 rounded-2xl text-center hover:from-purple-100 hover:to-purple-200 transition-all cursor-pointer shadow-sm hover:shadow-md transform hover:-translate-y-1 duration-200">
-              <div className="w-14 h-14 mx-auto mb-4 bg-purple-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+            <div className="p-6 text-center transition-all duration-200 transform shadow-sm cursor-pointer group bg-linear-to-br from-purple-50 to-purple-100 rounded-2xl hover:from-purple-100 hover:to-purple-200 hover:shadow-md hover:-translate-y-1">
+              <div className="flex items-center justify-center mx-auto mb-4 transition-transform bg-purple-600 shadow-lg w-14 h-14 rounded-2xl group-hover:scale-110">
                 <BookOutlined className="text-2xl text-white" />
               </div>
-              <div className="font-bold text-slate-800 mb-1">Assignments</div>
+              <div className="mb-1 font-bold text-slate-800">Assignments</div>
               <div className="text-xs text-slate-600">Assign to classes</div>
             </div>
           </Link>
@@ -439,39 +439,39 @@ const AdminDashboard = () => {
       <Card
         title={
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-cyan-100 rounded-xl flex items-center justify-center">
+            <div className="flex items-center justify-center w-10 h-10 bg-cyan-100 rounded-xl">
               <CalendarOutlined className="text-xl text-cyan-600" />
             </div>
-            <span className="font-bold text-lg">Academic Management</span>
+            <span className="text-lg font-bold">Academic Management</span>
           </div>
         }
-        className="shadow-md hover:shadow-lg transition-shadow rounded-2xl border-0">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        className="transition-shadow border-0 shadow-md hover:shadow-lg rounded-2xl">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           <Link to="/admin/academics/classes">
-            <div className="p-5 bg-white border-2 border-indigo-100 rounded-xl text-center hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer">
-              <HomeOutlined className="text-3xl text-indigo-600 mb-3" />
-              <div className="font-semibold text-slate-800 mb-1">Classes</div>
+            <div className="p-5 text-center transition-all bg-white border-2 border-indigo-100 cursor-pointer rounded-xl hover:border-indigo-300 hover:shadow-md">
+              <HomeOutlined className="mb-3 text-3xl text-indigo-600" />
+              <div className="mb-1 font-semibold text-slate-800">Classes</div>
               <div className="text-xs text-slate-500">Manage classes</div>
             </div>
           </Link>
           <Link to="/admin/academics/subjects">
-            <div className="p-5 bg-white border-2 border-pink-100 rounded-xl text-center hover:border-pink-300 hover:shadow-md transition-all cursor-pointer">
-              <BookOutlined className="text-3xl text-pink-600 mb-3" />
-              <div className="font-semibold text-slate-800 mb-1">Subjects</div>
+            <div className="p-5 text-center transition-all bg-white border-2 border-pink-100 cursor-pointer rounded-xl hover:border-pink-300 hover:shadow-md">
+              <BookOutlined className="mb-3 text-3xl text-pink-600" />
+              <div className="mb-1 font-semibold text-slate-800">Subjects</div>
               <div className="text-xs text-slate-500">Manage subjects</div>
             </div>
           </Link>
           <Link to="/admin/academics/timetable">
-            <div className="p-5 bg-white border-2 border-cyan-100 rounded-xl text-center hover:border-cyan-300 hover:shadow-md transition-all cursor-pointer">
-              <CalendarOutlined className="text-3xl text-cyan-600 mb-3" />
-              <div className="font-semibold text-slate-800 mb-1">Schedule</div>
+            <div className="p-5 text-center transition-all bg-white border-2 cursor-pointer border-cyan-100 rounded-xl hover:border-cyan-300 hover:shadow-md">
+              <CalendarOutlined className="mb-3 text-3xl text-cyan-600" />
+              <div className="mb-1 font-semibold text-slate-800">Schedule</div>
               <div className="text-xs text-slate-500">Manage timetables</div>
             </div>
           </Link>
           <Link to="/admin/attendance">
-            <div className="p-5 bg-white border-2 border-orange-100 rounded-xl text-center hover:border-orange-300 hover:shadow-md transition-all cursor-pointer">
-              <CheckCircleOutlined className="text-3xl text-orange-600 mb-3" />
-              <div className="font-semibold text-slate-800 mb-1">
+            <div className="p-5 text-center transition-all bg-white border-2 border-orange-100 cursor-pointer rounded-xl hover:border-orange-300 hover:shadow-md">
+              <CheckCircleOutlined className="mb-3 text-3xl text-orange-600" />
+              <div className="mb-1 font-semibold text-slate-800">
                 Attendance
               </div>
               <div className="text-xs text-slate-500">View reports</div>
