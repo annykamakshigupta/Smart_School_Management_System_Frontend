@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { Tag } from "antd";
 import { getParentAnalytics } from "../../../services/analytics.service";
 import {
   AnalyticsLoading,
@@ -15,12 +16,12 @@ import {
   RecommendationsList,
   StatCard,
   BarChartCard,
-  LineChartCard,
-  AreaChartCard,
+  RiskTable,
+  RiskTag,
 } from "../../../components/Analytics/AnalyticsComponents";
 
 export default function ParentAnalyticsPage() {
-  const [payload, setPayload] = useState(null);
+  const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -29,9 +30,9 @@ export default function ParentAnalyticsPage() {
     setError(null);
     try {
       const res = await getParentAnalytics();
-      setPayload(res.data);
+      setData(res.data?.insights ?? res.data);
     } catch (err) {
-      setError(err.message || "Failed to fetch parent analytics");
+      setError(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -43,73 +44,86 @@ export default function ParentAnalyticsPage() {
 
   if (loading) return <AnalyticsLoading />;
   if (error) return <AnalyticsError message={error} onRetry={fetchInsights} />;
-  if (!payload)
+  if (!data)
     return (
       <AnalyticsError message="No insights available" onRetry={fetchInsights} />
     );
 
-  const insights = payload?.insights ?? payload;
-  const stats = payload?.stats ?? {};
-  const charts = payload?.charts ?? {};
-
   // Children performance chart
-  const childrenChart = (charts.childrenComparison || []).map((c) => ({
-    label: c.name,
-    value: Math.round(c.avgScore ?? 0),
-  }));
+  const childrenChart = (data.childrenPerformance || data.children || []).map(
+    (c) => ({
+      label: c.name || c.childName,
+      value: Math.round(c.averageScore ?? c.avgScore ?? c.overall ?? 0),
+    }),
+  );
 
-  const attendanceChart = (charts.childrenComparison || []).map((c) => ({
-    label: c.name,
-    value: Math.round(c.attendanceRate ?? 0),
-  }));
-
-  const compareSeries = (charts.childrenComparison || []).map((c) => ({
-    name: c.name,
-    avgScore: Math.round(c.avgScore ?? 0),
-    attendanceRate: Math.round(c.attendanceRate ?? 0),
-  }));
-
-  const firstChildTrend = (charts.firstChildTrend || []).map((m) => ({
-    label: m.month,
-    avgScore: m.avgScore,
-    exams: m.exams,
+  // Per-child subject breakdown (show first child's subjects as bar chart)
+  const firstChild = (data.childrenPerformance || data.children || [])[0];
+  const subjectChart = (firstChild?.subjects || []).map((s) => ({
+    label: s.subject || s.name,
+    value: Math.round(s.score ?? s.percentage ?? 0),
   }));
 
   // Alerts
   const alerts = [];
-  if (Array.isArray(insights.alerts) && insights.alerts.length) {
-    insights.alerts.forEach((a) => alerts.push(a));
+  if (data.concerns?.length) {
+    data.concerns.forEach((c) => {
+      alerts.push({
+        type: c.type || "warning",
+        title: c.title || "Concern",
+        message: c.message || c.description || c,
+      });
+    });
   }
-  if (insights.attendanceImpact?.impact === "negative") {
-    alerts.unshift({
-      type: "warning",
-      title: "Attendance Impact",
-      message:
-        insights.attendanceImpact.explanation ||
-        "Attendance may be affecting performance.",
+  if (data.attendanceAlerts?.length) {
+    data.attendanceAlerts.forEach((a) => {
+      alerts.push({
+        type: "warning",
+        title: `Attendance: ${a.childName || a.name || "Child"}`,
+        message:
+          a.message || `Attendance is ${a.percentage ?? a.rate ?? "low"}%`,
+      });
     });
   }
 
-  const avgOf = (nums) => {
-    const cleaned = nums.filter(
-      (n) => typeof n === "number" && !Number.isNaN(n),
-    );
-    if (!cleaned.length) return null;
-    return (
-      Math.round((cleaned.reduce((a, b) => a + b, 0) / cleaned.length) * 10) /
-      10
-    );
-  };
+  // Children table with risk info
+  const childrenRows = (data.childrenPerformance || data.children || []).map(
+    (c) => ({
+      name: c.name || c.childName,
+      class: c.class || c.className || "—",
+      averageScore: c.averageScore ?? c.avgScore ?? c.overall ?? 0,
+      attendance: c.attendance ?? "—",
+      risk: c.risk || "low",
+    }),
+  );
 
-  const avgScoreAll = avgOf(
-    (charts.childrenComparison || []).map((c) => c.avgScore),
-  );
-  const avgAttendanceAll = avgOf(
-    (charts.childrenComparison || []).map((c) => c.attendanceRate),
-  );
+  const childColumns = [
+    { key: "name", title: "Child" },
+    { key: "class", title: "Class" },
+    {
+      key: "averageScore",
+      title: "Avg Score",
+      render: (val) => (
+        <span
+          className={val < 50 ? "text-red-600 font-bold" : "text-slate-700"}>
+          {Math.round(val)}%
+        </span>
+      ),
+    },
+    {
+      key: "attendance",
+      title: "Attendance",
+      render: (val) => (typeof val === "number" ? `${val}%` : val),
+    },
+    {
+      key: "risk",
+      title: "Risk",
+      render: (val) => <RiskTag level={val} />,
+    },
+  ];
 
   return (
-    <div className="pb-8 space-y-6">
+    <div className="space-y-6 pb-8">
       <AnalyticsHeader
         title="AI Analytics"
         subtitle="Insights about your children's academic performance"
@@ -117,88 +131,55 @@ export default function ParentAnalyticsPage() {
         onRefresh={fetchInsights}
       />
 
-      <AISummaryPanel summary={insights.summary || insights.overallSummary} />
+      <AISummaryPanel summary={data.summary || data.overallSummary} />
 
       <AlertCards alerts={alerts} />
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <StatCard
-          label="Children"
-          value={stats.childrenCount ?? "—"}
-          color="blue"
-        />
-        <StatCard
-          label="Avg Score"
-          value={avgScoreAll ?? "—"}
-          suffix={avgScoreAll !== null ? "%" : ""}
-          trend={insights.progressSummary?.trend}
-          color="green"
-        />
-        <StatCard
-          label="Avg Attendance"
-          value={avgAttendanceAll ?? "—"}
-          suffix={avgAttendanceAll !== null ? "%" : ""}
-          trend={insights.progressSummary?.trend}
-          color="amber"
-        />
-        <StatCard
-          label="Impact"
-          value={insights.attendanceImpact?.impact || "—"}
-          color="purple"
-        />
-      </div>
+      {/* KPI Stats */}
+      {data.kpis && (
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {data.kpis.map((kpi, i) => (
+            <StatCard
+              key={i}
+              label={kpi.label}
+              value={kpi.value}
+              suffix={kpi.suffix}
+              trend={kpi.trend}
+              color={["blue", "green", "amber", "purple"][i % 4]}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Charts */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {childrenChart.length > 0 && (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {childrenChart.length > 1 && (
           <BarChartCard
             title="Children Performance Comparison"
             data={childrenChart}
             color="#8b5cf6"
           />
         )}
-        {attendanceChart.length > 0 && (
+        {subjectChart.length > 0 && (
           <BarChartCard
-            title="Children Attendance Comparison"
-            data={attendanceChart}
+            title={`${firstChild?.name || "Child"} — Subject Scores`}
+            data={subjectChart}
             color="#06b6d4"
           />
         )}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {compareSeries.length > 0 && (
-          <LineChartCard
-            title="Attendance vs Performance (by Child)"
-            data={compareSeries}
-            xKey="name"
-            lines={[
-              { key: "avgScore", name: "Avg Score %", color: "#8b5cf6" },
-              {
-                key: "attendanceRate",
-                name: "Attendance %",
-                color: "#06b6d4",
-              },
-            ]}
-          />
-        )}
-        {firstChildTrend.length > 0 && (
-          <AreaChartCard
-            title={`${charts.firstChildName || "Child"} — Progress Trend`}
-            data={firstChildTrend}
-            xKey="label"
-            areas={[{ key: "avgScore", name: "Avg Score %", color: "#10b981" }]}
-          />
-        )}
-      </div>
+      {/* Children Overview Table */}
+      {childrenRows.length > 0 && (
+        <RiskTable
+          title="Children Overview"
+          data={childrenRows}
+          columns={childColumns}
+        />
+      )}
 
       <RecommendationsList
-        items={
-          insights.parentActions ||
-          insights.recommendations ||
-          insights.parentTips ||
-          []
-        }
+        items={data.recommendations || data.parentTips || []}
         title="Recommendations for Parents"
       />
     </div>

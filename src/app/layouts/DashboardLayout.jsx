@@ -10,7 +10,6 @@ import DashboardHeader from "../../components/Header/DashboardHeader";
 import Sidebar from "../../components/Sidebar/Sidebar";
 import { SidebarProvider, useSidebar } from "../../context/SidebarContext";
 import { useAuth } from "../../hooks/useAuth";
-import ChatbotLauncher from "../../components/AIChat/ChatbotLauncher";
 
 const { Content } = Layout;
 
@@ -31,7 +30,8 @@ const DashboardContent = () => {
         className={`
           transition-[margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]
           ${collapsed ? "lg:ml-20" : "lg:ml-64"}
-        `}>
+        `}
+      >
         {/* Header */}
         <DashboardHeader userName={userName} userRole={userRole} />
 
@@ -42,7 +42,8 @@ const DashboardContent = () => {
             bg-slate-50
             min-h-[calc(100vh-64px)]
             mt-16
-          ">
+          "
+        >
           <div className="max-w-7xl mx-auto">
             <Outlet />
           </div>
@@ -57,9 +58,6 @@ const DashboardContent = () => {
           aria-hidden="true"
         />
       )}
-
-      {/* AI Chatbot */}
-      <ChatbotLauncher />
     </Layout>
   );
 };

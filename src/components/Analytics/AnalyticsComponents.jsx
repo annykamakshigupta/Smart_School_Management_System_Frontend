@@ -19,10 +19,6 @@ import {
 import {
   BarChart,
   Bar,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -38,37 +34,6 @@ import {
   Cell,
   Legend,
 } from "recharts";
-
-// ───────────────────────────────────────────────────────
-// Generic Card Wrapper
-// ───────────────────────────────────────────────────────
-export function AnalyticsCard({
-  title,
-  icon,
-  action,
-  children,
-  className = "",
-}) {
-  return (
-    <div
-      className={`rounded-2xl bg-white border border-slate-200 shadow-sm p-6 ${className}`}>
-      {(title || action) && (
-        <div className="flex items-center justify-between gap-3 mb-4">
-          <div className="flex items-center gap-2 min-w-0">
-            {icon && <span className="text-slate-500">{icon}</span>}
-            {title && (
-              <h3 className="text-base font-bold text-slate-800 truncate">
-                {title}
-              </h3>
-            )}
-          </div>
-          {action && <div className="shrink-0">{action}</div>}
-        </div>
-      )}
-      {children}
-    </div>
-  );
-}
 
 // ───────────────────────────────────────────────────────
 // Loading State
@@ -350,149 +315,6 @@ export function BarChartCard({
 }
 
 // ───────────────────────────────────────────────────────
-// Line Chart Card
-// ───────────────────────────────────────────────────────
-export function LineChartCard({
-  title,
-  data = [],
-  lines = [{ key: "value", name: "Value", color: "#6366f1" }],
-  xKey = "label",
-  height = 300,
-}) {
-  if (!data.length) return null;
-  return (
-    <AnalyticsCard title={title}>
-      <ResponsiveContainer width="100%" height={height}>
-        <LineChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis
-            dataKey={xKey}
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-          />
-          <YAxis
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-          />
-          <RTooltip
-            contentStyle={{
-              borderRadius: 12,
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            }}
-          />
-          <Legend />
-          {lines.map((l) => (
-            <Line
-              key={l.key}
-              type="monotone"
-              dataKey={l.key}
-              name={l.name}
-              stroke={l.color}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
-            />
-          ))}
-        </LineChart>
-      </ResponsiveContainer>
-    </AnalyticsCard>
-  );
-}
-
-// ───────────────────────────────────────────────────────
-// Area Chart Card
-// ───────────────────────────────────────────────────────
-export function AreaChartCard({
-  title,
-  data = [],
-  areas = [{ key: "value", name: "Value", color: "#6366f1" }],
-  xKey = "label",
-  height = 300,
-}) {
-  if (!data.length) return null;
-  return (
-    <AnalyticsCard title={title}>
-      <ResponsiveContainer width="100%" height={height}>
-        <AreaChart data={data}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-          <XAxis
-            dataKey={xKey}
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-          />
-          <YAxis
-            tick={{ fontSize: 11, fill: "#64748b" }}
-            axisLine={{ stroke: "#e2e8f0" }}
-          />
-          <RTooltip
-            contentStyle={{
-              borderRadius: 12,
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            }}
-          />
-          <Legend />
-          {areas.map((a) => (
-            <Area
-              key={a.key}
-              type="monotone"
-              dataKey={a.key}
-              name={a.name}
-              stroke={a.color}
-              fill={a.color}
-              fillOpacity={0.12}
-              strokeWidth={2}
-              dot={false}
-            />
-          ))}
-        </AreaChart>
-      </ResponsiveContainer>
-    </AnalyticsCard>
-  );
-}
-
-// ───────────────────────────────────────────────────────
-// Pie Chart Card
-// ───────────────────────────────────────────────────────
-export function PieChartCard({
-  title,
-  data = [],
-  nameKey = "name",
-  valueKey = "value",
-  height = 280,
-}) {
-  if (!data.length) return null;
-  return (
-    <AnalyticsCard title={title}>
-      <ResponsiveContainer width="100%" height={height}>
-        <PieChart>
-          <RTooltip
-            contentStyle={{
-              borderRadius: 12,
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
-            }}
-          />
-          <Legend />
-          <Pie
-            data={data}
-            dataKey={valueKey}
-            nameKey={nameKey}
-            innerRadius={55}
-            outerRadius={88}
-            paddingAngle={3}>
-            {data.map((_, i) => (
-              <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-            ))}
-          </Pie>
-        </PieChart>
-      </ResponsiveContainer>
-    </AnalyticsCard>
-  );
-}
-
-// ───────────────────────────────────────────────────────
 // Radar Chart Card
 // ───────────────────────────────────────────────────────
 export function RadarChartCard({
@@ -529,76 +351,6 @@ export function RadarChartCard({
         </RadarChart>
       </ResponsiveContainer>
     </div>
-  );
-}
-
-// ───────────────────────────────────────────────────────
-// Attendance Heatmap (custom grid) — value is 0..100
-// ───────────────────────────────────────────────────────
-function heatColor(value) {
-  if (value >= 90) return "bg-emerald-500";
-  if (value >= 80) return "bg-emerald-400";
-  if (value >= 70) return "bg-amber-400";
-  if (value >= 60) return "bg-amber-300";
-  if (value > 0) return "bg-red-300";
-  return "bg-slate-200";
-}
-
-export function AttendanceHeatmapCard({ title, data = [] }) {
-  if (!data.length) return null;
-  const cells = data.slice(-84);
-
-  return (
-    <AnalyticsCard
-      title={title}
-      action={
-        <Tooltip title="Shows daily attendance present-rate for your classes (last 12 weeks).">
-          <Tag color="blue">Heatmap</Tag>
-        </Tooltip>
-      }>
-      <div className="grid grid-cols-12 gap-2">
-        {Array.from({ length: 12 }).map((_, week) => (
-          <div key={week} className="grid grid-rows-7 gap-2">
-            {Array.from({ length: 7 }).map((__, day) => {
-              const idx = week * 7 + day;
-              const item = cells[idx];
-              const value = item?.value ?? item?.presentRate ?? 0;
-              return (
-                <Tooltip
-                  key={day}
-                  title={
-                    item
-                      ? `${item.date}: ${value}% (${item.total || 0} marked)`
-                      : "—"
-                  }>
-                  <div
-                    className={
-                      "w-4 h-4 rounded-md border border-white/60 shadow-sm " +
-                      heatColor(value)
-                    }
-                  />
-                </Tooltip>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-4 flex items-center justify-between text-xs text-slate-500">
-        <span>Low</span>
-        <div className="flex items-center gap-1">
-          {[0, 60, 70, 80, 90].map((v) => (
-            <span
-              key={v}
-              className={
-                "w-4 h-4 rounded-md border border-white/60 " + heatColor(v)
-              }
-            />
-          ))}
-        </div>
-        <span>High</span>
-      </div>
-    </AnalyticsCard>
   );
 }
 
