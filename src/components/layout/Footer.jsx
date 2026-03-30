@@ -116,30 +116,6 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Project Info */}
-          <div className="footer-column">
-            <h3 className="footer-heading">Project Info</h3>
-            <ul className="footer-info-list">
-              <li className="info-item">
-                <div className="info-icon-box">
-                  <MdSchool className="info-icon" />
-                </div>
-                <span className="info-text">Final Year Academic Project</span>
-              </li>
-              <li className="info-item">
-                <div className="info-icon-box">
-                  <MdEmail className="info-icon" />
-                </div>
-                <span className="info-text">Educational Use Only</span>
-              </li>
-              <li className="info-item">
-                <div className="info-icon-box">
-                  <MdCode className="info-icon" />
-                </div>
-                <span className="info-text">Agile Scrum Methodology</span>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Bottom Bar */}

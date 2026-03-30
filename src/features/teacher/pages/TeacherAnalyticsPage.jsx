@@ -16,12 +16,15 @@ import {
   RecommendationsList,
   StatCard,
   BarChartCard,
+  LineChartCard,
+  RadarChartCard,
+  AttendanceHeatmapCard,
   RiskTable,
   RiskTag,
 } from "../../../components/Analytics/AnalyticsComponents";
 
 export default function TeacherAnalyticsPage() {
-  const [data, setData] = useState(null);
+  const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -30,7 +33,7 @@ export default function TeacherAnalyticsPage() {
     setError(null);
     try {
       const res = await getTeacherAnalytics();
-      setData(res.data?.insights ?? res.data);
+      setPayload(res.data);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -44,48 +47,59 @@ export default function TeacherAnalyticsPage() {
 
   if (loading) return <AnalyticsLoading />;
   if (error) return <AnalyticsError message={error} onRetry={fetchInsights} />;
-  if (!data)
+  if (!payload)
     return (
       <AnalyticsError message="No insights available" onRetry={fetchInsights} />
     );
 
+  const insights = payload?.insights ?? payload;
+  const charts = payload?.charts ?? {};
+  const stats = payload?.stats ?? {};
+
   // Chart data
-  const performanceChart = (
-    data.classPerformance ||
-    data.studentPerformance ||
-    []
-  ).map((c) => ({
-    label: c.className || c.class || c.name,
-    value: Math.round(c.averageScore ?? c.avgScore ?? 0),
+  const weakStudentsBar = (charts.weakStudents || []).map((s) => ({
+    label: s.name,
+    value: Math.round(s.avgScore ?? 0),
   }));
 
-  const subjectDifficultyChart = (data.subjectDifficulty || []).map((s) => ({
-    label: s.subject || s.name,
-    value: Math.round(s.failRate ?? s.difficulty ?? 0),
+  const subjectPerf = (charts.subjectPerformance || []).map((s) => ({
+    subject: s.subject,
+    value: Math.round(s.avgScore ?? 0),
+  }));
+
+  const subjectPerfLine = (charts.subjectPerformance || []).map((s) => ({
+    label: s.subject,
+    avgScore: Math.round(s.avgScore ?? 0),
+    failCount: s.failCount ?? 0,
   }));
 
   // Alerts
   const alerts = [];
-  if (data.weakStudents?.length) {
+  if (insights.weakStudents?.length) {
     alerts.push({
       type: "warning",
       title: "Students Need Attention",
-      message: `${data.weakStudents.length} student(s) scoring below average — consider remedial support.`,
+      message: `${insights.weakStudents.length} student(s) scoring below average — consider remedial support.`,
     });
   }
-  if (data.attendanceConcerns?.length) {
+  if (insights.attendanceConcerns?.length) {
     alerts.push({
       type: "warning",
       title: "Low Attendance Detected",
-      message: `${data.attendanceConcerns.length} student(s) have low attendance in your classes.`,
+      message: `${insights.attendanceConcerns.length} student(s) have low attendance in your classes.`,
     });
   }
 
+  if (Array.isArray(insights.alerts) && insights.alerts.length) {
+    insights.alerts.forEach((a) => alerts.push(a));
+  }
+
   // At-risk students
-  const weakStudents = (data.weakStudents || data.atRiskStudents || []).slice(
-    0,
-    15,
-  );
+  const weakStudents = (
+    insights.weakStudents ||
+    insights.atRiskStudents ||
+    []
+  ).slice(0, 15);
   const riskColumns = [
     { key: "name", title: "Student" },
     {
@@ -131,40 +145,53 @@ export default function TeacherAnalyticsPage() {
         onRefresh={fetchInsights}
       />
 
-      <AISummaryPanel summary={data.summary || data.overallSummary} />
+      <AISummaryPanel summary={insights.summary || insights.overallSummary} />
 
       <AlertCards alerts={alerts} />
 
-      {/* KPI Stats */}
-      {data.kpis && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {data.kpis.map((kpi, i) => (
-            <StatCard
-              key={i}
-              label={kpi.label}
-              value={kpi.value}
-              suffix={kpi.suffix}
-              trend={kpi.trend}
-              color={["blue", "green", "amber", "purple"][i % 4]}
-            />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Classes" value={stats.classCount ?? "—"} />
+        <StatCard label="Students" value={stats.totalStudents ?? "—"} />
+        <StatCard
+          label="Trend"
+          value={insights.classPerformance?.trend || "—"}
+          trend={
+            insights.classPerformance?.trend === "improving" ? "up" : "stable"
+          }
+        />
+        <StatCard
+          label="Pass Rate"
+          value={
+            insights.classPerformance?.passRate !== undefined
+              ? Math.round(insights.classPerformance.passRate)
+              : "—"
+          }
+          suffix={insights.classPerformance?.passRate !== undefined ? "%" : ""}
+          trend={insights.classPerformance?.trend}
+        />
+      </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <RadarChartCard title="Student Performance Radar" data={subjectPerf} />
         <BarChartCard
-          title="Class Performance Overview"
-          data={performanceChart}
-          color="#3b82f6"
+          title="Weak Students (Average Score %)"
+          data={weakStudentsBar}
+          color="#ef4444"
         />
-        {subjectDifficultyChart.length > 0 && (
-          <BarChartCard
-            title="Subject Difficulty (Fail Rate %)"
-            data={subjectDifficultyChart}
-            color="#ef4444"
-          />
-        )}
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LineChartCard
+          title="Subject Performance"
+          data={subjectPerfLine}
+          xKey="label"
+          lines={[{ key: "avgScore", name: "Avg Score %", color: "#3b82f6" }]}
+        />
+        <AttendanceHeatmapCard
+          title="Attendance Heatmap"
+          data={charts.attendanceHeatmap || []}
+        />
       </div>
 
       {/* Weak Students Table */}
@@ -177,7 +204,12 @@ export default function TeacherAnalyticsPage() {
       )}
 
       <RecommendationsList
-        items={data.recommendations || data.teachingTips || []}
+        items={
+          insights.interventionTips ||
+          insights.recommendations ||
+          insights.teachingTips ||
+          []
+        }
         title="Teaching Recommendations"
       />
     </div>

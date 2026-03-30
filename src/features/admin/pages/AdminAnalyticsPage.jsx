@@ -16,12 +16,15 @@ import {
   RecommendationsList,
   StatCard,
   BarChartCard,
+  LineChartCard,
+  AreaChartCard,
+  PieChartCard,
   RiskTable,
   RiskTag,
 } from "../../../components/Analytics/AnalyticsComponents";
 
 export default function AdminAnalyticsPage() {
-  const [data, setData] = useState(null);
+  const [payload, setPayload] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -30,7 +33,7 @@ export default function AdminAnalyticsPage() {
     setError(null);
     try {
       const res = await getAdminAnalytics();
-      setData(res.data?.insights ?? res.data);
+      setPayload(res.data);
     } catch (err) {
       setError(err.response?.data?.message || err.message);
     } finally {
@@ -44,66 +47,103 @@ export default function AdminAnalyticsPage() {
 
   if (loading) return <AnalyticsLoading />;
   if (error) return <AnalyticsError message={error} onRetry={fetchInsights} />;
-  if (!data)
+  if (!payload)
     return (
       <AnalyticsError message="No insights available" onRetry={fetchInsights} />
     );
 
+  const insights = payload?.insights ?? payload;
+  const charts = payload?.charts ?? {};
+  const stats = payload?.stats ?? {};
+
+  const atRiskStudentsAll = Array.isArray(insights.atRiskStudents)
+    ? insights.atRiskStudents
+    : [];
+
   // Build chart-ready data
-  const classChartData = (data.classPerformance || []).map((c) => ({
-    label: c.className || c.class,
-    value: Math.round(c.averageScore ?? c.avgScore ?? 0),
+  const classChartData = (charts.classComparison || []).map((c) => ({
+    label: c.className,
+    value: Math.round(c.avgScore ?? 0),
   }));
 
-  const subjectChartData = (
-    data.weakSubjects ||
-    data.subjectAnalysis ||
-    []
-  ).map((s) => ({
-    label: s.subject || s.name,
-    value: Math.round(s.averageScore ?? s.avgScore ?? s.score ?? 0),
+  const subjectChartData = (charts.subjectPerformance || []).map((s) => ({
+    label: s.subject,
+    value: Math.round(s.avgScore ?? 0),
+  }));
+
+  const performanceTrend = (charts.resultTrend || []).map((r) => ({
+    label: r.month,
+    avgScore: r.avgScore,
+    exams: r.exams,
+  }));
+
+  const feeTrend = (charts.feeCollectionTrend || []).map((f) => ({
+    label: f.month,
+    expected: f.expected,
+    collected: f.collected,
   }));
 
   // Alerts
   const alerts = [];
-  if (data.dropoutRisks?.length) {
+  if (atRiskStudentsAll.length || insights.dropoutRisks?.length) {
+    const riskCount =
+      atRiskStudentsAll.length ||
+      insights.dropoutRisks?.reduce?.((sum, r) => sum + (r.count || 0), 0) ||
+      insights.dropoutRisks.length;
     alerts.push({
       type: "danger",
       title: "Dropout Risk Detected",
-      message: `${data.dropoutRisks.length} student(s) are at risk of dropping out. Review immediately.`,
+      message: `${riskCount} student(s) are at risk of dropping out. Review immediately.`,
     });
   }
-  if (data.feeDefaulters?.length || data.feeForecast?.defaulterCount) {
+  if (insights.feeDefaulters?.length || insights.feeForecast?.defaulterCount) {
     alerts.push({
       type: "warning",
       title: "Fee Collection Alert",
       message:
-        data.feeForecast?.summary ||
-        `${data.feeDefaulters?.length ?? data.feeForecast?.defaulterCount} students have outstanding fees.`,
+        insights.feeForecast?.summary ||
+        `${insights.feeDefaulters?.length ?? insights.feeForecast?.defaulterCount} students have outstanding fees.`,
     });
   }
-  if (data.attendanceConcerns?.length) {
+  if (insights.attendanceConcerns?.length) {
     alerts.push({
       type: "warning",
       title: "Low Attendance",
-      message: `${data.attendanceConcerns.length} student(s) with attendance below threshold.`,
+      message: `${insights.attendanceConcerns.length} student(s) with attendance below threshold.`,
     });
   }
 
+  if (Array.isArray(insights.alerts) && insights.alerts.length) {
+    insights.alerts.forEach((a) => alerts.push(a));
+  }
+
   // At-risk students table
-  const atRiskStudents = [
-    ...(data.dropoutRisks || []),
-    ...(data.atRiskStudents || []),
-  ].slice(0, 10);
+  const atRiskStudents = atRiskStudentsAll.slice(0, 10);
 
   const riskColumns = [
-    { key: "name", title: "Student" },
+    {
+      key: "name",
+      title: "Student",
+      render: (val, row) => {
+        const meta = [row.class, row.status].filter(Boolean).join(" • ");
+        return (
+          <div>
+            <div className="font-medium text-slate-800">{val || "—"}</div>
+            <div className="text-xs text-slate-500">{meta || "—"}</div>
+          </div>
+        );
+      },
+    },
     {
       key: "risk",
       title: "Risk Level",
       render: (val) => <RiskTag level={val || "medium"} />,
     },
-    { key: "reason", title: "Reason" },
+    {
+      key: "reason",
+      title: "Reason",
+      render: (val) => <span className="text-slate-700">{val || "—"}</span>,
+    },
   ];
 
   return (
@@ -116,26 +156,65 @@ export default function AdminAnalyticsPage() {
       />
 
       {/* AI Summary */}
-      <AISummaryPanel summary={data.summary || data.overallSummary} />
+      <AISummaryPanel summary={insights.summary || insights.overallSummary} />
 
       {/* Alerts */}
       <AlertCards alerts={alerts} />
 
       {/* KPI Stats */}
-      {data.kpis && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {data.kpis.map((kpi, i) => (
-            <StatCard
-              key={i}
-              label={kpi.label}
-              value={kpi.value}
-              suffix={kpi.suffix}
-              trend={kpi.trend}
-              color={["blue", "green", "amber", "purple"][i % 4]}
-            />
-          ))}
-        </div>
-      )}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Students" value={stats.totalStudents ?? "—"} />
+        <StatCard label="Classes" value={stats.totalClasses ?? "—"} />
+        <StatCard
+          label="Attendance"
+          value={stats.overallAttendanceRate ?? "—"}
+          suffix={stats.overallAttendanceRate !== undefined ? "%" : ""}
+          trend={
+            insights.attendancePrediction?.risk === "high" ? "down" : "stable"
+          }
+        />
+        <StatCard
+          label="Fee Collection"
+          value={stats.feeCollectionRate ?? "—"}
+          suffix={stats.feeCollectionRate !== undefined ? "%" : ""}
+          trend={
+            insights.feeCollectionForecast?.collectionRate > 80
+              ? "up"
+              : "stable"
+          }
+        />
+      </div>
+
+      {/* Trend Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <LineChartCard
+          title="Student Performance Trend"
+          data={performanceTrend}
+          xKey="label"
+          lines={[{ key: "avgScore", name: "Avg Score %", color: "#6366f1" }]}
+        />
+        <AreaChartCard
+          title="Fee Collection Trend"
+          data={feeTrend}
+          xKey="label"
+          areas={[
+            { key: "expected", name: "Expected", color: "#94a3b8" },
+            { key: "collected", name: "Collected", color: "#10b981" },
+          ]}
+        />
+      </div>
+
+      {/* Distribution Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <PieChartCard
+          title="Attendance Distribution"
+          data={charts.attendanceDistribution || []}
+        />
+        <PieChartCard
+          title="Fee Status Distribution"
+          data={charts.feeDistribution || []}
+        />
+      </div>
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -161,7 +240,7 @@ export default function AdminAnalyticsPage() {
       )}
 
       {/* Recommendations */}
-      <RecommendationsList items={data.recommendations || []} />
+      <RecommendationsList items={insights.recommendations || []} />
     </div>
   );
 }
